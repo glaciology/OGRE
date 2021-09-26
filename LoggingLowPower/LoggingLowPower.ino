@@ -8,10 +8,10 @@
 SFE_UBLOX_GNSS myGNSS;
 
 ////////SPI STUFF
-//#define SPI_SPEED 1000000
-//#define SPI_ORDER MSBFIRST
-//#define SPI_MODE SPI_MODE0
-//SPISettings mySettings(SPI_SPEED, SPI_ORDER, SPI_MODE);
+#define SPI_SPEED 1000000
+#define SPI_ORDER MSBFIRST
+#define SPI_MODE SPI_MODE0
+SPISettings mySettings(SPI_SPEED, SPI_ORDER, SPI_MODE);
 
 /////////SD STUFF
 File myFile; //File that all GNSS data is written to
@@ -30,16 +30,15 @@ const long interval = 100000;
 const int ledPin = LED_BUILTIN;
 
 /////////CALLBACKS
-int numSFRBX = 0; // Keep count of how many SFRBX message groups have been received (see note above)
-int numRAWX = 0; // Keep count of how many RAWX message groups have been received (see note above)
-
-void newSFRBX(UBX_RXM_SFRBX_data_t ubxDataStruct){
-  numSFRBX++; // Increment the count
-}
-
-void newRAWX(UBX_RXM_RAWX_data_t ubxDataStruct){
-  numRAWX++; // Increment the count
-}
+//int numSFRBX = 0; // Keep count of how many SFRBX message groups have been received (see note above)
+//int numRAWX = 0; // Keep count of how many RAWX message groups have been received (see note above)
+//void newSFRBX(UBX_RXM_SFRBX_data_t ubxDataStruct){
+//  numSFRBX++; // Increment the count
+//}
+//
+//void newRAWX(UBX_RXM_RAWX_data_t ubxDataStruct){
+//  numRAWX++; // Increment the count
+//}
 
 
 void setup(void) {
@@ -54,6 +53,8 @@ void setup(void) {
 //  SPI.endTransaction();
 
   pinMode(ledPin, OUTPUT);
+
+  beginSD();
 
   //SD CARD STUFF
    while (Serial.available()){
@@ -99,43 +100,53 @@ void setup(void) {
   myGNSS.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
   myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); //Save (only) the communications port settings to flash and BBR
   myGNSS.setNavigationFrequency(1); //Produce one navigation solution per second (that's plenty for Precise Point Positioning)
-  myGNSS.setAutoRXMSFRBXcallback(&newSFRBX); // Enable automatic RXM SFRBX messages with callback to newSFRBX
+  myGNSS.setAutoRXMSFRBXcallback(true, false); // Enable automatic RXM SFRBX messages 
   myGNSS.logRXMSFRBX(); // Enable RXM SFRBX data logging
-  myGNSS.setAutoRXMRAWXcallback(&newRAWX); // Enable automatic RXM RAWX messages with callback to newRAWX
+  myGNSS.setAutoRXMRAWXcallback(true, false); // Enable automatic RXM RAWX messages 
   myGNSS.logRXMRAWX(); // Enable RXM RAWX data logging
 }
 
 void loop(void) {
+  digitalWrite(ledPin, HIGH);
 
-  previousMillis = millis();
-  Serial.println(previousMillis);
+  System.print("elapsed time: ");
+  System.println(millis());
   
-  while ((millis()-previousMillis) < interval){
-    digitalWrite(ledPin, HIGH);
+  if ((millis() > interval){
+    Serial.println("timeout, going to sleep");
+    digitalWrite(ledPin, LOW);
+    delay(1000);
 
-    //DO STUFF HERE
-    myGNSS.checkUblox(); // Check for the arrival of new data and process it.
-    myGNSS.checkCallbacks(); // Check if any callbacks are waiting to be processed.
+    uint16_t remainingBytes = myGNSS.fileBufferAvailable(); // Check if there are any bytes remaining in the file buffer
+    while (remainingBytes > 0){ // While there is still data in the file buffer
+      uint8_t myBuffer[sdWriteSize]; // Create our own buffer to hold the data while we write it to SD card
+      uint16_t bytesToWrite = remainingBytes; // Write the remaining bytes to SD card sdWriteSize bytes at a time
+      if (bytesToWrite > sdWriteSize){
+        bytesToWrite = sdWriteSize;
+      }
+      myGNSS.extractFileBufferData((uint8_t *)&myBuffer, bytesToWrite); // Extract bytesToWrite bytes from the UBX file buffer and put them into myBuffer
+      myFile.write(myBuffer, bytesToWrite); // Write bytesToWrite bytes from myBuffer to the ubxDataFile on the SD card
+      bytesWritten += bytesToWrite; // Update bytesWritten
+      remainingBytes -= bytesToWrite; // Decrement remainingBytes
+  }
+    MyFile.close();
+    System.println("logging stopped");
+    Serial.flush();
+    delay(100);
+    goToSleep();
+  }
 
-    while (myGNSS.fileBufferAvailable() >= sdWriteSize) // Check to see if we have at least sdWriteSize waiting in the buffer
-    {
+  //DO GNSS STUFF
+  myGNSS.checkUblox(); // Check for the arrival of new data and process it.
+
+  while (myGNSS.fileBufferAvailable() >= sdWriteSize){ // Check to see if we have at least sdWriteSize waiting in the buffer
       uint8_t myBuffer[sdWriteSize]; // Create our own buffer to hold the data while we write it to SD card
       myGNSS.extractFileBufferData((uint8_t *)&myBuffer, sdWriteSize); // Extract exactly sdWriteSize bytes from the UBX file buffer and put them into myBuffer
       myFile.write(myBuffer, sdWriteSize); // Write exactly sdWriteSize bytes from myBuffer to the ubxDataFile on the SD card
       // In case the SD writing is slow or there is a lot of data to write, keep checking for the arrival of new data
       myGNSS.checkUblox(); // Check for the arrival of new data and process it.
-      myGNSS.checkCallbacks(); // Check if any callbacks are waiting to be processed.
+      //myGNSS.checkCallbacks(); // Check if any callbacks are waiting to be processed.
     }
-
-    //49 days later?
-    if(millis()<previousMillis){
-      previousMillis = millis();
-    }
-  }
-  Serial.println("timeout, going to sleep");
-  digitalWrite(ledPin, LOW);
-  delay(1000);
-  goToSleep();
 }
 
 //Power everything down and wait for interrupt wakeup
@@ -143,12 +154,23 @@ void goToSleep()
 {
   Wire.end(); //Power down I2C
   SPI.end(); //Power down SPI
-  //SPI1.end(); //This example doesn't use SPI1 but you will need to end any instance you may have created
-
+  qwiic.end(); //Power down QWIIC
   power_adc_disable(); //Power down ADC. It it started by default before setup().
-
   Serial.end(); //Power down UART
-  //Serial1.end();
+  //powerLEDOff();
+  //microSDPowerOff();
+  //qwiicPowerOff();
+
+  //Force the peripherals off
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM0);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM1);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM2);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM3);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM4);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM5);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_ADC);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_UART0);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_UART1);
 
   //Disable all pads
   for (int x = 0 ; x < 50 ; x++)
@@ -210,13 +232,16 @@ void wakeFromSleep()
 
   //Turn on I2C
   Wire.begin();
+  qwiic.begin();
 
-  //Restart Sensors
+
   Serial.println("restarted!");
-//  if (barometricSensor.begin() == false)
-//  {
-//    Serial.println("MS5637 sensor did not respond. Please check wiring.");
-//  }
+  myGNSS.setFileBufferSize(fileBufferSize); // setFileBufferSize must be called _before_ .begin
+
+  if (myGNSS.begin() == false){
+    Serial.println(F("u-blox GNSS not detected at default I2C address. Please check wiring. Freezing..."));
+    while (1);
+  }
 }
 
 //Called once number of milliseconds has passed
