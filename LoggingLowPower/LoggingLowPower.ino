@@ -54,7 +54,7 @@ void setup(void) {
 
   pinMode(ledPin, OUTPUT);
 
-  beginSD();
+  //beginSD();
 
   //SD CARD STUFF
    while (Serial.available()){
@@ -100,19 +100,19 @@ void setup(void) {
   myGNSS.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
   myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); //Save (only) the communications port settings to flash and BBR
   myGNSS.setNavigationFrequency(1); //Produce one navigation solution per second (that's plenty for Precise Point Positioning)
-  myGNSS.setAutoRXMSFRBXcallback(true, false); // Enable automatic RXM SFRBX messages 
+  myGNSS.setAutoRXMSFRBX(true, false); // Enable automatic RXM SFRBX messages 
   myGNSS.logRXMSFRBX(); // Enable RXM SFRBX data logging
-  myGNSS.setAutoRXMRAWXcallback(true, false); // Enable automatic RXM RAWX messages 
+  myGNSS.setAutoRXMRAWX(true, false); // Enable automatic RXM RAWX messages 
   myGNSS.logRXMRAWX(); // Enable RXM RAWX data logging
 }
 
 void loop(void) {
   digitalWrite(ledPin, HIGH);
 
-  System.print("elapsed time: ");
-  System.println(millis());
+  Serial.print("elapsed time: ");
+  Serial.println(millis());
   
-  if ((millis() > interval){
+  if (millis() > interval){
     Serial.println("timeout, going to sleep");
     digitalWrite(ledPin, LOW);
     delay(1000);
@@ -126,11 +126,11 @@ void loop(void) {
       }
       myGNSS.extractFileBufferData((uint8_t *)&myBuffer, bytesToWrite); // Extract bytesToWrite bytes from the UBX file buffer and put them into myBuffer
       myFile.write(myBuffer, bytesToWrite); // Write bytesToWrite bytes from myBuffer to the ubxDataFile on the SD card
-      bytesWritten += bytesToWrite; // Update bytesWritten
+      //bytesWritten += bytesToWrite; // Update bytesWritten
       remainingBytes -= bytesToWrite; // Decrement remainingBytes
   }
-    MyFile.close();
-    System.println("logging stopped");
+    myFile.close();
+    Serial.println("logging stopped");
     Serial.flush();
     delay(100);
     goToSleep();
@@ -154,7 +154,7 @@ void goToSleep()
 {
   Wire.end(); //Power down I2C
   SPI.end(); //Power down SPI
-  qwiic.end(); //Power down QWIIC
+  //qwiic.end(); //Power down QWIIC
   power_adc_disable(); //Power down ADC. It it started by default before setup().
   Serial.end(); //Power down UART
   //powerLEDOff();
@@ -232,7 +232,7 @@ void wakeFromSleep()
 
   //Turn on I2C
   Wire.begin();
-  qwiic.begin();
+  //qwiic.begin();
 
 
   Serial.println("restarted!");
