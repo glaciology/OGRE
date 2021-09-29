@@ -21,11 +21,11 @@ const byte PIN_QWIIC_SCL = 14;
 const byte PIN_QWIIC_SCA = 12;
 
 /////////TIMING
-uint32_t msToSleep = 10000; //SLEEP INTERVAL (MS)
+uint32_t msToSleep = 100000; //SLEEP INTERVAL (MS)
 #define TIMER_FREQ 32768L //Counter/Timer 6 will use the 32kHz clock
 uint32_t sysTicksToSleep = msToSleep * TIMER_FREQ / 1000;
 unsigned long previousMillis = 0;
-const long interval = 10000; //AWAKE INTERVAL
+const long interval = 1000000; //AWAKE INTERVAL
 const int ledPin = LED_BUILTIN;
 
 /////////COUNTING
@@ -103,7 +103,7 @@ void loop(void) {
     Serial.println("timeout, going to sleep");
     digitalWrite(ledPin, LOW);
     delay(1000);
-    myFile.write("Logging Stopped");
+    //myFile.write("Logging Stopped");
     delay(10);
     myFile.close();
     bytesWritten = 0;
