@@ -4,48 +4,53 @@
    V0.0.1 (pre-release)
 
    Hardware:
+   - Artemis MicroMod v.
+   - Ublox ZED-F9P-01B-01
 
    Dependencies:
-   - SparkFun_u-blox_GNSS_Arduino_Library v2.1.1
+   - SparkFun_u-blox_GNSS_Arduino_Library v2.0.17
+   - Apollo3 Arduino Core v2.1.0
 */
 
-//#include <RTC.h>
+///////// LIBRARIES & OBJECT INSTANTIATION(S)
 #include <Wire.h>
 #include <SD.h>
 #include <SPI.h>
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h> // Library v2.1.1: http://librarymanager/All#SparkFun_u-blox_GNSS
 SFE_UBLOX_GNSS myGNSS;
+//////////////////
 
-///////// SD CARD
+///////// SD CARD & BUFFER SIZES
 File myFile; //File that all GNSS data is written to
 #define sdWriteSize 512 // Write data to the SD card in blocks of 512 bytes
 #define fileBufferSize 16384 // Allocate 16KBytes of RAM for UBX message storage
+//////////////////
 
 ///////// PINOUTS
+const int ledPin = LED_BUILTIN;
 const byte sdChipSelect = 41; //Primary SPI Chip Select is CS for the MicroMod Artemis Processor
-//const byte PIN_MICROSD_CHIP_SELECT = 55;
-//const byte PIN_MICROSD_POWER = 4;
-//const byte PIN_QWIIC_POWER = 44;
-//const byte PIN_QWIIC_SCL = 14;
-//const byte PIN_QWIIC_SCA = 12;
-
-#define PIN_PWC_POWER     33  // G1
-#define PIN_QWIIC_POWER   34  // G2 
+#define PIN_QWIIC_POWER   34  // G2 - Drive low to turn off Peripheral
 #define PIN_SD_CS         41  // CS
+//////////////////
 
-///////// TIMING
+///////// TIMING - SPECIFY INTERVAL HERE -  -------------------------
 uint32_t msToSleep = 10000; //SLEEP INTERVAL (MS)
 const long interval = 10000; //LOGGING INTERVAL (MS)
+---------------------------------------------------------------------
 unsigned long PREVIOUS_MILLIS = 0;
-
-#define TIMER_FREQ 32768L //Counter/Timer 6 will use the 32kHz clock
+#define TIMER_FREQ 32768L //CTimer6 will use the 32kHz clock
 uint32_t sysTicksToSleep = msToSleep * TIMER_FREQ / 1000;
-const int ledPin = LED_BUILTIN;
+//////////////////
 
 ///////// COUNTING
 //int count = 0; //counter
 unsigned long bytesWritten = 0;
 unsigned long lastPrint = 0; //used to keep time for logging
+//////////////////
+
+///////// DEBUGGING
+#define DEBUG true // Output messages to Serial monitor
+//////////////////
 
 void setup(void) {
   Serial.begin(115200);
