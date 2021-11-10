@@ -1,5 +1,4 @@
 
-
 // POWER DOWN AND WAIT FOR INTERRUPT
 void goToSleep() {
 
@@ -71,12 +70,12 @@ void wakeFromSleep() {
   Serial.println("Turning back on");
 
   //CONFIM SD CARD RESTARTED
-  if (!SD.begin(sdChipSelect)) {
+  if (!SD.begin(PIN_SD_CS)) {
     Serial.println("Card failed, or not present. Freezing...");
     // don't do anything more:
     while (1);
   }
-  myFile = SD.open("RAWX.txt", FILE_WRITE);
+  myFile = SD.open("RAWX.UBX", FILE_WRITE);
   delay(100);
 
   //CONFIRM QWIIC GNSS RESTARTED
@@ -91,22 +90,23 @@ void wakeFromSleep() {
 }
 
 
+
 ///////// AUXILIARLY OFF/ON FUNCTIONS
 void qwiicPowerOff() {
   digitalWrite(PIN_QWIIC_POWER, LOW);
 }
 
-void peripheralPowerOff() {
-  delay(250); // Non-blocking delay
-  digitalWrite(PIN_PWC_POWER, LOW);
-}
+//void peripheralPowerOff() {
+//  delay(250); // Non-blocking delay
+//  digitalWrite(PIN_PWC_POWER, LOW);
+//}
 
 void qwiicPowerOn() {
   digitalWrite(PIN_QWIIC_POWER, HIGH);
   delay(10);
 }
 
-void peripheralPowerOn() {
-  digitalWrite(PIN_PWC_POWER, HIGH);
-  delay(250); // Non-blocking delay to allow Qwiic devices time to power up
-}
+//void peripheralPowerOn() {
+//  digitalWrite(PIN_PWC_POWER, HIGH);
+//  delay(250); // Non-blocking delay to allow Qwiic devices time to power up
+//}

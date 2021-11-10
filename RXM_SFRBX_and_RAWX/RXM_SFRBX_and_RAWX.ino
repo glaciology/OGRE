@@ -1,53 +1,5 @@
 /*
-  Configuring the GNSS to automatically send RXM SFRBX and RAWX reports over I2C and log them to file on SD card
-  By: Paul Clark
-  SparkFun Electronics
-  Date: October 18th, 2021
-  License: MIT. See license file for more information but you can
-  basically do whatever you want with this code.
-
-  This example shows how to configure the u-blox GNSS to send RXM SFRBX and RAWX reports automatically
-  and log the data to SD card in UBX format.
-
-  ** Please note: this example will only work on u-blox ADR or High Precision GNSS or Time Sync products **
-
-  ** Please note: this example will only work on processors like the Artemis which have plenty of RAM available **
-
-  Data is logged in u-blox UBX format. Please see the u-blox protocol specification for more details.
-  You can replay and analyze the data using u-center:
-  https://www.u-blox.com/en/product/u-center
-  Or you can use (e.g.) RTKLIB to analyze the data and extract your precise location or produce
-  Post-Processed Kinematic data:
-  https://rtklibexplorer.wordpress.com/
-  http://rtkexplorer.com/downloads/rtklib-code/
-
-  This code is intended to be run on the MicroMod Data Logging Carrier Board using the Artemis Processor
-  but can be adapted by changing the chip select pin and SPI definitions:
-  https://www.sparkfun.com/products/16829
-  https://www.sparkfun.com/products/16401
-
-  Hardware Connections:
-  Please see: https://learn.sparkfun.com/tutorials/micromod-data-logging-carrier-board-hookup-guide
-  Insert the Artemis Processor into the MicroMod Data Logging Carrier Board and secure with the screw.
-  Connect your GNSS breakout to the Carrier Board using a Qwiic cable.
-  Connect an antenna to your GNSS board if required.
-  Insert a formatted micro-SD card into the socket on the Carrier Board.
-  Connect the Carrier Board to your computer using a USB-C cable.
-  Ensure you have the SparkFun Apollo3 boards installed: http://boardsmanager/All#SparkFun_Apollo3
-  This code has been tested using version 2.1.0 of the Apollo3 boards on Arduino IDE 1.8.13.
-   - Version 2.1.1 of Apollo3 contains a feature which makes I2C communication with u-blox modules problematic
-   - We recommend using v2.1.0 of Apollo3 until v2.2.0 is released
-  Select "Artemis MicroMod Processor" as the board type.
-  Press upload to upload the code onto the Artemis.
-  Open the Serial Monitor at 115200 baud to see the output.
-
-  To minimise I2C bus errors, it is a good idea to open the I2C pull-up split pad links on
-  both the MicroMod Data Logging Carrier Board and the u-blox module breakout.
-
-  Feel like supporting open source hardware?
-  Buy a board from SparkFun!
-  ZED-F9P RTK2: https://www.sparkfun.com/products/15136
-  NEO-M8P RTK: https://www.sparkfun.com/products/15005
+RAWX LOGGING SIMPLE
 */
 
 #include <SPI.h>
@@ -197,17 +149,19 @@ void setup()
   // (This will also disable any "auto" messages that were enabled and saved by other examples and reduce the load on the I2C bus)
   //myGNSS.factoryDefault(); delay(5000);
 
+  myGNSS.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, 1);   // Enable/Disable GPS
+  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, 0);   // Disable GLONASS
+  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, 0);   // Disable Galileo
+  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, 0);   // Disable BeiDou
+  myGNSS.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, 0); // Disable QZSS
+  
+
   myGNSS.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
   myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); //Save (only) the communications port settings to flash and BBR
-
   myGNSS.setNavigationFrequency(1); //Produce one navigation solution per second (that's plenty for Precise Point Positioning)
-
   myGNSS.setAutoRXMSFRBXcallback(&newSFRBX); // Enable automatic RXM SFRBX messages with callback to newSFRBX
-
   myGNSS.logRXMSFRBX(); // Enable RXM SFRBX data logging
-
   myGNSS.setAutoRXMRAWXcallback(&newRAWX); // Enable automatic RXM RAWX messages with callback to newRAWX
-
   myGNSS.logRXMRAWX(); // Enable RXM RAWX data logging
 
   Serial.println(F("Press any key to stop logging."));

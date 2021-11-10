@@ -13,81 +13,91 @@
 */
 
 ///////// LIBRARIES & OBJECT INSTANTIATION(S)
-#include <Wire.h>
-#include <SD.h>
-#include <SPI.h>
+#include <Wire.h> // SDA 44 SCL 45 
+#include <SD.h>   // 
+#include <SPI.h>  // CS 41 MISO/MOSI/CLK ? 
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h> // Library v2.1.1: http://librarymanager/All#SparkFun_u-blox_GNSS
 SFE_UBLOX_GNSS myGNSS;
 //////////////////
 
 ///////// SD CARD & BUFFER SIZES
-File myFile; //File that all GNSS data is written to
-#define sdWriteSize 512 // Write data to the SD card in blocks of 512 bytes
-#define fileBufferSize 16384 // Allocate 16KBytes of RAM for UBX message storage
+File myFile;                  // File that all GNSS data is written to
+#define sdWriteSize 512       // Write data to the SD card in blocks of 512 bytes
+#define fileBufferSize 16384  // Allocate 16KBytes of RAM for UBX message storage
 //////////////////
 
 ///////// PINOUTS
-const int ledPin = LED_BUILTIN;
-const byte sdChipSelect = 41; //Primary SPI Chip Select is CS for the MicroMod Artemis Processor
+#define ledPin            LED_BUILTIN
 #define PIN_QWIIC_POWER   34  // G2 - Drive low to turn off Peripheral
 #define PIN_SD_CS         41  // CS
 //////////////////
 
 ///////// TIMING - SPECIFY INTERVAL HERE -  -------------------------
-uint32_t msToSleep = 10000; //SLEEP INTERVAL (MS)
-const long interval = 10000; //LOGGING INTERVAL (MS)
----------------------------------------------------------------------
+uint32_t msToSleep = 40000;   // SLEEP INTERVAL (MS)
+const long interval = 60000; // LOGGING INTERVAL (MS)
+//-------------------------------------------------------------------
 unsigned long PREVIOUS_MILLIS = 0;
-#define TIMER_FREQ 32768L //CTimer6 will use the 32kHz clock
+#define TIMER_FREQ 32768L // CTimer6 will use the 32kHz clock
 uint32_t sysTicksToSleep = msToSleep * TIMER_FREQ / 1000;
 //////////////////
 
 ///////// COUNTING
-//int count = 0; //counter
+//int count = 0; // counter
 unsigned long bytesWritten = 0;
-unsigned long lastPrint = 0; //used to keep time for logging
+unsigned long lastPrint = 0; // used to keep time for logging
 //////////////////
 
 ///////// DEBUGGING
 #define DEBUG true // Output messages to Serial monitor
+#if DEBUG
+#define DEBUG_PRINTLN(x)  Serial.println(x)
+#define DEBUG_SERIALFLUSH() Serial.flush()
+#else
+#define DEBUG_PRINTLN(x)
+#define DEBUG_SERIALFLUSH()
+#endif
 //////////////////
 
 void setup(void) {
-  Serial.begin(115200);
-  Serial.println("OGRENet GNSS LOGGER");
+  #if DEBUG
+    Serial.begin(115200); // open serial port
+    Serial.println("OGRENet GNSS LOGGER");
+  #endif
+   
   Wire.begin();
   SPI.begin();
   pinMode(ledPin, OUTPUT);
 
-  ///////// On Apollo3 v2 MANUALLY DISABLE PULLUPS
-  // The IOM and pin numbers here are specific to the Artemis MicroMod Processor Board
+  ///////// On Apollo3 v2 MANUALLY DISABLE PULLUPS - IOM and pin #s specific to Artemis MicroMod
   am_hal_gpio_pincfg_t sclPinCfg = g_AM_BSP_GPIO_IOM4_SCL;  // Artemis MicroMod Processor Board uses IOM4 for I2C communication
-  am_hal_gpio_pincfg_t sdaPinCfg = g_AM_BSP_GPIO_IOM4_SDA;
+  am_hal_gpio_pincfg_t sdaPinCfg = g_AM_BSP_GPIO_IOM4_SDA;  //
   sclPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          // Disable the SCL/SDA pull-ups
-  sdaPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;
+  sdaPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          //
   pin_config(PinName(39), sclPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 39 for SCL
   pin_config(PinName(40), sdaPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
 
-  ///////// SD CARD INITIALIZATION
-  while (Serial.available()) {
-    Serial.read();
-  }
+  #if DEBUG
+    while (Serial.available()) {
+      Serial.read();
+    }
+  #endif
 
-  Serial.println("Initializing SD card...");
-  if (!SD.begin(sdChipSelect)) {
-    Serial.println("Card failed, or not present. Freezing...");
+  ///////// SD CARD INITIALIZATION
+  DEBUG_PRINTLN("Initializing SD card...");
+  if (!SD.begin(PIN_SD_CS)) {
+    DEBUG_PRINTLN("Card failed, or not present. Freezing...");
     // don't do anything more:
     while (1);
   }
-  Serial.println("SD card initialized.");
+  DEBUG_PRINTLN("SD card initialized.");
 
-  // Create or open a file called "RXM_RAWX.ubx" on the SD card.
+  // Create or open a file called "RAWX.ubx" on the SD card.
   // If the file already exists, the new data is appended to the end of the file.
   // If using longer logging timescales, consider creating new file each time?
-  myFile = SD.open("RAWX.txt", FILE_WRITE);
+  myFile = SD.open("RAWX.UBX", FILE_WRITE);
   if (!myFile)
   {
-    Serial.println(F("Failed to create UBX data file! Freezing..."));
+    DEBUG_PRINTLN(F("Failed to create UBX data file! Freezing..."));
     while (1);
   }
 
@@ -102,7 +112,7 @@ void loop(void) {
 
   if (millis() - PREVIOUS_MILLIS > interval) {
     ///////// FINISH LOGGING
-    Serial.println(millis());
+    DEBUG_PRINTLN(millis());
     uint16_t remainingBytes = myGNSS.fileBufferAvailable(); // Check if there are any bytes remaining in the file buffer
     while (remainingBytes > 0) { // While there is still data in the file buffer
       uint8_t myBuffer[sdWriteSize]; // Create our own buffer to hold the data while we write it to SD card
@@ -116,12 +126,12 @@ void loop(void) {
     }
 
     ///////// SLEEP SHUTDOWN PREP
-    Serial.println("timeout, going to sleep");
+    DEBUG_PRINTLN("timeout, going to sleep");
     delay(100);
     myFile.close();
     bytesWritten = 0;
     lastPrint = 0;
-    Serial.flush();
+    DEBUG_SERIALFLUSH();
     delay(100);
     goToSleep();
     /////////
@@ -137,16 +147,18 @@ void loop(void) {
     myGNSS.checkUblox(); // Check for the arrival of new data and process it if SD slow
   }
 
-  ///////// PRINT BYTES WRITTEN
-  if (millis() > (lastPrint + 1000)) { // Print bytesWritten once per second
-    Serial.print(F("The number of bytes written to SD card is ")); // Print how many bytes have been written to SD card
-    Serial.println(bytesWritten);
-    uint16_t maxBufferBytes = myGNSS.getMaxFileBufferAvail(); // Get how full the file buffer has been (not how full it is now)
-    if (maxBufferBytes > ((fileBufferSize / 5) * 4)) { // Warn the user if fileBufferSize was more than 80% full
-      Serial.println(F("Warning: the file buffer has been over 80% full. Some data may have been lost."));
+  ///////// PRINT BYTES WRITTEN (DEBUG MODE)
+  #if DEBUG
+    if (millis() > (lastPrint + 1000)) { // Print bytesWritten once per second
+      Serial.print(F("The number of bytes written to SD card is ")); // Print how many bytes have been written to SD card
+      Serial.println(bytesWritten);
+      uint16_t maxBufferBytes = myGNSS.getMaxFileBufferAvail(); // Get how full the file buffer has been (not how full it is now)
+      if (maxBufferBytes > ((fileBufferSize / 5) * 4)) { // Warn the user if fileBufferSize was more than 80% full
+        Serial.println(F("Warning: the file buffer has been over 80% full. Some data may have been lost."));
+      }
+      lastPrint = millis(); // Update lastPrint
     }
-    lastPrint = millis(); // Update lastPrint
-  }
+  #endif
 }
 
 
