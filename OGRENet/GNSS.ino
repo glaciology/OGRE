@@ -10,9 +10,9 @@ void configureGNSS(){
   
   myGNSS.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, 0);   // Enable GPS
   myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, 1);   // Enable GLONASS
-  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, 1);   // Disable Galileo
-  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, 1);   // Disable BeiDou
-  myGNSS.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, 0); // Disable QZSS
+  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, 1);   // Enable Galileo
+  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, 1);   // Enable BeiDou
+  myGNSS.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, 0); // Enable QZSS
   
   
   myGNSS.setI2COutput(COM_TYPE_UBX);                 // Set the I2C port to output UBX only (turn off NMEA noise)

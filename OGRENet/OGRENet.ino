@@ -33,8 +33,8 @@ File myFile;                  // File that all GNSS data is written to
 //////////////////
 
 ///////// TIMING - SPECIFY INTERVAL HERE -  -------------------------
-uint32_t msToSleep = 40000;   // SLEEP INTERVAL (MS)
-const long interval = 60000; // LOGGING INTERVAL (MS)
+uint32_t msToSleep = 0;   // SLEEP INTERVAL (MS)
+const long interval = 90000000; // LOGGING INTERVAL (MS)
 //-------------------------------------------------------------------
 unsigned long PREVIOUS_MILLIS = 0;
 #define TIMER_FREQ 32768L // CTimer6 will use the 32kHz clock
@@ -162,6 +162,7 @@ void loop(void) {
 }
 
 
+// Interrupt hanlder for STIMER
 // CALLED ONCE NUMBER OF MS HAVE PASSED
 extern "C" void am_stimer_cmpr6_isr(void)
 {

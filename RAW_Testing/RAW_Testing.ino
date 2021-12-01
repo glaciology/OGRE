@@ -26,6 +26,15 @@ File myFile; //File that all GNSS data is written to
   
 #endif
 
+#define DEBUG false
+#if DEBUG
+#define DEBUG_PRINTLN(x)  Serial.println(x)
+#define DEBUG_SERIALFLUSH() Serial.flush()
+#else
+#define DEBUG_PRINTLN(x)
+#define DEBUG_SERIALFLUSH()
+#endif
+
 #define sdWriteSize 512 // Write data to the SD card in blocks of 512 bytes
 #define fileBufferSize 16384 // Allocate 16KBytes of RAM for UBX message storage
 
@@ -63,11 +72,13 @@ void newRAWX(UBX_RXM_RAWX_data_t ubxDataStruct)
 }
 
 void setup()
-{
-  Serial.begin(115200);
-  while (!Serial); //Wait for user to open terminal
-  Serial.println("SparkFun u-blox Example");
 
+{
+  #if DEBUG
+    Serial.begin(115200);
+    while (!Serial); //Wait for user to open terminal
+    Serial.println("SparkFun u-blox Example");
+  #endif
   pinMode(LED_BUILTIN, OUTPUT); // Flash LED_BUILTIN each time we write to the SD card
   digitalWrite(LED_BUILTIN, LOW);
 
@@ -88,28 +99,31 @@ void setup()
     pin_config(PinName(40), sdaPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
   #endif
 #endif
+  #if DEBUG
+    while (Serial.available()) // Make sure the Serial buffer is empty
+    {
+      Serial.read();
+    }
+  
+    Serial.println(F("Press any key to start logging."));
+  
+    while (!Serial.available()) // Wait for the user to press a key
+    {
+      ; // Do nothing
+    }
+  
+    delay(100); // Wait, just in case multiple characters were sent
+  
+    while (Serial.available()) // Empty the Serial buffer
+    {
+      Serial.read();
+    }
+  
+    Serial.println("Initializing SD card...");
+  #endif
 
-  while (Serial.available()) // Make sure the Serial buffer is empty
-  {
-    Serial.read();
-  }
-
-  Serial.println(F("Press any key to start logging."));
-
-  while (!Serial.available()) // Wait for the user to press a key
-  {
-    ; // Do nothing
-  }
-
-  delay(100); // Wait, just in case multiple characters were sent
-
-  while (Serial.available()) // Empty the Serial buffer
-  {
-    Serial.read();
-  }
-
-  Serial.println("Initializing SD card...");
-
+  ////
+  
   // See if the card is present and can be initialized:
   if (!SD.begin(sdChipSelect))
   {
@@ -124,12 +138,14 @@ void setup()
   myFile = SD.open("RXM_RAWX.ubx", FILE_WRITE);
   if(!myFile)
   {
-    Serial.println(F("Failed to create UBX data file! Freezing..."));
-    while (1);
+    #if DEBUG
+      Serial.println(F("Failed to create UBX data file! Freezing..."));
+      while (1);
+    #endif
   }
 
   //myGNSS.enableDebugging(); // Uncomment this line to enable lots of helpful GNSS debug messages on Serial
-  myGNSS.enableDebugging(Serial, true); // Or, uncomment this line to enable only the important GNSS debug messages on Serial
+  //myGNSS.enableDebugging(Serial, true); // Or, uncomment this line to enable only the important GNSS debug messages on Serial
 
   myGNSS.disableUBX7Fcheck(); // RAWX data can legitimately contain 0x7F, so we need to disable the "7F" check in checkUbloxI2C
 
@@ -141,8 +157,10 @@ void setup()
 
   if (myGNSS.begin() == false) //Connect to the u-blox module using Wire port
   {
-    Serial.println(F("u-blox GNSS not detected at default I2C address. Please check wiring. Freezing..."));
-    while (1);
+    #if DEBUG
+      Serial.println(F("u-blox GNSS not detected at default I2C address. Please check wiring. Freezing..."));
+      while (1);
+    #endif
   }
 
   // Uncomment the next line if you want to reset your module back to the default settings with 1Hz navigation rate
@@ -164,8 +182,9 @@ void setup()
   myGNSS.setAutoRXMRAWXcallback(&newRAWX); // Enable automatic RXM RAWX messages with callback to newRAWX
   myGNSS.logRXMRAWX(); // Enable RXM RAWX data logging
 
-  Serial.println(F("Press any key to stop logging."));
-
+  #if DEBUG
+    Serial.println(F("Press any key to stop logging."));
+  #endif
   lastPrint = millis(); // Initialize lastPrint
 }
 
@@ -187,68 +206,95 @@ void loop()
     myGNSS.extractFileBufferData((uint8_t *)&myBuffer, sdWriteSize); // Extract exactly sdWriteSize bytes from the UBX file buffer and put them into myBuffer
 
     myFile.write(myBuffer, sdWriteSize); // Write exactly sdWriteSize bytes from myBuffer to the ubxDataFile on the SD card
-
     // In case the SD writing is slow or there is a lot of data to write, keep checking for the arrival of new data
     myGNSS.checkUblox(); // Check for the arrival of new data and process it.
     myGNSS.checkCallbacks(); // Check if any callbacks are waiting to be processed.
 
     digitalWrite(LED_BUILTIN, LOW); // Turn LED_BUILTIN off again
   }
-
+  myFile.flush();
   // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-  if (millis() > (lastPrint + 1000)) // Print the message count once per second
-  {
-    Serial.print(F("Number of message groups received: SFRBX: ")); // Print how many message groups have been received (see note above)
-    Serial.print(numSFRBX);
-    Serial.print(F(" RAWX: "));
-    Serial.println(numRAWX);
-
-    uint16_t maxBufferBytes = myGNSS.getMaxFileBufferAvail(); // Get how full the file buffer has been (not how full it is now)
-
-    //Serial.print(F("The maximum number of bytes which the file buffer has contained is: ")); // It is a fun thing to watch how full the buffer gets
-    //Serial.println(maxBufferBytes);
-
-    if (maxBufferBytes > ((fileBufferSize / 5) * 4)) // Warn the user if fileBufferSize was more than 80% full
+  #if DEBUG
+    if (millis() > (lastPrint + 1000)) // Print the message count once per second
     {
-      Serial.println(F("Warning: the file buffer has been over 80% full. Some data may have been lost."));
-    }
-
-    lastPrint = millis(); // Update lastPrint
-  }
-
-  // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-  if (Serial.available()) // Check if the user wants to stop logging
-  {
-    uint16_t remainingBytes = myGNSS.fileBufferAvailable(); // Check if there are any bytes remaining in the file buffer
-
-    while (remainingBytes > 0) // While there is still data in the file buffer
-    {
-      digitalWrite(LED_BUILTIN, HIGH); // Flash LED_BUILTIN while we write to the SD card
-
-      uint8_t myBuffer[sdWriteSize]; // Create our own buffer to hold the data while we write it to SD card
-
-      uint16_t bytesToWrite = remainingBytes; // Write the remaining bytes to SD card sdWriteSize bytes at a time
-      if (bytesToWrite > sdWriteSize)
+      Serial.print(F("Number of message groups received: SFRBX: ")); // Print how many message groups have been received (see note above)
+      Serial.print(numSFRBX);
+      Serial.print(F(" RAWX: "));
+      Serial.println(numRAWX);
+  
+      uint16_t maxBufferBytes = myGNSS.getMaxFileBufferAvail(); // Get how full the file buffer has been (not how full it is now)
+  
+      //Serial.print(F("The maximum number of bytes which the file buffer has contained is: ")); // It is a fun thing to watch how full the buffer gets
+      //Serial.println(maxBufferBytes);
+  
+      if (maxBufferBytes > ((fileBufferSize / 5) * 4)) // Warn the user if fileBufferSize was more than 80% full
       {
-        bytesToWrite = sdWriteSize;
+        Serial.println(F("Warning: the file buffer has been over 80% full. Some data may have been lost."));
       }
-
-      myGNSS.extractFileBufferData((uint8_t *)&myBuffer, bytesToWrite); // Extract bytesToWrite bytes from the UBX file buffer and put them into myBuffer
-
-      myFile.write(myBuffer, bytesToWrite); // Write bytesToWrite bytes from myBuffer to the ubxDataFile on the SD card
-
-      remainingBytes -= bytesToWrite; // Decrement remainingBytes
+  
+      lastPrint = millis(); // Update lastPrint
     }
+  #endif
 
-    digitalWrite(LED_BUILTIN, LOW); // Turn LED_BUILTIN off
+  // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+//  uint16_t remainingBytes = myGNSS.fileBufferAvailable(); // Check if there are any bytes remaining in the file buffer
+//  
+//  while (remainingBytes > 0) // While there is still data in the file buffer
+//  {
+//        digitalWrite(LED_BUILTIN, HIGH); // Flash LED_BUILTIN while we write to the SD card
+//  
+//        uint8_t myBuffer[sdWriteSize]; // Create our own buffer to hold the data while we write it to SD card
+//  
+//        uint16_t bytesToWrite = remainingBytes; // Write the remaining bytes to SD card sdWriteSize bytes at a time
+//        if (bytesToWrite > sdWriteSize)
+//        {
+//          bytesToWrite = sdWriteSize;
+//        }
+//  
+//        myGNSS.extractFileBufferData((uint8_t *)&myBuffer, bytesToWrite); // Extract bytesToWrite bytes from the UBX file buffer and put them into myBuffer
+//  
+//        myFile.write(myBuffer, bytesToWrite); // Write bytesToWrite bytes from myBuffer to the ubxDataFile on the SD card
+//  
+//        remainingBytes -= bytesToWrite; // Decrement remainingBytes
+//      }
+//  
+//  digitalWrite(LED_BUILTIN, LOW); // Turn LED_BUILTIN off
+//  
+//  myFile.close(); // Close the data file
+//  myFile = SD.open("RXM_RAWX.ubx", FILE_WRITE);
 
-    myFile.close(); // Close the data file
-
-    Serial.println(F("Logging stopped. Freezing..."));
-    while(1); // Do nothing more
-  }
+  #if DEBUG
+    if (Serial.available()) // Check if the user wants to stop logging
+    {
+      uint16_t remainingBytes = myGNSS.fileBufferAvailable(); // Check if there are any bytes remaining in the file buffer
+  
+      while (remainingBytes > 0) // While there is still data in the file buffer
+      {
+        digitalWrite(LED_BUILTIN, HIGH); // Flash LED_BUILTIN while we write to the SD card
+  
+        uint8_t myBuffer[sdWriteSize]; // Create our own buffer to hold the data while we write it to SD card
+  
+        uint16_t bytesToWrite = remainingBytes; // Write the remaining bytes to SD card sdWriteSize bytes at a time
+        if (bytesToWrite > sdWriteSize)
+        {
+          bytesToWrite = sdWriteSize;
+        }
+  
+        myGNSS.extractFileBufferData((uint8_t *)&myBuffer, bytesToWrite); // Extract bytesToWrite bytes from the UBX file buffer and put them into myBuffer
+  
+        myFile.write(myBuffer, bytesToWrite); // Write bytesToWrite bytes from myBuffer to the ubxDataFile on the SD card
+  
+        remainingBytes -= bytesToWrite; // Decrement remainingBytes
+      }
+  
+      digitalWrite(LED_BUILTIN, LOW); // Turn LED_BUILTIN off
+  
+      myFile.close(); // Close the data file
+  
+      Serial.println(F("Logging stopped. Freezing..."));
+      while(1); // Do nothing more
+    }
+  #endif
 
   // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 }
