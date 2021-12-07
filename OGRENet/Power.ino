@@ -57,21 +57,23 @@ void wakeFromSleep() {
   //Turn on ADC
   powerControlADC(true); // Turn on ADC
   Wire.begin(); // I2C
-  SPI.begin(); // SPI
   qwiicPowerOn();
   //peripheralPowerOn();
+  SPI.begin(); // SPI
 
   //Set any pinModes
   digitalWrite(ledPin, HIGH);
 
   //Turn on Serial
-  Serial.begin(115200);
+  #if DEBUG
+    Serial.begin(115200); // open serial port
+  #endif
   delay(2500);
-  Serial.println("Turning back on");
+  DEBUG_PRINTLN("Turning back on");
 
   //CONFIM SD CARD RESTARTED
   if (!SD.begin(PIN_SD_CS)) {
-    Serial.println("Card failed, or not present. Freezing...");
+    DEBUG_PRINTLN("Card Failed, or not present. Freezing...");
     // don't do anything more:
     while (1);
   }
@@ -81,32 +83,32 @@ void wakeFromSleep() {
   //CONFIRM QWIIC GNSS RESTARTED
   myGNSS.setFileBufferSize(fileBufferSize); // setFileBufferSize must be called _before_ .begin
   if (myGNSS.begin() == false) {
-    Serial.println(F("u-blox GNSS not detected at default I2C address. Please check wiring. Freezing..."));
+    DEBUG_PRINTLN(F("u-blox GNSS not detected at default I2C address. Please check wiring. Freezing..."));
     while (1);
   }
   Serial.println("restarted");
   PREVIOUS_MILLIS = millis();
-  Serial.println(PREVIOUS_MILLIS);
+  DEBUG_PRINTLN(PREVIOUS_MILLIS);
 }
-
 
 
 ///////// AUXILIARLY OFF/ON FUNCTIONS
 void qwiicPowerOff() {
-  digitalWrite(PIN_QWIIC_POWER, LOW);
+  digitalWrite(PIN_ZED_POWER, LOW);
 }
 
-//void peripheralPowerOff() {
-//  delay(250); // Non-blocking delay
-//  digitalWrite(PIN_PWC_POWER, LOW);
-//}
+void peripheralPowerOff() {
+  delay(250); // Non-blocking delay
+  digitalWrite(PIN_PERIPHERAL, LOW);
+}
 
 void qwiicPowerOn() {
-  digitalWrite(PIN_QWIIC_POWER, HIGH);
+  digitalWrite(PIN_ZED_POWER, HIGH);
   delay(10);
 }
 
-//void peripheralPowerOn() {
-//  digitalWrite(PIN_PWC_POWER, HIGH);
-//  delay(250); // Non-blocking delay to allow Qwiic devices time to power up
-//}
+void peripheralPowerOn() {
+  digitalWrite(PIN_PERIPHERAL, HIGH);
+  delay(250); 
+  
+}

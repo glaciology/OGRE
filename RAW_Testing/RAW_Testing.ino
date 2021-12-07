@@ -168,7 +168,7 @@ void setup()
   //myGNSS.factoryDefault(); delay(5000);
 
   myGNSS.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, 1);   // Enable/Disable GPS
-  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, 0);   // Disable GLONASS
+  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, 1);   // Disable GLONASS
   myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, 0);   // Disable Galileo
   myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, 0);   // Disable BeiDou
   myGNSS.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, 0); // Disable QZSS

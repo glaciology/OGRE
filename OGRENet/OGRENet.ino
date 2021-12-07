@@ -10,6 +10,9 @@
    Dependencies:
    - SparkFun_u-blox_GNSS_Arduino_Library v2.0.17
    - Apollo3 Arduino Core v2.1.0
+
+   Issues: 
+   - Peripheral power: https://issueexplorer.com/issue/sparkfun/Arduino_Apollo3/407
 */
 
 ///////// LIBRARIES & OBJECT INSTANTIATION(S)
@@ -28,13 +31,14 @@ File myFile;                  // File that all GNSS data is written to
 
 ///////// PINOUTS
 #define ledPin            LED_BUILTIN
-#define PIN_QWIIC_POWER   34  // G2 - Drive low to turn off Peripheral
+#define PIN_ZED_POWER   34  // G2 - Drive low to turn off ZED
 #define PIN_SD_CS         41  // CS
+#define PIN_PERIPHERAL    33  // G1 - Drive low to turn of SD/Perhipherals
 //////////////////
 
 ///////// TIMING - SPECIFY INTERVAL HERE -  -------------------------
-uint32_t msToSleep = 0;   // SLEEP INTERVAL (MS)
-const long interval = 90000000; // LOGGING INTERVAL (MS)
+uint32_t msToSleep = 10000;   // SLEEP INTERVAL (MS)
+const long interval = 10000; // LOGGING INTERVAL (MS)
 //-------------------------------------------------------------------
 unsigned long PREVIOUS_MILLIS = 0;
 #define TIMER_FREQ 32768L // CTimer6 will use the 32kHz clock
@@ -48,7 +52,7 @@ unsigned long lastPrint = 0; // used to keep time for logging
 //////////////////
 
 ///////// DEBUGGING
-#define DEBUG true // Output messages to Serial monitor
+#define DEBUG false // Output messages to Serial monitor
 #if DEBUG
 #define DEBUG_PRINTLN(x)  Serial.println(x)
 #define DEBUG_SERIALFLUSH() Serial.flush()
