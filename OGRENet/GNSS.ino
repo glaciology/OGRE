@@ -23,3 +23,45 @@ void configureGNSS(){
   myGNSS.setAutoRXMRAWX(true, false);                // Enable automatic RXM RAWX messages 
   myGNSS.logRXMRAWX();                               // Enable RXM RAWX data logging
 }
+
+
+void logGNSS(){
+  ///////// DO GNSS STUFF
+  myGNSS.checkUblox(); // Check for the arrival of new data and process it.
+  while (myGNSS.fileBufferAvailable() >= sdWriteSize) { // Check to see if we have at least sdWriteSize waiting in the buffer
+    petDog();
+    uint8_t myBuffer[sdWriteSize]; // Create our own buffer to hold the data while we write it to SD card
+    myGNSS.extractFileBufferData((uint8_t *)&myBuffer, sdWriteSize); // Extract exactly sdWriteSize bytes from the UBX file buffer and put them into myBuffer
+    myFile.write(myBuffer, sdWriteSize); // Write exactly sdWriteSize bytes from myBuffer to the ubxDataFile on the SD card
+    bytesWritten += sdWriteSize; // Update bytesWritten
+    myGNSS.checkUblox(); // Check for the arrival of new data and process it if SD slow
+  }
+
+  ///////// PRINT BYTES WRITTEN (DEBUG MODE)
+  #if DEBUG
+    if (millis() > (lastPrint + 1000)) { // Print bytesWritten once per second
+      Serial.print(F("The number of bytes written to SD card is ")); // Print how many bytes have been written to SD card
+      Serial.println(bytesWritten);
+      uint16_t maxBufferBytes = myGNSS.getMaxFileBufferAvail(); // Get how full the file buffer has been (not how full it is now)
+      if (maxBufferBytes > ((fileBufferSize / 5) * 4)) { // Warn the user if fileBufferSize was more than 80% full
+        Serial.println(F("Warning: the file buffer has been over 80% full. Some data may have been lost."));
+      }
+      lastPrint = millis(); // Update lastPrint
+    }
+  #endif
+}
+
+void closeGNSS(){
+      uint16_t remainingBytes = myGNSS.fileBufferAvailable(); // Check if there are any bytes remaining in the file buffer
+    while (remainingBytes > 0) { // While there is still data in the file buffer
+      petDog();
+      uint8_t myBuffer[sdWriteSize]; // Create our own buffer to hold the data while we write it to SD card
+      uint16_t bytesToWrite = remainingBytes; // Write the remaining bytes to SD card sdWriteSize bytes at a time
+      if (bytesToWrite > sdWriteSize) {
+        bytesToWrite = sdWriteSize;
+      }
+      myGNSS.extractFileBufferData((uint8_t *)&myBuffer, bytesToWrite); // Extract bytesToWrite bytes from the UBX file buffer and put them into myBuffer
+      myFile.write(myBuffer, bytesToWrite); // Write bytesToWrite bytes from myBuffer to the ubxDataFile on the SD card
+      remainingBytes -= bytesToWrite; // Decrement remainingBytes
+    }
+}
