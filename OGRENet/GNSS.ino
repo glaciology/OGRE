@@ -1,27 +1,34 @@
 void configureGNSS(){
-  /////////GNSS SETTINGS
-  myGNSS.disableUBX7Fcheck(); // RAWX data can legitimately contain 0x7F, so we need to disable the "7F" check in checkUbloxI2C
+  ///////// SEND GNSS SETTING CONFIG TO UBLOX
+  myGNSS.disableUBX7Fcheck();               // RAWX data can legitimately contain 0x7F, so we need to disable the "7F" check in checkUbloxI2C
   myGNSS.setFileBufferSize(fileBufferSize); // setFileBufferSize must be called _before_ .begin
   
   if (myGNSS.begin() == false){
-    DEBUG_PRINTLN(F("u-blox GNSS not detected at default I2C address. Please check wiring. Freezing..."));
+    DEBUG_PRINTLN(F("UBLOX GNSS not detected at default I2C address. Freezing..."));
     while (1);
   }
-  
-  myGNSS.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, 0);   // Enable GPS
-  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, 1);   // Enable GLONASS
-  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, 1);   // Enable Galileo
-  myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, 1);   // Enable BeiDou
-  myGNSS.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, 0); // Enable QZSS
-  
+
+  if (firstConfig) {
+    myGNSS.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, logGPS);    // Enable GPS (define in USER SETTINGS)
+    myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);    // Enable GLONASS
+    myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);    // Enable Galileo
+    myGNSS.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);    // Enable BeiDou
+    myGNSS.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS); // Enable QZSS
+
+    //firstConfig = false;
+    DEBUG_PRINTLN("GNSS CONSTELLATIONS CONFIGURED");
+  }
   
   myGNSS.setI2COutput(COM_TYPE_UBX);                 // Set the I2C port to output UBX only (turn off NMEA noise)
   myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); // Save (only) the communications port settings to flash and BBR
-  myGNSS.setNavigationFrequency(1);                  // Produce one navigation solution per second (that's plenty for Precise Point Positioning)
-  myGNSS.setAutoRXMSFRBX(true, false);               // Enable automatic RXM SFRBX messages 
-  myGNSS.logRXMSFRBX();                              // Enable RXM SFRBX data logging
+  myGNSS.setNavigationFrequency(1);                  // Produce one navigation solution per second
   myGNSS.setAutoRXMRAWX(true, false);                // Enable automatic RXM RAWX messages 
   myGNSS.logRXMRAWX();                               // Enable RXM RAWX data logging
+
+  if (logNav){
+    myGNSS.setAutoRXMSFRBX(true, false);            // Enable automatic RXM SFRBX messages 
+    myGNSS.logRXMSFRBX();                           // Enable RXM SFRBX data logging
+  }
 }
 
 
@@ -40,6 +47,7 @@ void logGNSS(){
   ///////// PRINT BYTES WRITTEN (DEBUG MODE)
   #if DEBUG
     if (millis() > (lastPrint + 1000)) { // Print bytesWritten once per second
+      petDog();
       Serial.print(F("The number of bytes written to SD card is ")); // Print how many bytes have been written to SD card
       Serial.println(bytesWritten);
       uint16_t maxBufferBytes = myGNSS.getMaxFileBufferAvail(); // Get how full the file buffer has been (not how full it is now)
@@ -64,4 +72,9 @@ void closeGNSS(){
       myFile.write(myBuffer, bytesToWrite); // Write bytesToWrite bytes from myBuffer to the ubxDataFile on the SD card
       remainingBytes -= bytesToWrite; // Decrement remainingBytes
     }
+
+    delay(100);
+    myFile.close();
+    bytesWritten = 0;
+    lastPrint = 0;
 }

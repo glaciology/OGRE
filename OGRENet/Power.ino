@@ -12,10 +12,11 @@ void goToSleep() {
 
    // Use the lower power 32kHz clock. Use it to run CT6 as well.
   am_hal_stimer_config(AM_HAL_STIMER_CFG_CLEAR | AM_HAL_STIMER_CFG_FREEZE);
-  am_hal_stimer_config(AM_HAL_STIMER_XTAL_32KHZ | AM_HAL_STIMER_CFG_COMPARE_G_ENABLE);
+  am_hal_stimer_config(AM_HAL_STIMER_XTAL_32KHZ);
+  //am_hal_stimer_config(AM_HAL_STIMER_XTAL_32KHZ | AM_HAL_STIMER_CFG_COMPARE_G_ENABLE);
 
-  //  *********
-  configureSleepStimer();
+//  // Configure Counter/Timer Alarm
+//  configureSleepStimer();
   
   //Power down cache, flash, SRAM
   am_hal_pwrctrl_memory_deepsleep_powerdown(AM_HAL_PWRCTRL_MEM_ALL); // Power down all flash and cache
@@ -24,18 +25,17 @@ void goToSleep() {
   //Deep Sleep
   am_hal_sysctrl_sleep(AM_HAL_SYSCTRL_SLEEP_DEEP);
 
-  ///////// Waiting for Stimer Interrupt 
+  ///////// Waiting for RTC or WDT Interrupt 
   ///////// Sleeping
   ///////// Sleeping...
   
-  //Turn off interrupt
-  NVIC_DisableIRQ(STIMER_CMPR6_IRQn);
-  am_hal_stimer_int_disable(AM_HAL_STIMER_INT_COMPAREG); //Disable C/T G=6
+//  //Turn off interrupt
+//  NVIC_DisableIRQ(STIMER_CMPR6_IRQn);
+//  am_hal_stimer_int_disable(AM_HAL_STIMER_INT_COMPAREG); //Disable C/T G=6
 
   // WAKE
   wakeFromSleep();
 }
-
 
 // POWER UP SMOOTHLY
 void wakeFromSleep() {
@@ -49,22 +49,14 @@ void wakeFromSleep() {
   // Turn on ADC
   powerControlADC(true); // Turn on ADC
   Wire.begin(); // I2C
-  qwiicPowerOn();
-  //peripheralPowerOn();
   SPI.begin(); // SPI
+  petDog();
 
   //Turn on Serial
   #if DEBUG
     Serial.begin(115200); // open serial port
   #endif
   delay(2500);
-
-//  // RECONFIGURATIONS
-//  configureSD();
-//  configureGNSS();
-//  configureLogAlarm();
-  
-  DEBUG_PRINTLN("restarted");
 
 }
 
