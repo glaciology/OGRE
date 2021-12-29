@@ -64,7 +64,7 @@ byte logMode                = 2;   // 1 = daily, 2 = rolling
 // LOG MODE: Rolling Interval
 uint32_t secondsSleep       = 20;  // SLEEP INTERVAL (S)
 uint32_t minutesSleep       = 0;
-uint32_t secondsLog         = 20;  // LOGGING INTERVAL (S)
+uint32_t secondsLog         = 30;  // LOGGING INTERVAL (S)
 uint32_t minutesLog         = 0;
 
 // LOG MODE: Daily Interval **** NOT FULLY CONFIGURED YET
@@ -99,7 +99,7 @@ unsigned long currMillis   = 0;
 //////////////////
 
 ///////// DEBUGGING
-#define DEBUG               true // Output messages to Serial monitor
+#define DEBUG               false // Output messages to Serial monitor
 #if DEBUG
 #define DEBUG_PRINTLN(x)    Serial.println(x)
 #define DEBUG_SERIALFLUSH() Serial.flush()
