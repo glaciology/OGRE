@@ -1,22 +1,44 @@
 
 // POWER DOWN AND WAIT FOR INTERRUPT
 void goToSleep() {
-
+  # if DEBUG
+    Serial.end();
+  #endif 
   Wire.end(); //Power down I2C
   SPI.end(); //Power down SPI
-  Serial.end();
-  powerControlADC(false); //Power down ADC. It it started by default before setup().
+  power_adc_disable();
+  //powerControlADC(false); //Power down ADC. It it started by default before setup().
   digitalWrite(LED, LOW); // Turn off LED
-  qwiicPowerOff();
+  //qwiicPowerOff();
   //peripheralPowerOff();
+  
+  // Force peripherals off
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM0);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM1);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM2);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM3);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM4);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM5);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_ADC);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_UART0);
+  am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_UART1);
 
-   // Use the lower power 32kHz clock. Use it to run CT6 as well.
+  // Disable all pads except G1 (33), G2 (34) and LED_BUILTIN (19)
+  for (int x = 0; x < 50; x++)
+  {
+    if ((x != 33) && (x != 34) && (x != 19))
+    {
+      am_hal_gpio_pinconfig(x, g_AM_HAL_GPIO_DISABLE);
+    }
+  }
+
+  qwiicPowerOff();
+  peripheralPowerOff(); 
+
+  // Use the lower power 32kHz clock.
   am_hal_stimer_config(AM_HAL_STIMER_CFG_CLEAR | AM_HAL_STIMER_CFG_FREEZE);
   am_hal_stimer_config(AM_HAL_STIMER_XTAL_32KHZ);
   //am_hal_stimer_config(AM_HAL_STIMER_XTAL_32KHZ | AM_HAL_STIMER_CFG_COMPARE_G_ENABLE);
-
-//  // Configure Counter/Timer Alarm
-//  configureSleepStimer();
   
   //Power down cache, flash, SRAM
   am_hal_pwrctrl_memory_deepsleep_powerdown(AM_HAL_PWRCTRL_MEM_ALL); // Power down all flash and cache
@@ -29,10 +51,6 @@ void goToSleep() {
   ///////// Sleeping
   ///////// Sleeping...
   
-//  //Turn off interrupt
-//  NVIC_DisableIRQ(STIMER_CMPR6_IRQn);
-//  am_hal_stimer_int_disable(AM_HAL_STIMER_INT_COMPAREG); //Disable C/T G=6
-
   // WAKE
   wakeFromSleep();
 }
@@ -47,9 +65,12 @@ void wakeFromSleep() {
   am_hal_stimer_config(AM_HAL_STIMER_HFRC_3MHZ);
 
   // Turn on ADC
-  powerControlADC(true); // Turn on ADC
+  ap3_adc_setup();
+  //powerControlADC(true); // Turn on ADC
   Wire.begin(); // I2C
+  disableI2CPullups();
   SPI.begin(); // SPI
+  
   petDog();
 
   //Turn on Serial
@@ -60,54 +81,53 @@ void wakeFromSleep() {
 
 }
 
-
 ///////// AUXILIARLY OFF/ON FUNCTIONS
 void qwiicPowerOff() {
-  digitalWrite(PIN_ZED_POWER, LOW);
+  digitalWrite(ZED_POWER, LOW);
 }
 
 void peripheralPowerOff() {
-  delay(250); // Non-blocking delay
-  digitalWrite(PIN_PERIPHERAL, LOW);
+  delay(250); 
+  digitalWrite(PERIPHERAL_POWER, LOW);
 }
 
 void qwiicPowerOn() {
-  digitalWrite(PIN_ZED_POWER, HIGH);
-  delay(10);
+  digitalWrite(ZED_POWER, HIGH);
+  delay(250);
 }
 
 void peripheralPowerOn() {
-  digitalWrite(PIN_PERIPHERAL, HIGH);
+  digitalWrite(PERIPHERAL_POWER, HIGH);
   delay(250); 
   
 }
 
 void disableI2CPullups() {
+  #if (apolloCore == 2) 
     ///////// On Apollo3 v2 MANUALLY DISABLE PULLUPS - IOM and pin #s specific to Artemis MicroMod
-  am_hal_gpio_pincfg_t sclPinCfg = g_AM_BSP_GPIO_IOM4_SCL;  // Artemis MicroMod Processor Board uses IOM4 for I2C communication
-  am_hal_gpio_pincfg_t sdaPinCfg = g_AM_BSP_GPIO_IOM4_SDA;  //
-  sclPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          // Disable the SCL/SDA pull-ups
-  sdaPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          //
-  pin_config(PinName(39), sclPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 39 for SCL
-  pin_config(PinName(40), sdaPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
+    am_hal_gpio_pincfg_t sclPinCfg = g_AM_BSP_GPIO_IOM4_SCL;  // Artemis MicroMod Processor Board uses IOM4 for I2C communication
+    am_hal_gpio_pincfg_t sdaPinCfg = g_AM_BSP_GPIO_IOM4_SDA;  //
+    sclPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          // Disable the SCL/SDA pull-ups
+    sdaPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          //
+    pin_config(PinName(39), sclPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 39 for SCL
+    pin_config(PinName(40), sdaPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
+  #else 
+    Wire.setPullups(0);
+    Wire.setClock(400000); 
+  #endif
+
 }
 
-
-
-
-unsigned long previousMillis      = 0; 
-unsigned long currentMillis = millis();
-
 // Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)
-void blinkLed(byte ledFlashes, unsigned int ledDelay) {
+void blinkLed(byte ledFlashes, unsigned int leddelay) {
   byte i = 0;
   while (i < ledFlashes * 2)
   {
-    unsigned long currentMillis = millis();
-    if (currentMillis - previousMillis >= ledDelay)
+    unsigned long currMillis = millis();
+    if (currMillis - prevMillis >= leddelay)
     {
       digitalWrite(LED, !digitalRead(LED));
-      previousMillis = currentMillis;
+      prevMillis = currMillis;
       i++;
     }
   }
