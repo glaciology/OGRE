@@ -44,16 +44,23 @@ SdFs sd;                                           // SdFs = FAT16/FAT32 and exF
 APM3_RTC rtc;
 APM3_WDT wdt;
 File myFile;
+TwoWire myWire(2);                                 // USE I2C bus 2, SDA/SCL 25/27
+SPIClass mySpi(3);                                 // Use IO Master 4 on pads 39/40/38
 //////////////////
 
 ///////// PINOUTS
-#define LED                 LED_BUILTIN
-#define ZED_POWER             34  // G2 - Drive low to turn off ZED
-#define PERIPHERAL_POWER      33  // G1 - Drive low to turn off SD/Perhipherals
-#define PIN_SD_CS             41  // CS
-#define SDA                   44
-#define SCL                   45
-#define SD_CONFIG             SdSpiConfig(PIN_SD_CS, SHARED_SPI, SD_SCK_MHZ(24))
+#define LED                     16
+#define ZED_POWER               34  // Drive low to turn off ZED
+#define PERIPHERAL_POWER        18  // Drive low to turn off uSD
+#define PIN_SD_CS               41  
+#define COPI                    38
+#define CIPO                    43
+#define SCK                     42
+#define SDA                     25
+#define SCL                     27
+#define ZED_POWER               34
+#define PER_POWER               18
+#define SD_CONFIG               SdSpiConfig(PIN_SD_CS, SHARED_SPI, SD_SCK_MHZ(24))
 //////////////////
 
 //////////////////////////////////////////////////////
@@ -72,12 +79,12 @@ byte logStartHr             = 10;  // UTC
 byte logEndHr               = 14;  // UTC
 
 // UBLOX Message Config:
-int logGPS               = 1;      // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
-int logGLO               = 1;
-int logGAL               = 0;
-int logBDS               = 0;
-int logQZSS              = 0;
-bool logNav              = true;   // TRUE if SFRBX (satellite nav) included in logging
+int logGPS                  = 1;    // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
+int logGLO                  = 1;
+int logGAL                  = 0;
+int logBDS                  = 0;
+int logQZSS                 = 0;
+bool logNav                 = true; // TRUE if SFRBX (satellite nav) included in logging
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
@@ -123,12 +130,12 @@ void setup() {
   pinMode(PERIPHERAL_POWER, OUTPUT);
   pinMode(LED, OUTPUT);
 
-  qwiicPowerOn();
+  zedPowerOn();
   peripheralPowerOn();
   
-  Wire.begin();
+  myWire.begin();
   disableI2CPullups();
-  SPI.begin();
+  mySpi.begin();
 
   configureWdt(); 
 }
@@ -138,20 +145,20 @@ void loop() {
     if (alarmFlag) { 
       DEBUG_PRINTLN("Alarm Triggered: Configuring System");     
       petDog();  
-      qwiicPowerOn();      // TURN UBLOX ON
-      peripheralPowerOn(); // TURN SD & PERIPHERALS ON
-      delay(100); // delay(1000);
-      configureSD();       // CONFIGURE SD
-      configureGNSS();     // CONFIGURE GNSS SETTINGS
-      configureLogAlarm(); // sets RTC clock to interrupt log end
-      DEBUG_PRINTLN("Configuration Complete"); 
+      zedPowerOn();           // TURN UBLOX ON
+      peripheralPowerOn();    // TURN SD & PERIPHERALS ON
+      delay(100);             // delay(1000);
+      configureSD();          // CONFIGURE SD
+      configureGNSS();        // CONFIGURE GNSS SETTINGS
+      configureLogAlarm();    // sets RTC clock to interrupt log end
+      DEBUG_PRINTLN("Configuration Complete: Logging"); 
       
-      if (initSetup){      // Indicates Config Complete 
+      if (initSetup){         // Indicates Config Complete to user
         blinkLed(10, 100);
         initSetup = false;
       }
       
-      while(!alarmFlag) {  // LOG DATA UNTIL alarmFlag = True
+      while(!alarmFlag) {     // LOG DATA UNTIL alarmFlag = True
         logGNSS();
       }
       
@@ -161,7 +168,7 @@ void loop() {
     }
 
     if (wdtFlag) {
-      petDog(); // Restart watchdog timer
+      petDog(); 
     }
     
     //DEBUG_PRINTLN(wdtCounterMax);

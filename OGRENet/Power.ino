@@ -4,13 +4,13 @@ void goToSleep() {
   # if DEBUG
     Serial.end();
   #endif 
-  Wire.end(); //Power down I2C
-  SPI.end(); //Power down SPI
+  myWire.end(); //Power down I2C
+  mySpi.end(); //Power down SPI
   power_adc_disable();
   //powerControlADC(false); //Power down ADC. It it started by default before setup().
   digitalWrite(LED, LOW); // Turn off LED
-  //qwiicPowerOff();
-  //peripheralPowerOff();
+  zedPowerOff(); 
+  peripheralPowerOff();
   
   // Force peripherals off
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM0);
@@ -23,16 +23,16 @@ void goToSleep() {
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_UART0);
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_UART1);
 
-  // Disable all pads except G1 (33), G2 (34) and LED_BUILTIN (19)
+  // Disable all pads except 16, 18, 34 (LED and PWR CNTRLS)
   for (int x = 0; x < 50; x++)
   {
-    if ((x != 33) && (x != 34) && (x != 19))
+    if ((x != LED) && (x != ZED_POWER) && (x != PERIPHERAL_POWER))
     {
       am_hal_gpio_pinconfig(x, g_AM_HAL_GPIO_DISABLE);
     }
   }
 
-  qwiicPowerOff();
+  zedPowerOff();
   peripheralPowerOff(); 
 
   // Use the lower power 32kHz clock.
@@ -67,9 +67,9 @@ void wakeFromSleep() {
   // Turn on ADC
   ap3_adc_setup();
   //powerControlADC(true); // Turn on ADC
-  Wire.begin(); // I2C
+  myWire.begin(); // I2C
   disableI2CPullups();
-  SPI.begin(); // SPI
+  mySpi.begin(); // SPI
   
   petDog();
 
@@ -82,22 +82,22 @@ void wakeFromSleep() {
 }
 
 ///////// AUXILIARLY OFF/ON FUNCTIONS
-void qwiicPowerOff() {
-  digitalWrite(ZED_POWER, LOW);
+void zedPowerOff() {
+  digitalWrite(ZED_POWER, HIGH);
 }
 
 void peripheralPowerOff() {
   delay(250); 
-  digitalWrite(PERIPHERAL_POWER, LOW);
+  digitalWrite(PERIPHERAL_POWER, HIGH);
 }
 
-void qwiicPowerOn() {
-  digitalWrite(ZED_POWER, HIGH);
+void zedPowerOn() {
+  digitalWrite(ZED_POWER, LOW);
   delay(250);
 }
 
 void peripheralPowerOn() {
-  digitalWrite(PERIPHERAL_POWER, HIGH);
+  digitalWrite(PERIPHERAL_POWER, LOW);
   delay(250); 
   
 }
@@ -109,11 +109,11 @@ void disableI2CPullups() {
     am_hal_gpio_pincfg_t sdaPinCfg = g_AM_BSP_GPIO_IOM4_SDA;  //
     sclPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          // Disable the SCL/SDA pull-ups
     sdaPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          //
-    pin_config(PinName(39), sclPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 39 for SCL
-    pin_config(PinName(40), sdaPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
+    pin_config(SCL, sclPinCfg);                               // Artemis MicroMod Processor Board uses Pin/Pad 39 for SCL
+    pin_config(SDA, sdaPinCfg);                               // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
   #else 
-    Wire.setPullups(0);
-    Wire.setClock(400000); 
+    myWire.setPullups(0);
+    myWire.setClock(400000); 
   #endif
 
 }
