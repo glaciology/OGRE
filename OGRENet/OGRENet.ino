@@ -1,6 +1,6 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 12/28/21
+   Derek Pickell 1/19/22
    V0.2.0 (beta-release)
 
    Hardware:
@@ -60,7 +60,7 @@ SPIClass mySpi(3);                                 // Use IO Master 4 on pads 39
 #define SCL                     27
 #define ZED_POWER               34
 #define PER_POWER               18
-#define SD_CONFIG               SdSpiConfig(PIN_SD_CS, SHARED_SPI, SD_SCK_MHZ(24))
+#define SD_CONFIG               SdSpiConfig(PIN_SD_CS, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
 //////////////////
 
 //////////////////////////////////////////////////////
@@ -69,9 +69,9 @@ SPIClass mySpi(3);                                 // Use IO Master 4 on pads 39
 byte logMode                = 2;   // 1 = daily, 2 = rolling
 
 // LOG MODE: Rolling Interval
-uint32_t secondsSleep       = 20;  // SLEEP INTERVAL (S)
+uint32_t secondsSleep       = 50;  // SLEEP INTERVAL (S)
 uint32_t minutesSleep       = 0;
-uint32_t secondsLog         = 30;  // LOGGING INTERVAL (S)
+uint32_t secondsLog         = 50;  // LOGGING INTERVAL (S)
 uint32_t minutesLog         = 0;
 
 // LOG MODE: Daily Interval **** NOT FULLY CONFIGURED YET

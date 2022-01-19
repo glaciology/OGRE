@@ -4,7 +4,7 @@ void configureGNSS(){
   gnss.disableUBX7Fcheck();               // RAWX data can legitimately contain 0x7F: So disable the "7F" check in checkUbloxI2C
   gnss.setFileBufferSize(fileBufferSize); // Allocate >2KB RAM for Buffer. CALL before .begin()
   
-  if (gnss.begin() == false){
+  if (gnss.begin(myWire) == false){
     DEBUG_PRINTLN(F("UBLOX not detected at default I2C address. Freezing..."));
     while (1); // WDT will reset sys
   }
@@ -16,6 +16,7 @@ void configureGNSS(){
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);    // Enable Galileo
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);    // Enable BeiDou
     success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS); // Enable QZSS
+    myDelay(2000);
     if (!success){
       DEBUG_PRINTLN("GNSS CONSTELLATIONS FAILED TO CONFIGURE");
     }
@@ -30,6 +31,10 @@ void configureGNSS(){
     gnss.setAutoRXMSFRBX(true, false);            // Enable automatic RXM SFRBX (NAV) messages 
     gnss.logRXMSFRBX();                           // Enable RXM SFRBX (NAV) data logging
   }
+
+  #if DEBUG
+    gnss.enableDebugging(Serial, true); // Or, uncomment this line to enable only the important GNSS debug messages on Serial
+  #endif
 }
 
 void logGNSS(){

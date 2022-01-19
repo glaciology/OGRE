@@ -134,3 +134,18 @@ void blinkLed(byte ledFlashes, unsigned int leddelay) {
   // Turn off LED
   digitalWrite(LED, LOW);
 }
+
+// Non-blocking delay (ms: duration)
+// https://arduino.stackexchange.com/questions/12587/how-can-i-handle-the-millis-rollover
+void myDelay(unsigned long ms)
+{
+  unsigned long start = millis();         // Start: timestamp
+  for (;;)
+  {
+    petDog();                             // Reset watchdog timer
+    unsigned long now = millis();         // Now: timestamp
+    unsigned long elapsed = now - start;  // Elapsed: duration
+    if (elapsed >= ms)                    // Comparing durations: OK
+      return;
+  }
+}
