@@ -14,7 +14,7 @@ File myFile; //File that all GNSS data is written to
 
 
 ///////// PINOUTS
-#define LED                   16
+#define LED                   33
 #define ZED_POWER             34  
 #define PERIPHERAL_POWER      18
 #define PIN_SD_CS             41  
