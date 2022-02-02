@@ -1,19 +1,26 @@
 
 void configureSD(){
   ///////// SD CARD INITIALIZATION
-  if (!sd.begin(SD_CONFIG)) { // https://github.com/sparkfun/Arduino_Apollo3/issues/370
-    DEBUG_PRINTLN("Card failed, or not present. Freezing...");
-    while (1); 
-  }
-  DEBUG_PRINTLN("SD card initialized.");
+  if (!sd.begin(SD_CONFIG)) { // 
+    DEBUG_PRINTLN("Card failed, or not present. Trying again...");
+    delay(2000);
 
-  // Create a new log file and open for writing
-  // O_CREAT  - Create the file if it does not exist
-  // O_APPEND - Seek to the end of the file prior to each write
-  // O_WRITE  - Open the file for writing
-  myFile.open("RAWX.UBX", O_CREAT | O_APPEND | O_WRITE);
-  if (!myFile) {
-    DEBUG_PRINTLN(F("Failed to create UBX data file! Freezing..."));
-    while (1); 
+    if (!sd.begin(SD_CONFIG)) { // 
+      DEBUG_PRINTLN("Card failed, or not present...");
+      online.uSD = false;
+      while (1) {
+        blinkLed(2, 250);
+        delay(2000);
+      }
+    }
+    else{
+      DEBUG_PRINTLN("Info: microSD initialized.");
+      online.uSD = true;
+    }
   }
+  else{
+    DEBUG_PRINTLN("SD card initialized.");
+    online.uSD = true;
+  }
+  
 }

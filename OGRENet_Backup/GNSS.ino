@@ -4,38 +4,18 @@ void configureGNSS(){
   gnss.disableUBX7Fcheck();               // RAWX data can legitimately contain 0x7F: So disable the "7F" check in checkUbloxI2C
   gnss.setFileBufferSize(fileBufferSize); // Allocate >2KB RAM for Buffer. CALL before .begin()
   
-  if (gnss.begin(myWire) == false) {
-    DEBUG_PRINTLN("UBLOX not detected at default I2C address. Reattempting...");
-    
-    delay(2000);
-
-    if (gnss.begin(myWire) == false) {
-      DEBUG_PRINTLN("UBLOX not detected at default I2C address.");
-      online.gnss = false;
-      logDebug();
-      while(1) {
-        blinkLed(3, 250);
-        delay(2000);
-      }
-    }
-    else{
-      DEBUG_PRINTLN("UBLOX initialized.");
-      online.gnss = true;
-    }
-  }
-  else {
-    DEBUG_PRINTLN("UBLOX initialized.");
-    online.gnss == true;
+  if (gnss.begin() == false){
+    DEBUG_PRINTLN(F("UBLOX not detected at default I2C address. Freezing..."));
+    while (1); // WDT will reset sys
   }
 
-  if (initSetup) {
+  if (firstConfig) {
     bool success = true;
     success &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, logGPS);    // Enable GPS (define in USER SETTINGS)
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);    // Enable GLONASS
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);    // Enable Galileo
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);    // Enable BeiDou
     success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS); // Enable QZSS
-    myDelay(2000);
     if (!success){
       DEBUG_PRINTLN("GNSS CONSTELLATIONS FAILED TO CONFIGURE");
     }
@@ -44,46 +24,15 @@ void configureGNSS(){
   gnss.setI2COutput(COM_TYPE_UBX);                 // Set the I2C port to output UBX only (no NMEA)
   gnss.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); // Save communications port settings to flash and BBR
   gnss.setNavigationFrequency(1);                  // Produce one navigation solution per second
-  
   gnss.setAutoRXMRAWX(true, false);                // Enable automatic RXM RAWX (RAW) messages 
   gnss.logRXMRAWX();                               // Enable RXM RAWX (RAW) data logging
   if (logNav){
     gnss.setAutoRXMSFRBX(true, false);            // Enable automatic RXM SFRBX (NAV) messages 
     gnss.logRXMSFRBX();                           // Enable RXM SFRBX (NAV) data logging
   }
-  if (logMode == 1 || logMode == 4){
-    gnss.setAutoPVT(true);
-  }
-
-  #if DEBUG
-    gnss.enableDebugging(Serial, true); // Or, uncomment this line to enable only the important GNSS debug messages on Serial
-  #endif
-
-  // OPEN LOG FILE
-  // O_CREAT  - Create the file if it does not exist
-  // O_APPEND - Seek to the end of the file prior to each write
-  // O_WRITE  - Open the file for writing
-  myFile.open("RAWX.UBX", O_CREAT | O_APPEND | O_WRITE);
-  if (!myFile) {
-    DEBUG_PRINTLN(F("Failed to create UBX data file! Freezing..."));
-    while (1); 
-  }
-  else {
-    online.logGnss = true;
-  }
-
-  // Reset counters
-  bytesWritten      = 0;
-  writeFailCounter  = 0;
-  syncFailCounter   = 0;
-  closeFailCounter  = 0;
-
-  gnss.clearFileBuffer();         // Clear file buffer
-  gnss.clearMaxFileBufferAvail(); // Reset max file buffer size
-    
 }
 
-void logGNSS() {
+void logGNSS(){
   ///////// RECEIVE AND LOG GNSS MESSAGES
   gnss.checkUblox(); // Check for arrival of new data and process it.
   while (gnss.fileBufferAvailable() >= sdWriteSize) { // Check to see if we have at least sdWriteSize waiting in the buffer
@@ -93,7 +42,6 @@ void logGNSS() {
     
     if (!myFile.write(myBuffer, sdWriteSize)){
         DEBUG_PRINTLN("Warning: Failed to write to log file!");
-        writeFailCounter++;
     }
     
     //myFile.write(myBuffer, sdWriteSize); // Write exactly sdWriteSize bytes from myBuffer to the ubxDataFile on the SD card
@@ -102,10 +50,7 @@ void logGNSS() {
   }
 
   if (millis() > (prevMillis + 10000)){ // Periodically save data
-    if (!myFile.sync()) {
-      DEBUG_PRINTLN("Warning: Failed to sync log file!");
-      syncFailCounter++; // Count number of failed file syncs
-    }
+    myFile.sync();
     prevMillis = millis();
   }
 
@@ -115,7 +60,7 @@ void logGNSS() {
       petDog();
       Serial.print(F("The number of bytes written to SD card is ")); // Print how many bytes have been written to SD card
       Serial.println(bytesWritten);
-      maxBufferBytes = gnss.getMaxFileBufferAvail(); // Get how full the file buffer has been (not how full it is now)
+      uint16_t maxBufferBytes = gnss.getMaxFileBufferAvail(); // Get how full the file buffer has been (not how full it is now)
       if (maxBufferBytes > ((fileBufferSize / 5) * 4)) { // Warn the user if fileBufferSize was more than 80% full
         Serial.println(F("Warning: the file buffer has been over 80% full. Some data may have been lost."));
       }
@@ -139,18 +84,11 @@ void closeGNSS(){
       remainingBytes -= bytesToWrite; // Decrement remainingBytes
     }
 
-    if (!myFile.sync()) {
-      DEBUG_PRINTLN("Warning: Failed to sync log file!");
-      syncFailCounter++; // Count number of failed file syncs
-    }
-
     delay(100); // CRITICAL - GIVE SD TIME TO WRITE
 
     if (!myFile.close()){
       DEBUG_PRINTLN("Warning: failed to close log file.");
-      closeFailCounter++; 
     }
-    
     bytesWritten = 0;
     lastPrint = 0;
 }

@@ -4,12 +4,13 @@ void goToSleep() {
   # if DEBUG
     Serial.end();
   #endif 
-  myWire.end(); //Power down I2C
-  mySpi.end(); //Power down SPI
+  Wire.end(); //Power down I2C
+  SPI.end(); //Power down SPI
   power_adc_disable();
+  //powerControlADC(false); //Power down ADC. It it started by default before setup().
   digitalWrite(LED, LOW); // Turn off LED
-  zedPowerOff(); 
-  peripheralPowerOff();
+  //qwiicPowerOff();
+  //peripheralPowerOff();
   
   // Force peripherals off
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM0);
@@ -22,20 +23,17 @@ void goToSleep() {
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_UART0);
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_UART1);
 
-  // Disable all pads except LED and PWR CONTROL PINS
+  // Disable all pads except G1 (33), G2 (34) and LED_BUILTIN (19)
   for (int x = 0; x < 50; x++)
   {
-    if ((x != LED) && (x != ZED_POWER) && (x != PER_POWER))
+    if ((x != 33) && (x != 34) && (x != 19))
     {
       am_hal_gpio_pinconfig(x, g_AM_HAL_GPIO_DISABLE);
     }
   }
 
-  // Clear online/offline flags
-  online.gnss = false;
-  online.uSD = false;
-  online.logGnss = false;
-  online.logDebug = false;
+  qwiicPowerOff();
+  peripheralPowerOff(); 
 
   // Use the lower power 32kHz clock.
   am_hal_stimer_config(AM_HAL_STIMER_CFG_CLEAR | AM_HAL_STIMER_CFG_FREEZE);
@@ -68,9 +66,10 @@ void wakeFromSleep() {
 
   // Turn on ADC
   ap3_adc_setup();
-  myWire.begin(); // I2C
+  //powerControlADC(true); // Turn on ADC
+  Wire.begin(); // I2C
   disableI2CPullups();
-  mySpi.begin(); // SPI
+  SPI.begin(); // SPI
   
   petDog();
 
@@ -83,22 +82,22 @@ void wakeFromSleep() {
 }
 
 ///////// AUXILIARLY OFF/ON FUNCTIONS
-void zedPowerOff() {
-  digitalWrite(ZED_POWER, HIGH);
+void qwiicPowerOff() {
+  digitalWrite(ZED_POWER, LOW);
 }
 
 void peripheralPowerOff() {
   delay(250); 
-  digitalWrite(PER_POWER, HIGH);
+  digitalWrite(PERIPHERAL_POWER, LOW);
 }
 
-void zedPowerOn() {
-  digitalWrite(ZED_POWER, LOW);
+void qwiicPowerOn() {
+  digitalWrite(ZED_POWER, HIGH);
   delay(250);
 }
 
 void peripheralPowerOn() {
-  digitalWrite(PER_POWER, LOW);
+  digitalWrite(PERIPHERAL_POWER, HIGH);
   delay(250); 
   
 }
@@ -110,11 +109,11 @@ void disableI2CPullups() {
     am_hal_gpio_pincfg_t sdaPinCfg = g_AM_BSP_GPIO_IOM4_SDA;  //
     sclPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          // Disable the SCL/SDA pull-ups
     sdaPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          //
-    pin_config(SCL, sclPinCfg);                               // Artemis MicroMod Processor Board uses Pin/Pad 39 for SCL
-    pin_config(SDA, sdaPinCfg);                               // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
+    pin_config(PinName(39), sclPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 39 for SCL
+    pin_config(PinName(40), sdaPinCfg);                       // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
   #else 
-    myWire.setPullups(0);
-    myWire.setClock(400000); 
+    Wire.setPullups(0);
+    Wire.setClock(400000); 
   #endif
 
 }
@@ -134,19 +133,4 @@ void blinkLed(byte ledFlashes, unsigned int leddelay) {
   }
   // Turn off LED
   digitalWrite(LED, LOW);
-}
-
-// Non-blocking delay (ms: duration)
-// https://arduino.stackexchange.com/questions/12587/how-can-i-handle-the-millis-rollover
-void myDelay(unsigned long ms)
-{
-  unsigned long start = millis();         // Start: timestamp
-  for (;;)
-  {
-    petDog();                             // Reset watchdog timer
-    unsigned long now = millis();         // Now: timestamp
-    unsigned long elapsed = now - start;  // Elapsed: duration
-    if (elapsed >= ms)                    // Comparing durations: OK
-      return;
-  }
 }
