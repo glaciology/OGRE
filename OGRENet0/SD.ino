@@ -1,7 +1,7 @@
 
 void configureSD(){
   ///////// SD CARD INITIALIZATION
-  if (!sd.begin(SD_CONFIG)) { // https://github.com/sparkfun/Arduino_Apollo3/issues/370
+  if (!sd.begin(PIN_SD_CS, SD_SCK_MHZ(24))) { // https://github.com/sparkfun/Arduino_Apollo3/issues/370
     DEBUG_PRINTLN("Card failed, or not present. Freezing...");
     while (1); 
   }

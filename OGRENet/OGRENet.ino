@@ -19,12 +19,13 @@
         *10 Blinks: System Configuration Complete (After Initial Power On or Reset Only)
 
    TODO: 
-   - Testing: SD card to large size, millis rollover
+   - Testing: SD card to large size
    - HOTSTART UBX-SOS
    - File scheme - naming or appending??
    - Continous mode: make sure data saves when unplugged
+   - Adjust WDT to be longer
 */
-const int HARDWARE_VERSION  = 0; // 0 = CUSTOM DARTMOUTH HARDWARE, 1 = SPARKFUN MICROMOD
+#define HARDWARE_VERSION 1 // 0 = CUSTOM DARTMOUTH HARDWARE, 1 = SPARKFUN MICROMOD
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
 #include <Wire.h>                                  // SDA 44 SCL 45 
@@ -42,38 +43,39 @@ FsFile debugFile;
 //////////////////
 
 ///////// PINOUTS & OBJ INSTANCES
-#if(HARDWARE_VERSION ==0)
-TwoWire myWire(2);                  // USE I2C bus 2, SDA/SCL 25/27
-SPIClass mySpi(3);                  // Use IO Master 4 on pads 39/40/38
-#define LED                     16
-#define ZED_POWER               34  // Drive low to turn off ZED
-#define PER_POWER               18  // Drive low to turn off uSD
-#define PIN_SD_CS               41  
-#elif
-TwoWire myWire();                  // USE default I2C
-SPIClass mySpi();                  // Use default SPI
-#define LED                     LED_BUILTIN
-#define ZED_POWER               0  // Drive low to turn off ZED
-#define PER_POWER               0  // Drive low to turn off uSD
-#define PIN_SD_CS               0  
+#if HARDWARE_VERSION == 0
+const byte LED                    = 16;
+const byte PER_POWER              = 18;  // Drive to turn off uSD
+#elif HARDWARE_VERSION == 1
+const byte LED                    = 19;
+const byte PER_POWER              = 33;  // Drive to turn off uSD
 #endif
-#define SD_CONFIG               SdSpiConfig(PIN_SD_CS, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
+const byte ZED_POWER              = 34;  // Drive to turn off ZED
+const byte PIN_SD_CS              = 41; 
+
+#if HARDWARE_VERSION == 0
+TwoWire myWire(2);                // USE I2C bus 2, SDA/SCL 25/27
+SPIClass mySpi(3);                // Use SPI bus 3, 39/42/44
+#elif HARDWARE_VERSION == 1
+TwoWire myWire(4);                // USE I2C bus 4, 39/40
+#endif
+
+SPIClass mySpi(3);                  // Use SPI 3
+#define SD_CONFIG               SdSpiConfig(PIN_SD_CS, SHARED_SPI, SD_SCK_MHZ(24), &mySpi)
 //////////////////
 
 //////////////////////////////////////////////////////
 //----------- USERS SPECIFY INTERVAL HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 2;   // 1 = daily fixed, 2 = daily rolling, 3 continuous, 4 monthly
+byte logMode                = 1;   // 1 = daily fixed, 2 = daily rolling, 3 continuous, 4 monthly
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
-byte logStartHr             = 10;  // UTC
-byte logEndHr               = 12;  // UTC
+byte logStartHr             = 16;  // UTC
+byte logEndHr               = 18;  // UTC
 
 // LOG MODE 2: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 50;  // SLEEP INTERVAL (S)
-uint32_t minutesSleep       = 0;
 uint32_t secondsLog         = 50;  // LOGGING INTERVAL (S)
-uint32_t minutesLog         = 0;
 
 // LOG MODE 4: ONCE/MONTH FOR 24 HOURS
 byte logStartDay            = 1;  // Day of month between 1 and 28
@@ -89,20 +91,19 @@ bool logNav                 = true; // TRUE if SFRBX (satellite nav) included in
 //////////////////////////////////////////////////////
 
 ///////// GLOBAL VARIABLES
-const int apolloCore              = 1;     // VERSION 1 or 2...
 const int sdWriteSize             = 512;   // Write data to SD in blocks of 512 bytes
 const int fileBufferSize          = 16384; // Allocate 16KB RAM for UBX message storage
 uint16_t  maxBufferBytes          = 0;     // How full the file buffer has been
-//volatile bool firstConfig         = true;  // First sys run will configure specific settings in GNSS, then false
 volatile bool wdtFlag             = false; // ISR WatchDog
 volatile bool rtcSyncFlag         = false; // Flag to indicate if RTC has been synced with GNSS
-volatile bool stimerFlag          = false; //
 volatile bool alarmFlag           = true;  // RTC alarm true when interrupt (initialized as true for first loop)
-volatile bool initSetup           = true;  // 
+volatile bool initSetup           = true;  // UBLOX Configuration satellite messages only once
 unsigned long bytesWritten        = 0;     // used for printing to Serial Monitor bytes written to SD
 unsigned long lastPrint           = 0;     // used to printing bytesWritten to Serial Monitor at 1Hz
 unsigned long prevMillis          = 0;
 unsigned long currMillis          = 0; 
+int                       settings[7];
+char                         line[25];
 // DEBUGGING
 unsigned long syncFailCounter     = 0;
 unsigned long writeFailCounter    = 0;
@@ -123,9 +124,12 @@ struct struct_online
 } online;
 
 ///////// DEBUGGING
-#define DEBUG               false // Output messages to Serial monitor
+#define DEBUG               true // Output messages to Serial monitor
+#define DEBUG GNSS          false
+
 #if DEBUG
 #define DEBUG_PRINTLN(x)    Serial.println(x)
+#define DEBUG_PRINT(x)      Serial.print(x)
 #define DEBUG_SERIALFLUSH() Serial.flush()
 #define PROG_TIMER()        millis()
 
@@ -155,24 +159,23 @@ void setup() {
   mySpi.begin();
   configureWdt();      
   configureSD();          
-  configureGNSS();
+  configureGNSS();                   // BLINK 3x - FAIL
   createDebugFile();        
 
   if (logMode == 1 || logMode == 4){ // GET GPS TIME
-       syncRtc();
+       syncRtc();                    // PERIODIC BLINK-AQUIRE; x10-FAIL; x5-SUCCESS
        configureSleepAlarm();
-       initSetup = false;
-       DEBUG_PRINTLN("Info: Datetime "); printDateTime();
+       DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
   }
 
-  blinkLed(10, 100); // BLINK 10x INDICATE SETUP COMPLETE
-  DEBUG_PRINTLN("SETUP LOOP COMPLETE");
+  blinkLed(10, 100);                // BLINK 10x- SETUP COMPLETE
+  DEBUG_PRINTLN("Info: SETUP COMPLETE");
 }
 
 void loop() {
   
     if (alarmFlag) { 
-      DEBUG_PRINTLN("Alarm Triggered: Configuring System");     
+      DEBUG_PRINTLN("Info: Alarm Triggered: Configuring System");     
       petDog();  
       zedPowerOn();           // TURN UBLOX ON
       peripheralPowerOn();    // TURN SD & PERIPHERALS ON
@@ -185,15 +188,18 @@ void loop() {
       }
      
       configureLogAlarm();    // sets RTC clock to interrupt log end
+      DEBUG_PRINT("Info: Logging until "); printAlarm();
       
       while(!alarmFlag) {     // LOG DATA UNTIL alarmFlag = True
         petDog();
         logGNSS();
       }
       
-      DEBUG_PRINTLN("Logging Terminated: Sleep");   
+      DEBUG_PRINTLN("Info: Logging Terminated");   
       closeGNSS(); 
+      logDebug();
       configureSleepAlarm();
+      DEBUG_PRINT("Info: Sleeping until "); printAlarm();
     }
 
     if (wdtFlag) {
@@ -201,6 +207,7 @@ void loop() {
     }
     
     //DEBUG_PRINTLN(wdtCounterMax);
+    DEBUG_PRINTLN("Info: Going to Sleep");  
     
     blinkLed(1, 100); // Blinks once every WDT trigger
     goToSleep();
@@ -212,19 +219,37 @@ void loop() {
 // Watchdog
 extern "C" void am_watchdog_isr(void) {
 
-  am_hal_wdt_int_clear(); // Clear WDT interrupt
+//  am_hal_wdt_int_clear(); // Clear WDT interrupt
+//
+//  if ( wdtCounter < 10 ){  
+//    am_hal_wdt_restart(); // "Pet" the dog (reset the timer)
+//  }
+//
+//  DEBUG_PRINTLN("WDT Trigger");
+//  wdtFlag = true; // Set the watchdog flag
+//  wdtCounter++; // Increment watchdog interrupt counter
+//  
+//  if (wdtCounter > wdtCounterMax){
+//    wdtCounterMax = wdtCounter;
+//  }
 
-  if ( wdtCounter < 10 ){  
-    am_hal_wdt_restart(); // "Pet" the dog (reset the timer)
+  // Clear the watchdog interrupt
+  wdt.clear();
+
+  // Perform system reset after 10 watchdog interrupts (should not occur)
+  if (wdtCounter < 10)
+  {
+    wdt.restart(); // Restart the watchdog timer
   }
 
-  DEBUG_PRINTLN("WDT Trigger");
   wdtFlag = true; // Set the watchdog flag
   wdtCounter++; // Increment watchdog interrupt counter
-  
-  if (wdtCounter > wdtCounterMax){
+
+  if (wdtCounter > wdtCounterMax)
+  {
     wdtCounterMax = wdtCounter;
   }
+
 }
 
 //// RTC

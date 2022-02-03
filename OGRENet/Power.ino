@@ -84,48 +84,63 @@ void wakeFromSleep() {
 
 ///////// AUXILIARLY OFF/ON FUNCTIONS
 void zedPowerOff() {
-  digitalWrite(ZED_POWER, HIGH);
+  if (HARDWARE_VERSION == 1){
+    digitalWrite(ZED_POWER, LOW);
+  } else {
+    digitalWrite(ZED_POWER, HIGH);
+  }
 }
 
 void peripheralPowerOff() {
   delay(250); 
-  digitalWrite(PER_POWER, HIGH);
+  if (HARDWARE_VERSION == 1){
+    digitalWrite(PER_POWER, LOW);
+  } else {
+    digitalWrite(PER_POWER, HIGH);
+  }
 }
 
 void zedPowerOn() {
-  digitalWrite(ZED_POWER, LOW);
+  if (HARDWARE_VERSION == 1){
+    digitalWrite(ZED_POWER, HIGH);
+  } else {
+    digitalWrite(ZED_POWER, LOW);
+  }
   delay(250);
 }
 
 void peripheralPowerOn() {
-  digitalWrite(PER_POWER, LOW);
+  if (HARDWARE_VERSION == 1){
+    digitalWrite(PER_POWER, HIGH);
+  } else {
+    digitalWrite(PER_POWER, LOW);
+  }
   delay(250); 
   
 }
 
 void disableI2CPullups() {
-  #if (apolloCore == 2) 
+  #if HARDWARE_VERSION == 3
     ///////// On Apollo3 v2 MANUALLY DISABLE PULLUPS - IOM and pin #s specific to Artemis MicroMod
     am_hal_gpio_pincfg_t sclPinCfg = g_AM_BSP_GPIO_IOM4_SCL;  // Artemis MicroMod Processor Board uses IOM4 for I2C communication
     am_hal_gpio_pincfg_t sdaPinCfg = g_AM_BSP_GPIO_IOM4_SDA;  //
     sclPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          // Disable the SCL/SDA pull-ups
     sdaPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          //
-    pin_config(SCL, sclPinCfg);                               // Artemis MicroMod Processor Board uses Pin/Pad 39 for SCL
-    pin_config(SDA, sdaPinCfg);                               // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
-  #else 
+    pin_config(39, sclPinCfg);                               // Artemis MicroMod Processor Board uses Pin/Pad 39 for SCL
+    pin_config(40, sdaPinCfg);                               // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
+  #else
     myWire.setPullups(0);
     myWire.setClock(400000); 
   #endif
-
 }
 
 // Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)
-void blinkLed(byte ledFlashes, unsigned int leddelay) {
+void blinkLed(byte ledFlashes, unsigned int ledDelay) {
   byte i = 0;
   while (i < ledFlashes * 2)
   {
     unsigned long currMillis = millis();
-    if (currMillis - prevMillis >= leddelay)
+    if (currMillis - prevMillis >= ledDelay)
     {
       digitalWrite(LED, !digitalRead(LED));
       prevMillis = currMillis;

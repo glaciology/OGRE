@@ -53,7 +53,7 @@ File myFile;
 #define PIN_SD_CS             41  // CS
 #define SDA                   44
 #define SCL                   45
-#define SD_CONFIG             SdSpiConfig(PIN_SD_CS, SHARED_SPI, SD_SCK_MHZ(24))
+#define SD_CONFIG             SdSpiConfig(PIN_SD_CS, SD_SCK_MHZ(24))
 //////////////////
 
 //////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ unsigned long currMillis   = 0;
 //////////////////
 
 ///////// DEBUGGING
-#define DEBUG               false // Output messages to Serial monitor
+#define DEBUG               true // Output messages to Serial monitor
 #if DEBUG
 #define DEBUG_PRINTLN(x)    Serial.println(x)
 #define DEBUG_SERIALFLUSH() Serial.flush()
@@ -115,7 +115,7 @@ unsigned long currMillis   = 0;
 void setup() {
   #if DEBUG
     Serial.begin(115200); // open serial port at 115200 baud
-    Serial.println("OGRENet GNSS LOGGER");
+    Serial.println("OGRENet GNSS LOGGER BACKUP");
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS

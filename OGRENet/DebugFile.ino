@@ -1,15 +1,11 @@
 // Create debugging log file
 void createDebugFile() {
-  // Create debug log file
-  // O_CREAT - Create the file if it does not exist
-  // O_APPEND - Seek to the end of the file prior to each write
-  // O_WRITE - Open the file for writing
-  if (!debugFile.open("debug.csv", O_CREAT | O_APPEND | O_WRITE)) {
+  if (!debugFile.open("debug.csv", O_CREAT | O_APPEND | O_WRITE)) { // Create file if new, Append to end, Open to Write
     DEBUG_PRINTLN("Warning: Failed to create debug file.");
     return;
   }
   else {
-    DEBUG_PRINTLN("Info: Created "); DEBUG_PRINTLN(debugFileName);
+    DEBUG_PRINTLN("Info: Created debug file"); 
   }
 
   // Write header to file
@@ -41,7 +37,7 @@ void logDebug() {
     return;
   }
   else {
-    DEBUG_PRINTLN("Info: Opened "); DEBUG_PRINTLN(debugFileName);
+    DEBUG_PRINTLN("Info: Opened "); DEBUG_PRINTLN("debug.csv");
   }
 
   // Create datetime string

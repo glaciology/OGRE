@@ -1,31 +1,38 @@
 
 // DEV NOTES: https://forum.sparkfun.com/viewtopic.php?t=52431
 
-// WATCHDOG TIMER CONFIGURATION/START:
 void configureWdt(){
-  // SETUP:
-  am_hal_wdt_config_t g_sWatchdogConfig = {
-  ////Substitude other values for AM_HAL_WDT_LFRC_CLK_16HZ to increase/decrease the range
-  .ui32Config = AM_HAL_WDT_LFRC_CLK_16HZ | AM_HAL_WDT_ENABLE_RESET | AM_HAL_WDT_ENABLE_INTERRUPT, // Configuration values/clk
-  ////****** EVEN THOUGH THESE IMPLY 16-BIT, THEY ARE ONLY 8-BIT - 255 MAX!
-  .ui16InterruptCount = 160,                                  //MAX 255! Set WDT interrupt for 10 seconds (160 / 16 = 10). 
-  .ui16ResetCount = 240                                       //MAX 255! Set WDT reset for 15 seconds (240 / 16 = 15).  
-  };
-  
-  // STARTING TIMER
-  am_hal_clkgen_control(AM_HAL_CLKGEN_CONTROL_LFRC_START, 0); // LFRC must be turned on as the watchdog requires LFRC.
-  am_hal_wdt_init(&g_sWatchdogConfig);                        // Initialize the watchdog.
-  NVIC_EnableIRQ(WDT_IRQn);                                   // Enable the interrupt for the watchdog in the NVIC.
-  am_hal_interrupt_master_enable();
-  am_hal_wdt_start();                                         // Enable the watchdog.
+//  // SETUP:
+//  am_hal_wdt_config_t g_sWatchdogConfig = {
+//  ////Substitude other values for AM_HAL_WDT_LFRC_CLK_16HZ to increase/decrease the range
+//  .ui32Config = AM_HAL_WDT_LFRC_CLK_16HZ | AM_HAL_WDT_ENABLE_RESET | AM_HAL_WDT_ENABLE_INTERRUPT, // Configuration values/clk
+//  ////****** EVEN THOUGH THESE IMPLY 16-BIT, THEY ARE ONLY 8-BIT - 255 MAX!
+//  .ui16InterruptCount = 160,                                  //MAX 255! Set WDT interrupt for 10 seconds (160 / 16 = 10). 
+//  .ui16ResetCount = 240                                       //MAX 255! Set WDT reset for 15 seconds (240 / 16 = 15).  
+//  };
+//  
+//  // STARTING TIMER
+//  am_hal_clkgen_control(AM_HAL_CLKGEN_CONTROL_LFRC_START, 0); // LFRC must be turned on as the watchdog requires LFRC.
+//  am_hal_wdt_init(&g_sWatchdogConfig);                        // Initialize the watchdog.
+//  NVIC_EnableIRQ(WDT_IRQn);                                   // Enable the interrupt for the watchdog in the NVIC.
+//  am_hal_interrupt_master_enable();
+//  am_hal_wdt_start();                                         // Enable the watchdog.
+
+  wdt.configure(WDT_16HZ, 128, 240); // 16 Hz clock, 10-second interrupt period, 15-second reset period
+
+  // Start the watchdog timer
+  wdt.start();
 }
+
 
 // RESET WATCHDOG TIMER
 void petDog() {
-  am_hal_wdt_restart();
+  //am_hal_wdt_restart();
+  wdt.restart();
   wdtFlag = false;
   wdtCounter = 0;
 }
+
 
 // RTC CONFIGURATION/START:
 void configureLogAlarm() {
@@ -52,7 +59,7 @@ void configureLogAlarm() {
   
   if (logMode == 2) {
     rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, 1/1/21
-    rtc.setAlarm(13, minutesLog, secondsLog, 0, 1, 1); 
+    rtc.setAlarm(13, 0, secondsLog, 0, 1, 1); 
     rtc.setAlarmMode(6);
     rtc.attachInterrupt();
   }
@@ -66,10 +73,11 @@ void configureLogAlarm() {
     rtc.setAlarmMode(2);
     rtc.attachInterrupt();
   }
-  
+
   alarmFlag = false;
   
 }
+
 
 void configureSleepAlarm() {
 
@@ -82,9 +90,8 @@ void configureSleepAlarm() {
     }
     
   if (logMode == 2){
-    DEBUG_PRINTLN(F("Info: Setting rolling RTC Sleep alarm"));
     rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, June 3rd, 2020 
-    rtc.setAlarm(13, minutesSleep, secondsSleep, 0, 1, 1); // 13:00:00.000, June 3rd. Note: No year alarm register
+    rtc.setAlarm(13, 0, secondsSleep, 0, 1, 1); // No year alarm register
     rtc.setAlarmMode(6);
   }
 
@@ -95,8 +102,19 @@ void configureSleepAlarm() {
   }
   rtc.attachInterrupt();
   alarmFlag = false;
-  
 }
+
+
+void printAlarm()
+{
+  rtc.getAlarm(); // Get the RTC's alarm date and time
+  char alarmBuffer[25];
+  sprintf(alarmBuffer, "20%02d-%02d-%02d %02d:%02d:%02d",
+          rtc.year, rtc.alarmMonth, rtc.alarmDayOfMonth,
+          rtc.alarmHour, rtc.alarmMinute, rtc.alarmSeconds, rtc.alarmHundredths);
+  DEBUG_PRINTLN(alarmBuffer);
+}
+
 
 void syncRtc() {
 
@@ -139,8 +157,8 @@ void syncRtc() {
             rtcDrift = gnssEpoch - rtcEpoch;                // Calculate RTC drift (debug)
             rtcSyncFlag = true;                             // Set flag, end SYNC
   
-            DEBUG_PRINTLN("Info: RTC drift: "); DEBUG_PRINTLN(rtcDrift);
-            DEBUG_PRINTLN("Info: RTC time synced to "); printDateTime();
+            DEBUG_PRINT("Info: RTC drift: "); DEBUG_PRINTLN(rtcDrift);
+            DEBUG_PRINT("Info: RTC time synced to "); printDateTime();
             blinkLed(5, 1000);
           }
         }

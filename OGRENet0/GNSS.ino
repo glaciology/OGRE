@@ -1,6 +1,7 @@
 void configureGNSS(){
   ///////// SEND GNSS SETTING CONFIG TO UBLOX
   //gnss.enableDebugging();               // Sparkfun_Gnss library debugging messages on Serial
+  //gnss.enableDebugging(Serial, true); // Or, uncomment this line to enable only the important GNSS debug messages on Serial
   gnss.disableUBX7Fcheck();               // RAWX data can legitimately contain 0x7F: So disable the "7F" check in checkUbloxI2C
   gnss.setFileBufferSize(fileBufferSize); // Allocate >2KB RAM for Buffer. CALL before .begin()
   
