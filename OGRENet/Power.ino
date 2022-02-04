@@ -1,17 +1,16 @@
-
 // POWER DOWN AND WAIT FOR INTERRUPT
 void goToSleep() {
   # if DEBUG
     Serial.end();
   #endif 
-  myWire.end(); //Power down I2C
-  mySpi.end(); //Power down SPI
+  myWire.end();           //Power down I2C
+  mySpi.end();            //Power down SPI
   power_adc_disable();
   digitalWrite(LED, LOW); // Turn off LED
   zedPowerOff(); 
   peripheralPowerOff();
   
-  // Force peripherals off
+  // Turn peripherals off
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM0);
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM1);
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM2);
@@ -40,7 +39,6 @@ void goToSleep() {
   // Use the lower power 32kHz clock.
   am_hal_stimer_config(AM_HAL_STIMER_CFG_CLEAR | AM_HAL_STIMER_CFG_FREEZE);
   am_hal_stimer_config(AM_HAL_STIMER_XTAL_32KHZ);
-  //am_hal_stimer_config(AM_HAL_STIMER_XTAL_32KHZ | AM_HAL_STIMER_CFG_COMPARE_G_ENABLE);
   
   //Power down cache, flash, SRAM
   am_hal_pwrctrl_memory_deepsleep_powerdown(AM_HAL_PWRCTRL_MEM_ALL); // Power down all flash and cache
@@ -50,7 +48,7 @@ void goToSleep() {
   am_hal_sysctrl_sleep(AM_HAL_SYSCTRL_SLEEP_DEEP);
 
   ///////// Waiting for RTC or WDT Interrupt 
-  ///////// Sleeping
+  ///////// Sleeping...
   ///////// Sleeping...
   
   // WAKE
@@ -74,7 +72,6 @@ void wakeFromSleep() {
   
   petDog();
 
-  //Turn on Serial
   #if DEBUG
     Serial.begin(115200); // open serial port
   #endif

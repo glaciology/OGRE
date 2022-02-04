@@ -1,5 +1,5 @@
-// Create debugging log file
 void createDebugFile() {
+  
   if (!debugFile.open("debug.csv", O_CREAT | O_APPEND | O_WRITE)) { // Create file if new, Append to end, Open to Write
     DEBUG_PRINTLN("Warning: Failed to create debug file.");
     return;
@@ -25,7 +25,7 @@ void createDebugFile() {
   }
 }
 
-// Log debugging information
+
 void logDebug() {
   // Increment debug counter
   debugCounter++;

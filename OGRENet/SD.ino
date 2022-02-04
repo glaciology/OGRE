@@ -1,4 +1,3 @@
-
 void configureSD(){
   ///////// SD CARD INITIALIZATION
   if (!sd.begin(SD_CONFIG)) { // 
@@ -22,19 +21,19 @@ void configureSD(){
     DEBUG_PRINTLN("Info: SD card initialized.");
     online.uSD = true;
   }
-  
 }
+
 
 void parseConfig() {
   
   int n;
   int i = 0;
-  // open test file
+  // open CONFIG file
   file.open("CONFIG.TXT", O_READ);
   
   // check for open error
   if (!file.isOpen()){
-    Serial.println("Warning: Could not open CONFIG.TXT");
+    DEBUG_PRINTLN("Warning: Could not open CONFIG.TXT");
   }
 
   // read lines from the file
@@ -49,7 +48,18 @@ void parseConfig() {
       
     } else {
       // no '\n' - line too long or missing '\n' at EOF
-      // handle error
+      DEBUG_PRINTLN("Warning: Unable to Read CONFIG. Check formatting");
+    }
+  }
+}
+
+void getFileName(){
+  for(uint8_t i=0; i<100; i++){
+    logFileName[4] = i/10 + '0';
+    logFileName[5] = i/10 + '0';
+    if (!sd.exists(logFileName)){
+      File = sd.open(logFileName, FILE_WRITE);
+      break;
     }
   }
 }
