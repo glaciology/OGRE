@@ -105,17 +105,6 @@ void configureSleepAlarm() {
 }
 
 
-void printAlarm()
-{
-  rtc.getAlarm(); // Get the RTC's alarm date and time
-  char alarmBuffer[25];
-  sprintf(alarmBuffer, "20%02d-%02d-%02d %02d:%02d:%02d",
-          rtc.year, rtc.alarmMonth, rtc.alarmDayOfMonth,
-          rtc.alarmHour, rtc.alarmMinute, rtc.alarmSeconds, rtc.alarmHundredths);
-  DEBUG_PRINTLN(alarmBuffer);
-}
-
-
 void syncRtc() {
 
     unsigned long loopStartTime = millis();
@@ -175,14 +164,26 @@ void syncRtc() {
 }
 
 // Print the RTC's date and time
-void printDateTime()
-{
-  rtc.getTime(); // Get the RTC's date and time
-  char dateTimeBuffer[25];
-  sprintf(dateTimeBuffer, "20%02d-%02d-%02d %02d:%02d:%02d",
-          rtc.year, rtc.month, rtc.dayOfMonth,
-          rtc.hour, rtc.minute, rtc.seconds, rtc.hundredths);
-  DEBUG_PRINTLN(dateTimeBuffer);
+void printDateTime() {
+  if (logMode == 3 || logMode == 2){
+    DEBUG_PRINTLN("Continuous");
+  } else {
+    rtc.getTime(); // Get the RTC's date and time
+    char dateTimeBuffer[25];
+    sprintf(dateTimeBuffer, "20%02d-%02d-%02d %02d:%02d:%02d",
+            rtc.year, rtc.month, rtc.dayOfMonth,
+            rtc.hour, rtc.minute, rtc.seconds, rtc.hundredths);
+    DEBUG_PRINTLN(dateTimeBuffer);
+  }
+}
+
+void printAlarm() {
+  rtc.getAlarm(); // Get the RTC's alarm date and time
+  char alarmBuffer[25];
+  sprintf(alarmBuffer, "20%02d-%02d-%02d %02d:%02d:%02d",
+          rtc.year, rtc.alarmMonth, rtc.alarmDayOfMonth,
+          rtc.alarmHour, rtc.alarmMinute, rtc.alarmSeconds, rtc.alarmHundredths);
+  DEBUG_PRINTLN(alarmBuffer);
 }
     
  

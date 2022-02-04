@@ -76,7 +76,6 @@ void wakeFromSleep() {
     Serial.begin(115200); // open serial port
   #endif
   delay(2500);
-
 }
 
 ///////// AUXILIARLY OFF/ON FUNCTIONS
@@ -103,7 +102,7 @@ void zedPowerOn() {
   } else {
     digitalWrite(ZED_POWER, LOW);
   }
-  delay(250);
+  delay(2500);
 }
 
 void peripheralPowerOn() {
@@ -112,7 +111,7 @@ void peripheralPowerOn() {
   } else {
     digitalWrite(PER_POWER, LOW);
   }
-  delay(250); 
+  delay(500); 
   
 }
 

@@ -40,10 +40,11 @@ void configureGNSS(){
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);     // Enable BeiDou
     success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
-    myDelay(2000);
+    delay(2000);
     if (!success){
       DEBUG_PRINTLN("Warning: GNSS CONSTELLATIONS FAILED TO CONFIGURE"); // LOG TO DEBUG
     }
+    initSetup = false;
   }
   
   gnss.setI2COutput(COM_TYPE_UBX);                 // Set the I2C port to output UBX only (no NMEA)
@@ -52,22 +53,33 @@ void configureGNSS(){
   
   gnss.setAutoRXMRAWX(true, false);                // Enable automatic RXM RAWX (RAW) messages 
   gnss.logRXMRAWX();                               // Enable RXM RAWX (RAW) data logging
+  
   if (logNav) {
     gnss.setAutoRXMSFRBX(true, false);            // Enable automatic RXM SFRBX (NAV) messages 
     gnss.logRXMSFRBX();                           // Enable RXM SFRBX (NAV) data logging
   }
+  
   if (logMode == 1 || logMode == 4) {
     gnss.setAutoPVT(true);
   }
 
-  myFile.open("RAWX.UBX", O_CREAT | O_APPEND | O_WRITE); // Create file if new, Append to end, Open to Write
-  if (!myFile) {
-    DEBUG_PRINTLN(F("Warning: Failed to create UBX data file! Freezing..."));
-    while (1); 
+  if (!initSetup) {                               // Create LOG file, but only when not in SETUP Mode
+    for (int i = 0; i < 1000; i++){
+      sprintf(logFileName, "RAWX%03d.ubx", i);
+      if (! sd.exists(logFileName)){
+        DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileName);
+        myFile.open(logFileName, O_CREAT | O_APPEND | O_WRITE);
+        break;
+      }
+    }
+    
+    if (!myFile) {
+      DEBUG_PRINTLN(F("Warning: Failed to create UBX data file! Freezing..."));
+      while (1); 
+    }
   }
-  else {
-    online.logGnss = true;
-  }
+  
+  //myFile.open("RAWX.UBX", O_CREAT | O_APPEND | O_WRITE); // Create file if new, Append to end, Open to Write
 
   // Reset counters
   bytesWritten      = 0;

@@ -23,8 +23,6 @@
    TODO: 
    - Testing: SD card with large storage size/format (exFAT)
    - HOTSTART UBX-SOS
-   - File scheme - new file naming
-   - Continous mode: make sure data saves when unplugged
    - Adjust WDT to be longer?
 */
 #define HARDWARE_VERSION 1 // 0 = CUSTOM DARTMOUTH HARDWARE, 1 = SPARKFUN ARTEMIS MICROMOD DATA LOGGER 
@@ -42,6 +40,7 @@ APM3_RTC rtc;
 APM3_WDT wdt;
 FsFile myFile;
 FsFile debugFile;
+FsFile configFile;
 //////////////////
 
 ///////// HARDWARE SPECIFIC PINOUTS & OBJECTS
@@ -64,12 +63,14 @@ TwoWire myWire(4);                       // USE I2C bus 4, 39/40
 
 SPIClass mySpi(3);                       // Use SPI 3
 #define SD_CONFIG   SdSpiConfig(PIN_SD_CS, SHARED_SPI, SD_SCK_MHZ(24), &mySpi)
+#define DEBUG                     true   // Output messages to Serial monitor
+#define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
 //////////////////
 
 //////////////////////////////////////////////////////
-//----------- USERS SPECIFY INTERVAL HERE ------------
+//----------- USERS SPECIFY CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 1;        // 1 = daily fixed, 2 = daily rolling, 3 continuous, 4 monthly
+byte logMode                = 2;        // 1 = daily fixed, 2 = daily rolling, 3 continuous, 4 monthly
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 16;       // UTC Hour 
@@ -103,7 +104,7 @@ unsigned long lastPrint           = 0;     // used to printing bytesWritten to S
 unsigned long prevMillis          = 0;     // Global time keeper
 int                       settings[7];     // Array that holds USER settings on SD
 char                         line[25];     // Temporary array for parsing USER settings
-char logFileName[]                = "RAWX00.UBX";
+char logFileName[]                = "RAWX000.ubx";
 // DEBUGGING
 uint16_t  maxBufferBytes          = 0;     // How full the file buffer has been
 unsigned long bytesWritten        = 0;     // used for printing to Serial Monitor bytes written to SD
@@ -126,9 +127,6 @@ struct struct_online
 } online;
 
 ///////// DEBUGGING MACROS
-#define DEBUG               true  // Output messages to Serial monitor
-#define DEBUG GNSS          false // Output GNSS debug messages to Serial monitor
-
 #if DEBUG
 #define DEBUG_PRINTLN(x)    Serial.println(x)
 #define DEBUG_PRINT(x)      Serial.print(x)
@@ -140,7 +138,7 @@ struct struct_online
 #define DEBUG_SERIALFLUSH()
 #define PROG_TIMER()
 #endif
-//////////////////
+//////////////////////////////////////////////////////
 
 
 void setup() {
@@ -163,6 +161,7 @@ void setup() {
   mySpi.begin();
   configureWdt();      
   configureSD();                     // BLINK 2x pattern - FAIL
+  getConfig();                       // Read LOG settings from Config.txt on uSD
   configureGNSS();                   // BLINK 3x pattern - FAIL
   createDebugFile();        
 
@@ -181,18 +180,17 @@ void loop() {
   
     if (alarmFlag) { 
       DEBUG_PRINTLN("Info: Alarm Triggered: Configuring System");     
-      petDog();  
+      petDog();                     //
       zedPowerOn();                 // TURN UBLOX ON
       peripheralPowerOn();          // TURN SD & PERIPHERALS ON
-      delay(100);                   // delay(1000);
       configureSD();                // CONFIGURE SD
       configureGNSS();              // CONFIGURE GNSS SETTINGS
       
       if (logMode == 1 || logMode == 4){
-        syncRtc();
+        syncRtc();                  // SYNC RTC W GPS
       }
 
-      configureLogAlarm();          // sets RTC clock to interrupt log end
+      configureLogAlarm();          // RTC INTERRUPT WHEN DONE LOGGING
       DEBUG_PRINT("Info: Logging until "); printAlarm();
       
       while(!alarmFlag) {           // LOG DATA UNTIL alarmFlag = True

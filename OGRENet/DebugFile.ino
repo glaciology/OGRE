@@ -9,7 +9,7 @@ void createDebugFile() {
   }
 
   // Write header to file
-  debugFile.println("datetime,online_gnss,rtcDrift, maxBufferBytes, wdtCounter Max");
+  debugFile.println("datetime,onlineGNSS,onlineGNSSLog, rtcSync, rtcDrift, bytesWritten, maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, Temperature, debugCounter");
 
   // Sync the debug file
   if (!debugFile.sync()) {
@@ -31,13 +31,12 @@ void logDebug() {
   debugCounter++;
 
   // Open debug file for writing
-  if (!debugFile.open("debug.csv", O_APPEND | O_WRITE))
-  {
+  if (!debugFile.open("debug.csv", O_APPEND | O_WRITE)) {
     DEBUG_PRINTLN("Warning: Failed to open debug file.");
     return;
   }
   else {
-    DEBUG_PRINTLN("Info: Opened "); DEBUG_PRINTLN("debug.csv");
+    DEBUG_PRINT("Info: Debug Dumped to: "); DEBUG_PRINTLN("debug.csv");
   }
 
   // Create datetime string
@@ -62,8 +61,7 @@ void logDebug() {
   debugFile.println(debugCounter);
 
   // Sync the debug file
-  if (!debugFile.sync())
-  {
+  if (!debugFile.sync()) {
     DEBUG_PRINTLN("Warning: Failed to sync debug file.");
     syncFailCounter++; // Count number of failed file syncs
   }
