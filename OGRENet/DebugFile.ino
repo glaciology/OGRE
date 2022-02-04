@@ -57,7 +57,7 @@ void logDebug() {
   debugFile.print(writeFailCounter);    debugFile.print(",");
   debugFile.print(syncFailCounter);     debugFile.print(",");
   debugFile.print(closeFailCounter);    debugFile.print(",");
-  debugFile.print(analogRead(ADC_INTERNAL_VSS));
+  debugFile.print(analogRead(ADC_INTERNAL_VSS)); debugFile.print(",");
   debugFile.println(debugCounter);
 
   // Sync the debug file
