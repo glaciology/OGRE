@@ -1,0 +1,5 @@
+LOG_MODE(1: daily fixed, 2: debug, 3: continuous, 3: 1 day/month)=2
+LOG_START_HOUR_UTC(only if using mode 1)=15
+LOG_END_HOUR_UTC(only if using mode 1)=18
+LOG_START_DAY(only if using mode 4, 0-28)=5
+
