@@ -50,6 +50,8 @@ const byte PER_POWER              = 18;  // Drive to turn off uSD
 #elif HARDWARE_VERSION == 1
 const byte LED                    = 19;  //
 const byte PER_POWER              = 33;  // Drive to turn off uSD
+const byte BAT                    = 32;  // ADC port for battery measure
+const byte BAT_CNTRL              = 22;  // Drive high to turn on Bat measure
 #endif
 const byte ZED_POWER              = 34;  // Drive to turn off ZED
 const byte PIN_SD_CS              = 41;  //
@@ -63,18 +65,15 @@ TwoWire myWire(4);                       // USE I2C bus 4, 39/40
 
 SPIClass mySpi(3);                       // Use SPI 3
 #define SD_CONFIG   SdSpiConfig(PIN_SD_CS, SHARED_SPI, SD_SCK_MHZ(24), &mySpi)
-#define DEBUG                     true   // Output messages to Serial monitor
-#define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
-//////////////////
 
 //////////////////////////////////////////////////////
 //----------- USERS SPECIFY CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 2;        // 1 = daily fixed, 2 = daily rolling, 3 continuous, 4 monthly
+byte logMode                = 1;        // 1 = daily fixed, 2 = daily rolling, 3 continuous, 4 monthly
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
-byte logStartHr             = 16;       // UTC Hour 
-byte logEndHr               = 18;       // UTC Hour
+byte logStartHr             = 18;       // UTC Hour 
+byte logEndHr               = 20;       // UTC Hour
 
 // LOG MODE 2: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 50;       // SLEEP INTERVAL (Seconds)
@@ -90,6 +89,10 @@ int logGAL                  = 0;
 int logBDS                  = 0;
 int logQZSS                 = 0;
 bool logNav                 = true;     // TRUE if SFRBX (satellite nav) included in logging
+
+// ADDITIONAL CONFIGURATION
+bool ledBlink               = true;     // If FALSE, all LED indicators during log/sleep disabled
+bool measureBattery         = false;    // If TRUE, uses battery circuit to measure V during debug logs
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
@@ -102,7 +105,7 @@ volatile bool alarmFlag           = true;  // RTC alarm true when interrupt (ini
 volatile bool initSetup           = true;  // False once GNSS messages configured: will not configure again
 unsigned long lastPrint           = 0;     // used to printing bytesWritten to Serial Monitor at 1Hz
 unsigned long prevMillis          = 0;     // Global time keeper
-int                       settings[7];     // Array that holds USER settings on SD
+int settings[7]                   = {};     // Array that holds USER settings on SD
 char                         line[25];     // Temporary array for parsing USER settings
 char logFileName[]                = "RAWX000.ubx";
 // DEBUGGING
@@ -118,15 +121,17 @@ long          rtcDrift            = 0;     // Tracks drift of RTC
 //////////////////
 
 ///////// GLOBAL VARIABLES
-struct struct_online
-{
+struct struct_online {
   bool uSD      = false;
   bool gnss     = false;
   bool logGnss  = false;
   bool logDebug = false;
 } online;
 
-///////// DEBUGGING MACROS
+///////// DEBUGGING
+#define DEBUG                     true   // Output messages to Serial monitor
+#define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
+
 #if DEBUG
 #define DEBUG_PRINTLN(x)    Serial.println(x)
 #define DEBUG_PRINT(x)      Serial.print(x)
@@ -211,8 +216,11 @@ void loop() {
     
     //DEBUG_PRINTLN(wdtCounterMax);
     DEBUG_PRINTLN("Info: WDT Interrupt. Going back to Sleep");  
-    
-    blinkLed(1, 100);               // BLINK once every WDT trigger
+
+    if (ledBlink){
+      blinkLed(1, 100);           // BLINK once every WDT trigger
+    }
+ 
     goToSleep();
 }
 

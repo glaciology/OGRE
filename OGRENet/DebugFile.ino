@@ -9,7 +9,7 @@ void createDebugFile() {
   }
 
   // Write header to file
-  debugFile.println("datetime,onlineGNSS,onlineGNSSLog, rtcSync, rtcDrift, bytesWritten, maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, Temperature, debugCounter");
+  debugFile.println("datetime,onlineGNSS,onlineGNSSLog, rtcSync, rtcDrift, bytesWritten, maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, Temperature, debugCounter, Battery");
 
   // Sync the debug file
   if (!debugFile.sync()) {
@@ -26,10 +26,29 @@ void createDebugFile() {
 }
 
 
+float measBat() {
+  float converter = 17.5;    // THIS MUST BE TUNED DEPENDING ON WHAT RESISTORS USED IN VOLTAGE DIVIDER
+  analogReadResolution(14); //Set resolution to 14 bit
+  
+  pinMode(BAT_CNTRL, HIGH);
+  int measure = analogRead(BAT);
+  delay(100);
+  int measure2 = analogRead(BAT);
+  delay(100);
+  int measure3 = analogRead(BAT);
+  pinMode(BAT_CNTRL, LOW);
+
+  float avgMeas = ((float)measure + (float)measure2 + (float)measure3)/3.0;
+  
+  return avgMeas * converter / 16384.0;
+}
+
+
 void logDebug() {
   // Increment debug counter
   debugCounter++;
 
+  analogReadResolution(14); //Set resolution to 14 bit
   // Open debug file for writing
   if (!debugFile.open("debug.csv", O_APPEND | O_WRITE)) {
     DEBUG_PRINTLN("Warning: Failed to open debug file.");
@@ -57,8 +76,12 @@ void logDebug() {
   debugFile.print(writeFailCounter);    debugFile.print(",");
   debugFile.print(syncFailCounter);     debugFile.print(",");
   debugFile.print(closeFailCounter);    debugFile.print(",");
-  debugFile.print(analogRead(ADC_INTERNAL_VSS)); debugFile.print(",");
-  debugFile.println(debugCounter);
+  debugFile.print(getInternalTemp(), 2); debugFile.print(",");
+  debugFile.print(debugCounter); debugFile.print(",");
+  if (measureBattery == true){
+    debugFile.print(measBat());
+  }
+  debugFile.println();
 
   // Sync the debug file
   if (!debugFile.sync()) {

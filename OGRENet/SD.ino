@@ -28,7 +28,8 @@ void getConfig() {
   
   int n;
   int i = 0;
-  // open CONFIG file
+  
+  // OPEN CONFIG file
   configFile.open("CONFIG.TXT", O_READ);
   
   // check for open error
@@ -52,12 +53,28 @@ void getConfig() {
       //DEBUG_PRINTLN("Warning: Line too long or missing '\n' at EOF: Check formatting");
     }
   }
-  logMode = settings[0];
-  logStartHr = settings[1];
-  logEndHr = settings[2];
+  
+  logMode     = settings[0];
+  logStartHr  = settings[1];
+  logEndHr    = settings[2];
   logStartDay = settings[3];
+
+  if (settings[4] == 0){
+    ledBlink = false;
+  } else {
+    ledBlink = true;
+  }
+
+  if (settings[5] == 0){
+    measureBattery = false;
+  } else  {
+    measureBattery = true;
+  }
+  
   DEBUG_PRINTLN("Info: Settings read from SD:");
   DEBUG_PRINT("Info: Log Mode: "); DEBUG_PRINTLN(logMode);
+  DEBUG_PRINT("Info: Log Battery?: "); DEBUG_PRINTLN(measureBattery);
+  DEBUG_PRINT("Info: Flash LED?: "); DEBUG_PRINTLN(ledBlink);
 
   if (logMode == 1 ){
     DEBUG_PRINT("Info: Start/End Hours: "); DEBUG_PRINT(logStartHr); DEBUG_PRINT(", ");DEBUG_PRINTLN(logStartHr);

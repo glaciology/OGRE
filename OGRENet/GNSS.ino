@@ -97,6 +97,10 @@ void logGNSS() {
   gnss.checkUblox();                                               // Check for arrival of new data and process it.
   while (gnss.fileBufferAvailable() >= sdWriteSize) {              // Check to see if we have at least sdWriteSize waiting in the buffer
     petDog();
+
+    if (ledBlink){
+      digitalWrite(LED, HIGH);
+    }
     
     uint8_t myBuffer[sdWriteSize];                                 // Create our own buffer to hold the data while we write it to SD card
     gnss.extractFileBufferData((uint8_t *)&myBuffer, sdWriteSize); // Extract exactly sdWriteSize bytes from the UBX file buffer and put them into myBuffer
@@ -108,6 +112,11 @@ void logGNSS() {
     
     bytesWritten += sdWriteSize;                                   // Update bytesWritten
     gnss.checkUblox();                                             // Check for the arrival of new data and process it if SD slow
+
+    if (ledBlink){
+      digitalWrite(LED, LOW);
+    }
+    
   }
 
   if (millis() - prevMillis > 10000){                              // Periodically save data
