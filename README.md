@@ -13,7 +13,7 @@ This Software has 4 modes of operation:
   - (3) Monthly Mode: Log GNSS data for 24 hours on a specified day each month
   - (4) Test Mode: Log GNSS data for 50 second intervals, sleep for 50 second intervals
   
-OUTPUTs: With all modes, GNSS data is logged to a uSD card in raw .ubx (UBLOX) proprietary format. A debug file is also generated, reporting the health of the system after each log session is closed.
+OUTPUTs: With all modes, GNSS data is logged to a uSD card in raw .ubx (UBLOX) proprietary format. A debug file is also generated, reporting the health of the system (temperature, errors, etc.) after each log session is closed.
   
 INPUTs: USERS specify settings in the [CONFIG.txt](OGRENet/CONFIG) file, which, if uploaded to the SD card, will be read into the software. 
 Otherwise, software will default to hardcoded values **SPECIFY HERE**
