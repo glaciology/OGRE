@@ -2,6 +2,9 @@
 On-ice Greenland Research Experimental Network
 
 ## Introduction
+
+![PCB Layout](Hardware/Silkscreen.png)
+
 ## How to Use This Software
 
 This Software has 4 modes of operation: 
