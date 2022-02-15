@@ -59,7 +59,7 @@ void configureGNSS(){
     gnss.logRXMSFRBX();                           // Enable RXM SFRBX (NAV) data logging
   }
   
-  if (logMode == 1 || logMode == 4) {
+  if (logMode == 1 || logMode == 3) {
     gnss.setAutoPVT(true);
   }
 

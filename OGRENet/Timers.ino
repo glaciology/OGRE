@@ -57,17 +57,17 @@ void configureLogAlarm() {
     rtc.attachInterrupt();
   }
   
-  if (logMode == 2) {
+  if (logMode == 4) {
     rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, 1/1/21
     rtc.setAlarm(13, 0, secondsLog, 0, 1, 1); 
     rtc.setAlarmMode(6);
     rtc.attachInterrupt();
   }
 
-  if (logMode == 3){ // empty - continuous
+  if (logMode == 2){ // empty - continuous
   }
 
-  if (logMode == 4) {
+  if (logMode == 3) {
     // WILL LOG FOR 24 HOURS ON SPECIFIED DAY OF MONTH
     rtc.setAlarm(23, 59, 59, 0, 0, 0); 
     rtc.setAlarmMode(2);
@@ -89,13 +89,13 @@ void configureSleepAlarm() {
     rtc.setAlarmMode(4); // match every day
     }
     
-  if (logMode == 2){
+  if (logMode == 4){
     rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, June 3rd, 2020 
     rtc.setAlarm(13, 0, secondsSleep, 0, 1, 1); // No year alarm register
     rtc.setAlarmMode(6);
   }
 
-  if (logMode == 4){
+  if (logMode == 3){
     rtc.setAlarm(0, 0, 0, 0, logStartDay, 0); 
     rtc.setAlarmMode(2); // match every month
     
@@ -165,7 +165,7 @@ void syncRtc() {
 
 // Print the RTC's date and time
 void printDateTime() {
-  if (logMode == 3 || logMode == 2){
+  if (logMode == 3){
     DEBUG_PRINTLN("Continuous");
   } else {
     rtc.getTime(); // Get the RTC's date and time

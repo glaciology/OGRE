@@ -69,17 +69,17 @@ SPIClass mySpi(3);                       // Use SPI 3
 //////////////////////////////////////////////////////
 //----------- USERS SPECIFY CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 1;        // 1 = daily fixed, 2 = daily rolling, 3 continuous, 4 monthly
+byte logMode                = 1;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 18;       // UTC Hour 
 byte logEndHr               = 20;       // UTC Hour
 
-// LOG MODE 2: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
+// LOG MODE 4: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 50;       // SLEEP INTERVAL (Seconds)
 uint32_t secondsLog         = 50;       // LOGGING INTERVAL (Seconds)
 
-// LOG MODE 4: ONCE/MONTH FOR 24 HOURS
+// LOG MODE 3: ONCE/MONTH FOR 24 HOURS
 byte logStartDay            = 1;        // Day of month between 1 and 28
 
 // UBLOX MESSAGE CONFIGURATION: 
@@ -170,7 +170,7 @@ void setup() {
   configureGNSS();                   // BLINK 3x pattern - FAIL
   createDebugFile();        
 
-  if (logMode == 1 || logMode == 4){ // GET GPS TIME
+  if (logMode == 1 || logMode == 3){ // GET GPS TIME
        syncRtc();                    // 1Hz BLINK-AQUIRE; x10-FAIL; x5-SUCCESS
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
@@ -191,7 +191,7 @@ void loop() {
       configureSD();                // CONFIGURE SD
       configureGNSS();              // CONFIGURE GNSS SETTINGS
       
-      if (logMode == 1 || logMode == 4){
+      if (logMode == 1 || logMode == 3){
         syncRtc();                  // SYNC RTC W GPS
       }
 

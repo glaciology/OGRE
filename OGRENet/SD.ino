@@ -80,7 +80,7 @@ void getConfig() {
     DEBUG_PRINT("Info: Start/End Hours: "); DEBUG_PRINT(logStartHr); DEBUG_PRINT(", ");DEBUG_PRINTLN(logEndHr);
   }
   
-  if (logMode == 4 ){
+  if (logMode == 3 ){
     DEBUG_PRINT("Day of Month to Log: "); DEBUG_PRINTLN(logStartDay);
   }
   
