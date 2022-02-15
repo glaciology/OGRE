@@ -53,3 +53,5 @@ If the USER has enabled LED_INDICATORS, the following additional lights will fla
 ## Materials
 ## License & Credits
 This project is released under the [MIT License](http://opensource.org/licenses/MIT)
+Some code for this project adapted from [Sparkfun GNSS Library](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library) and 
+[Cryologger Glacier Velocity Tracker](https://github.com/adamgarbo/Cryologger_Glacier_Velocity_Tracker)
