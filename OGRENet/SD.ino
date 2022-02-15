@@ -77,7 +77,7 @@ void getConfig() {
   DEBUG_PRINT("Info: Flash LED?: "); DEBUG_PRINTLN(ledBlink);
 
   if (logMode == 1 ){
-    DEBUG_PRINT("Info: Start/End Hours: "); DEBUG_PRINT(logStartHr); DEBUG_PRINT(", ");DEBUG_PRINTLN(logStartHr);
+    DEBUG_PRINT("Info: Start/End Hours: "); DEBUG_PRINT(logStartHr); DEBUG_PRINT(", ");DEBUG_PRINTLN(logEndHr);
   }
   
   if (logMode == 4 ){
