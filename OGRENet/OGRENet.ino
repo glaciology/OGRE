@@ -138,6 +138,7 @@ struct struct_online {
 
 #else
 #define DEBUG_PRINTLN(x)
+#define DEBUG_PRINT(x)
 #define DEBUG_SERIALFLUSH()
 #define PROG_TIMER()
 #endif
