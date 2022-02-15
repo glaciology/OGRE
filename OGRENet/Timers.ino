@@ -1,23 +1,8 @@
 
 // DEV NOTES: https://forum.sparkfun.com/viewtopic.php?t=52431
 
-void configureWdt(){
-//  // SETUP:
-//  am_hal_wdt_config_t g_sWatchdogConfig = {
-//  ////Substitude other values for AM_HAL_WDT_LFRC_CLK_16HZ to increase/decrease the range
-//  .ui32Config = AM_HAL_WDT_LFRC_CLK_16HZ | AM_HAL_WDT_ENABLE_RESET | AM_HAL_WDT_ENABLE_INTERRUPT, // Configuration values/clk
-//  ////****** EVEN THOUGH THESE IMPLY 16-BIT, THEY ARE ONLY 8-BIT - 255 MAX!
-//  .ui16InterruptCount = 160,                                  //MAX 255! Set WDT interrupt for 10 seconds (160 / 16 = 10). 
-//  .ui16ResetCount = 240                                       //MAX 255! Set WDT reset for 15 seconds (240 / 16 = 15).  
-//  };
-//  
-//  // STARTING TIMER
-//  am_hal_clkgen_control(AM_HAL_CLKGEN_CONTROL_LFRC_START, 0); // LFRC must be turned on as the watchdog requires LFRC.
-//  am_hal_wdt_init(&g_sWatchdogConfig);                        // Initialize the watchdog.
-//  NVIC_EnableIRQ(WDT_IRQn);                                   // Enable the interrupt for the watchdog in the NVIC.
-//  am_hal_interrupt_master_enable();
-//  am_hal_wdt_start();                                         // Enable the watchdog.
-
+void configureWdt() {
+  
   wdt.configure(WDT_16HZ, 128, 240); // 16 Hz clock, 10-second interrupt period, 15-second reset period
 
   // Start the watchdog timer
@@ -49,18 +34,11 @@ void configureLogAlarm() {
   
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM); // Clear the RTC alarm interrupt
 
-  // 1 = daily at defined hour, 2 = test mode, 3 = continuous, 4 = monthly for 24 hr
+  // 1 = daily at defined hours, 2 = continuous , 3 = monthly, 4 = test
   
   if (logMode == 1) {
     rtc.setAlarm(logEndHr, 0, 0, 0, 0, 0); 
     rtc.setAlarmMode(4); // match every day
-    rtc.attachInterrupt();
-  }
-  
-  if (logMode == 4) {
-    rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, 1/1/21
-    rtc.setAlarm(13, 0, secondsLog, 0, 1, 1); 
-    rtc.setAlarmMode(6);
     rtc.attachInterrupt();
   }
 
@@ -73,7 +51,14 @@ void configureLogAlarm() {
     rtc.setAlarmMode(2);
     rtc.attachInterrupt();
   }
-
+  
+  if (logMode == 4) {
+    rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, 1/1/21
+    rtc.setAlarm(13, 0, secondsLog, 0, 1, 1); 
+    rtc.setAlarmMode(6);
+    rtc.attachInterrupt();
+  }
+  
   alarmFlag = false;
   
 }
@@ -87,19 +72,19 @@ void configureSleepAlarm() {
   if (logMode == 1){
     rtc.setAlarm(logStartHr, 0, 0, 0, 0, 0);
     rtc.setAlarmMode(4); // match every day
-    }
-    
-  if (logMode == 4){
-    rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, June 3rd, 2020 
-    rtc.setAlarm(13, 0, secondsSleep, 0, 1, 1); // No year alarm register
-    rtc.setAlarmMode(6);
   }
 
   if (logMode == 3){
     rtc.setAlarm(0, 0, 0, 0, logStartDay, 0); 
     rtc.setAlarmMode(2); // match every month
-    
   }
+    
+  if (logMode == 4){
+    rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, Jan 1, 2021 
+    rtc.setAlarm(13, 0, secondsSleep, 0, 1, 1); // No year alarm register
+    rtc.setAlarmMode(6);
+  }
+
   rtc.attachInterrupt();
   alarmFlag = false;
 }
@@ -137,7 +122,7 @@ void syncRtc() {
                  dateValidFlag, timeValidFlag);
          DEBUG_PRINTLN(gnssBuffer);
 #endif
-  
+
           // Check if date and time are valid and sync RTC with GNSS
           if (fixType == 3 && dateValidFlag && timeValidFlag) {
             unsigned long rtcEpoch = rtc.getEpoch();        // Get RTC epoch time

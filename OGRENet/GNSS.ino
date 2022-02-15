@@ -44,7 +44,6 @@ void configureGNSS(){
     if (!success){
       DEBUG_PRINTLN("Warning: GNSS CONSTELLATIONS FAILED TO CONFIGURE"); // LOG TO DEBUG
     }
-    initSetup = false;
   }
   
   gnss.setI2COutput(COM_TYPE_UBX);                 // Set the I2C port to output UBX only (no NMEA)
@@ -64,9 +63,9 @@ void configureGNSS(){
   }
 
   if (!initSetup) {                               // Create LOG file, but only when not in SETUP Mode
-    for (int i = 0; i < 1000; i++){
+    for (int i = 1; i < 1000; i++) {
       sprintf(logFileName, "RAWX%03d.ubx", i);
-      if (! sd.exists(logFileName)){
+      if (! sd.exists(logFileName)) {
         DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileName);
         myFile.open(logFileName, O_CREAT | O_APPEND | O_WRITE);
         break;
@@ -79,9 +78,9 @@ void configureGNSS(){
     }
   }
   
-  //myFile.open("RAWX.UBX", O_CREAT | O_APPEND | O_WRITE); // Create file if new, Append to end, Open to Write
+  initSetup = false;
 
-  // Reset counters
+  // Reset debug counters
   bytesWritten      = 0;
   writeFailCounter  = 0;
   syncFailCounter   = 0;
@@ -105,7 +104,7 @@ void logGNSS() {
     uint8_t myBuffer[sdWriteSize];                                 // Create our own buffer to hold the data while we write it to SD card
     gnss.extractFileBufferData((uint8_t *)&myBuffer, sdWriteSize); // Extract exactly sdWriteSize bytes from the UBX file buffer and put them into myBuffer
     
-    if (!myFile.write(myBuffer, sdWriteSize)){                     // Write exactly sdWriteSize bytes from myBuffer to the ubxDataFile on the SD card
+    if (!myFile.write(myBuffer, sdWriteSize)) {                    // Write exactly sdWriteSize bytes from myBuffer to the ubxDataFile on the SD card
         DEBUG_PRINTLN("Warning: Failed to write to log file!");
         writeFailCounter++;
     }
@@ -116,10 +115,9 @@ void logGNSS() {
     if (ledBlink){
       digitalWrite(LED, LOW);
     }
-    
   }
 
-  if (millis() - prevMillis > 10000){                              // Periodically save data
+  if (millis() - prevMillis > 10000) {                             // Periodically save data
     if (!myFile.sync()) {
       DEBUG_PRINTLN("Warning: Failed to sync log file!");
       syncFailCounter++;                                           // Count number of failed file syncs
@@ -157,7 +155,7 @@ void closeGNSS(){
       syncFailCounter++;                                          // Count number of failed file syncs
     }
 
-    delay(100); // CRITICAL - GIVE SD TIME TO WRITE
+    delay(200); // CRITICAL - GIVE SD TIME TO WRITE
 
     if (!myFile.close()){
       DEBUG_PRINTLN("Warning: failed to close log file.");

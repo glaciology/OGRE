@@ -4,6 +4,7 @@ void createDebugFile() {
     DEBUG_PRINTLN("Warning: Failed to create debug file.");
     return;
   }
+  
   else {
     DEBUG_PRINTLN("Info: Created debug file"); 
   }
@@ -15,9 +16,6 @@ void createDebugFile() {
   if (!debugFile.sync()) {
     DEBUG_PRINTLN("Warning: Failed to sync debug file.");
   }
-
-  // Update the file create timestamp
-  //updateFileCreate(&debugFile);
 
   // Close log file
   if (!debugFile.close()) {
@@ -49,11 +47,12 @@ void logDebug() {
   debugCounter++;
 
   analogReadResolution(14); //Set resolution to 14 bit
-  // Open debug file for writing
+
   if (!debugFile.open("debug.csv", O_APPEND | O_WRITE)) {
     DEBUG_PRINTLN("Warning: Failed to open debug file.");
     return;
   }
+  
   else {
     DEBUG_PRINT("Info: Debug Dumped to: "); DEBUG_PRINTLN("debug.csv");
   }
@@ -88,9 +87,6 @@ void logDebug() {
     DEBUG_PRINTLN("Warning: Failed to sync debug file.");
     syncFailCounter++; // Count number of failed file syncs
   }
-
-  // Update file access timestamps
-  //updateFileAccess(&debugFile);
 
   // Close the debug file
   if (!debugFile.close()) {
