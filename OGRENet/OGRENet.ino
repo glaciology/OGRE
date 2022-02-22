@@ -43,16 +43,16 @@ FsFile configFile;
 
 ///////// HARDWARE SPECIFIC PINOUTS & OBJECTS
 #if HARDWARE_VERSION == 0
-const byte LED                    = 16;  //
+const byte LED                    = 33;  //
 const byte PER_POWER              = 18;  // Drive to turn off uSD
 #elif HARDWARE_VERSION == 1
 const byte LED                    = 19;  //
 const byte PER_POWER              = 33;  // Drive to turn off uSD
-const byte BAT                    = 32;  // ADC port for battery measure
-const byte BAT_CNTRL              = 22;  // Drive high to turn on Bat measure
 #endif
 const byte ZED_POWER              = 34;  // Drive to turn off ZED
 const byte PIN_SD_CS              = 41;  //
+const byte BAT                    = 32;  // ADC port for battery measure
+const byte BAT_CNTRL              = 22;  // Drive high to turn on Bat measure
 
 #if HARDWARE_VERSION == 0
 TwoWire myWire(2);                       // USE I2C bus 2, SDA/SCL 25/27
