@@ -3,13 +3,14 @@ void goToSleep() {
   # if DEBUG
     Serial.end();
   #endif 
+  zedPowerOff(); 
+  peripheralPowerOff();
+  enableI2CPullups();
   myWire.end();           //Power down I2C
   mySpi.end();            //Power down SPI
   power_adc_disable();
   digitalWrite(LED, LOW); // Turn off LED
-  zedPowerOff(); 
-  peripheralPowerOff();
-  
+
   // Turn peripherals off
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM0);
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM1);
@@ -66,9 +67,11 @@ void wakeFromSleep() {
 
   // Turn on ADC
   ap3_adc_setup();
+  delay(10);
   myWire.begin(); // I2C
-  disableI2CPullups();
+  delay(100);
   mySpi.begin(); // SPI
+  delay(100);
   
   petDog();
 
@@ -128,6 +131,10 @@ void disableI2CPullups() {
     myWire.setPullups(0);
     myWire.setClock(400000); 
   #endif
+}
+
+void enableI2CPullups() {
+   myWire.setPullups(24);
 }
 
 // Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)

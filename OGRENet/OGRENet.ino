@@ -23,7 +23,7 @@
    TODO: 
    - HOTSTART UBX-SOS?
 */
-#define HARDWARE_VERSION 1 // 0 = CUSTOM DARTMOUTH HARDWARE, 1 = SPARKFUN ARTEMIS MICROMOD DATA LOGGER 
+#define HARDWARE_VERSION 0 // 0 = CUSTOM DARTMOUTH HARDWARE, 1 = SPARKFUN ARTEMIS MICROMOD DATA LOGGER 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
 #include <Wire.h>                                  // 
@@ -56,7 +56,6 @@ const byte BAT_CNTRL              = 22;  // Drive high to turn on Bat measure
 
 #if HARDWARE_VERSION == 0
 TwoWire myWire(2);                       // USE I2C bus 2, SDA/SCL 25/27
-SPIClass mySpi(3);                       // Use SPI bus 3, 39/42/44
 #elif HARDWARE_VERSION == 1              //
 TwoWire myWire(4);                       // USE I2C bus 4, 39/40
 #endif
@@ -67,7 +66,7 @@ SPIClass mySpi(3);                       // Use SPI 3
 //////////////////////////////////////////////////////
 //----------- USERS SPECIFY CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 1;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
+byte logMode                = 4;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 16;       // UTC Hour 
@@ -127,7 +126,7 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 ///////// DEBUGGING MACROS
-#define DEBUG                     false  // Output messages to Serial monitor
+#define DEBUG                     true  // Output messages to Serial monitor
 #define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
@@ -154,15 +153,16 @@ void setup() {
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
+  myWire.begin();
+  delay(100);                        // CRITICAL
+  mySpi.begin();
+  delay(100);                        // CRITICAL 
   pinMode(ZED_POWER, OUTPUT);
   pinMode(PER_POWER, OUTPUT);
   pinMode(LED, OUTPUT);
-
   zedPowerOn();
   peripheralPowerOn();
-  myWire.begin();
   disableI2CPullups();
-  mySpi.begin();
   configureWdt();      
   configureSD();                     // BLINK 2x pattern - FAILED SETUP
   getConfig();                       // Read LOG settings from Config.txt on uSD
@@ -183,10 +183,11 @@ void setup() {
 void loop() {
   
     if (alarmFlag) {                // SLEEP UNTIL alarmFlag = True
-      DEBUG_PRINTLN("Info: Alarm Triggered: Configuring System");     
+      DEBUG_PRINTLN("Info: Alarm Triggered: Configuring System");   
       petDog();                     //
       zedPowerOn();                 // TURN UBLOX ON
       peripheralPowerOn();          // TURN SD & PERIPHERALS ON
+      disableI2CPullups();
       configureSD();                // CONFIGURE SD
       configureGNSS();              // CONFIGURE GNSS SETTINGS
       
