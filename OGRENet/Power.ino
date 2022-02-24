@@ -71,7 +71,7 @@ void wakeFromSleep() {
   myWire.begin(); // I2C
   delay(100);
   mySpi.begin(); // SPI
-  delay(100);
+  delay(1);
   
   petDog();
 

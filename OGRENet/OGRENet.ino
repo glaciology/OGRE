@@ -76,8 +76,8 @@ byte logEndHr               = 20;       // UTC Hour
 byte logStartDay            = 1;        // Day of month between 1 and 28
 
 // LOG MODE 4: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 50;       // SLEEP INTERVAL (Seconds)
-uint32_t secondsLog         = 50;       // LOGGING INTERVAL (Seconds)
+uint32_t secondsSleep       = 10;       // SLEEP INTERVAL (Seconds)
+uint32_t secondsLog         = 10;       // LOGGING INTERVAL (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;        // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
@@ -156,7 +156,7 @@ void setup() {
   myWire.begin();
   delay(100);                        // CRITICAL
   mySpi.begin();
-  delay(100);                        // CRITICAL 
+  delay(1);                        // CRITICAL 
   pinMode(ZED_POWER, OUTPUT);
   pinMode(PER_POWER, OUTPUT);
   pinMode(LED, OUTPUT);
