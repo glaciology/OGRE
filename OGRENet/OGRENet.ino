@@ -76,8 +76,8 @@ byte logEndHr               = 20;       // UTC Hour
 byte logStartDay            = 1;        // Day of month between 1 and 28
 
 // LOG MODE 4: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 10;       // SLEEP INTERVAL (Seconds)
-uint32_t secondsLog         = 10;       // LOGGING INTERVAL (Seconds)
+uint32_t secondsSleep       = 30;       // SLEEP INTERVAL (Seconds)
+uint32_t secondsLog         = 30;       // LOGGING INTERVAL (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;        // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
@@ -89,7 +89,7 @@ bool logNav                 = true;     // TRUE if SFRBX (satellite nav) include
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;     // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = false;    // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = true;    // If TRUE, uses battery circuit to measure V during debug logs
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 

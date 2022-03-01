@@ -25,20 +25,17 @@ void createDebugFile() {
 
 
 float measBat() {
-  float converter = 17.5;    // THIS MUST BE TUNED DEPENDING ON WHAT RESISTORS USED IN VOLTAGE DIVIDER
+  //float converter = 17.5;    // THIS MUST BE TUNED DEPENDING ON WHAT RESISTORS USED IN VOLTAGE DIVIDER
   analogReadResolution(14); //Set resolution to 14 bit
-  
-  pinMode(BAT_CNTRL, HIGH);
+  pinMode(BAT_CNTRL, OUTPUT);
+  digitalWrite(BAT_CNTRL, HIGH);
+  delay(1);
   int measure = analogRead(BAT);
-  delay(100);
-  int measure2 = analogRead(BAT);
-  delay(100);
-  int measure3 = analogRead(BAT);
-  pinMode(BAT_CNTRL, LOW);
-
-  float avgMeas = ((float)measure + (float)measure2 + (float)measure3)/3.0;
+  delay(1);
+  digitalWrite(BAT_CNTRL, LOW);
+  float vcc = (float)measure * 17.5 / 16384.0; // convert to normal number
   
-  return avgMeas * converter / 16384.0;
+  return vcc;
 }
 
 
@@ -78,7 +75,7 @@ void logDebug() {
   debugFile.print(getInternalTemp(), 2); debugFile.print(",");
   debugFile.print(debugCounter); debugFile.print(",");
   if (measureBattery == true){
-    debugFile.print(measBat());
+    debugFile.print(measBat(), 2);
   }
   debugFile.println();
 
