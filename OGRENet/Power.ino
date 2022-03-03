@@ -8,7 +8,7 @@ void goToSleep() {
   enableI2CPullups();
   myWire.end();           //Power down I2C
   mySpi.end();            //Power down SPI
-  power_adc_disable();
+  power_adc_disable();    // Disable ADC
   digitalWrite(LED, LOW); // Turn off LED
 
   // Turn peripherals off
@@ -35,7 +35,6 @@ void goToSleep() {
   online.gnss = false;
   online.uSD = false;
   online.logGnss = false;
-  online.logDebug = false;
 
   // Use the lower power 32kHz clock.
   am_hal_stimer_config(AM_HAL_STIMER_CFG_CLEAR | AM_HAL_STIMER_CFG_FREEZE);

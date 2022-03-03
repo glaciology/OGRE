@@ -42,7 +42,7 @@ void configureGNSS(){
     success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
     delay(2000);
     if (!success){
-      DEBUG_PRINTLN("Warning: GNSS CONSTELLATIONS FAILED TO CONFIGURE"); // LOG TO DEBUG
+      DEBUG_PRINTLN("Warning: GNSS CONSTELLATIONS FAILED TO CONFIGURE"); 
     }
   }
   
@@ -162,7 +162,4 @@ void closeGNSS(){
       DEBUG_PRINTLN("Warning: failed to close log file.");
       closeFailCounter++; 
     }
-    
-    bytesWritten = 0;
-    lastPrint = 0;
 }

@@ -100,8 +100,7 @@ volatile bool wdtFlag             = false;    // ISR WatchDog
 volatile bool rtcSyncFlag         = false;    // Flag to indicate if RTC has been synced with GNSS
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
-unsigned long lastPrint           = 0;        // used to printing bytesWritten to Serial Monitor at .1Hz
-unsigned long prevMillis          = 0;        // Global time keeper
+unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 int           settings[7]         = {};       // Array that holds USER settings on SD
 char line[25];                                // Temporary array for parsing USER settings
 char logFileName[]                = "RAWX000.ubx";
@@ -121,7 +120,6 @@ struct struct_online {
   bool uSD      = false;
   bool gnss     = false;
   bool logGnss  = false;
-  bool logDebug = false;
 } online;
 //////////////////////////////////////////////////////
 
