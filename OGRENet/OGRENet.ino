@@ -76,7 +76,7 @@ byte logEndHr               = 20;       // UTC Hour
 byte logStartDay            = 1;        // Day of month between 1 and 28
 
 // LOG MODE 4: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 30;       // SLEEP INTERVAL (Seconds)
+uint32_t secondsSleep       = 10;       // SLEEP INTERVAL (Seconds)
 uint32_t secondsLog         = 10;       // LOGGING INTERVAL (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
@@ -152,6 +152,11 @@ void setup() {
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
+//  myWire.begin(); // I2C
+//  delay(100);
+//  mySpi.begin(); // SPI
+//  delay(1);
+
   initializeBuses();
   pinMode(ZED_POWER, OUTPUT);
   pinMode(PER_POWER, OUTPUT);
@@ -169,6 +174,7 @@ void setup() {
        syncRtc();                    // 1Hz BLINK-AQUIRING; x10-FAIL; x5-SUCCESS (3 min MAX)
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
+       deinitializeBuses();
   }
 
   blinkLed(10, 100);                 // BLINK 10x- SETUP COMPLETE
@@ -179,9 +185,11 @@ void setup() {
 void loop() {
   
     if (alarmFlag) {                // SLEEP UNTIL alarmFlag = True
+      DEBUG_PRINTLN("Info: Alarm Triggered: Configuring System");
+      petDog();
+
       initializeBuses();
-      DEBUG_PRINTLN("Info: Alarm Triggered: Configuring System");   
-      petDog();                     //
+      delay(2500);
       zedPowerOn();                 // TURN UBLOX ON
       peripheralPowerOn();          // TURN SD & PERIPHERALS ON
       disableI2CPullups();
@@ -204,8 +212,10 @@ void loop() {
       closeGNSS(); 
       logDebug();                 
       configureSleepAlarm();
-      DEBUG_PRINT("Info: Sleeping until "); printAlarm();
+      
       deinitializeBuses();
+      
+      DEBUG_PRINT("Info: Sleeping until "); printAlarm();
     }
 
     if (wdtFlag) {

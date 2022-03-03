@@ -70,7 +70,7 @@ void configureSleepAlarm() {
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM);
   
   if (logMode == 1){
-    rtc.setAlarm(logStartHr, 0, 0, 0, 0, 0);
+    rtc.setAlarm(logStartHr, 16, 0, 0, 0, 0);
     rtc.setAlarmMode(4); // match every day
   }
 

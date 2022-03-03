@@ -1,9 +1,10 @@
 void initializeBuses(){
-  delay(10);
   myWire.begin(); // I2C
   delay(100);
   mySpi.begin(); // SPI
   delay(1);
+  pinMode(ZED_POWER, OUTPUT);
+  pinMode(PER_POWER, OUTPUT);
 }
 
 void deinitializeBuses(){
@@ -21,6 +22,11 @@ void goToSleep() {
     Serial.end();
   #endif 
   
+//  zedPowerOff(); 
+//  peripheralPowerOff();
+//  enableI2CPullups();
+//  myWire.end();           //Power down I2C
+//  mySpi.end();            //Power down SPI
   power_adc_disable();    // Disable ADC
   digitalWrite(LED, LOW); // Turn off LED
 
@@ -80,10 +86,16 @@ void wakeFromSleep() {
   // Turn on ADC
   petDog();
 
+//  delay(10);
+//  myWire.begin(); // I2C
+//  delay(100);
+//  mySpi.begin(); // SPI
+//  delay(1);
+
   #if DEBUG
     Serial.begin(115200); // open serial port
   #endif
-  delay(2500);
+//  delay(2500);
 
   if (measureBattery == true){
     ap3_adc_setup();
