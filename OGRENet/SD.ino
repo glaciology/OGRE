@@ -91,9 +91,9 @@ void getConfig() {
     DEBUG_PRINT("Log Mode 3 - Day of Month to Log: "); DEBUG_PRINTLN(logStartDay);
   }
 
-  DEBUG_PRINT("4. Constellations: "); DEBUG_PRINT("GPS "); DEBUG_PRINT(logGPS); DEBUG_PRINT("GLO "); DEBUG_PRINTLN(logGLO);
-  DEBUG_PRINT("GAL "); DEBUG_PRINT(logGAL); DEBUG_PRINT("BDS "); DEBUG_PRINT(logBDS); DEBUG_PRINT("QZSS "); DEBUG_PRINT(logQZSS);
-  DEBUG_PRINT("NAV "); DEBUG_PRINTLN(logNav);
+  DEBUG_PRINT("4. Constellations: "); DEBUG_PRINT("GPS "); DEBUG_PRINT(logGPS); DEBUG_PRINT(" GLO "); DEBUG_PRINTLN(logGLO);
+  DEBUG_PRINT(" GAL "); DEBUG_PRINT(logGAL); DEBUG_PRINT(" BDS "); DEBUG_PRINT(logBDS); DEBUG_PRINT(" QZSS "); DEBUG_PRINT(logQZSS);
+  DEBUG_PRINT(" NAV "); DEBUG_PRINTLN(logNav);
   
   if (!configFile.close()) {
     DEBUG_PRINTLN("Warning: Failed to close config file.");

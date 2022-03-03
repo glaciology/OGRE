@@ -77,7 +77,7 @@ byte logStartDay            = 1;        // Day of month between 1 and 28
 
 // LOG MODE 4: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 30;       // SLEEP INTERVAL (Seconds)
-uint32_t secondsLog         = 30;       // LOGGING INTERVAL (Seconds)
+uint32_t secondsLog         = 10;       // LOGGING INTERVAL (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;        // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
@@ -100,6 +100,7 @@ volatile bool wdtFlag             = false;    // ISR WatchDog
 volatile bool rtcSyncFlag         = false;    // Flag to indicate if RTC has been synced with GNSS
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
+volatile bool sleepFlag           = false;
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 int           settings[7]         = {};       // Array that holds USER settings on SD
 char line[25];                                // Temporary array for parsing USER settings
@@ -151,10 +152,7 @@ void setup() {
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
-  myWire.begin();
-  delay(100);                        // CRITICAL
-  mySpi.begin();
-  delay(1);                        // CRITICAL 
+  initializeBuses();
   pinMode(ZED_POWER, OUTPUT);
   pinMode(PER_POWER, OUTPUT);
   pinMode(LED, OUTPUT);
@@ -181,6 +179,7 @@ void setup() {
 void loop() {
   
     if (alarmFlag) {                // SLEEP UNTIL alarmFlag = True
+      initializeBuses();
       DEBUG_PRINTLN("Info: Alarm Triggered: Configuring System");   
       petDog();                     //
       zedPowerOn();                 // TURN UBLOX ON
@@ -206,6 +205,7 @@ void loop() {
       logDebug();                 
       configureSleepAlarm();
       DEBUG_PRINT("Info: Sleeping until "); printAlarm();
+      deinitializeBuses();
     }
 
     if (wdtFlag) {

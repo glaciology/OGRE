@@ -1,13 +1,26 @@
-// POWER DOWN AND WAIT FOR INTERRUPT
-void goToSleep() {
-  # if DEBUG
-    Serial.end();
-  #endif 
+void initializeBuses(){
+  delay(10);
+  myWire.begin(); // I2C
+  delay(100);
+  mySpi.begin(); // SPI
+  delay(1);
+}
+
+void deinitializeBuses(){
   zedPowerOff(); 
   peripheralPowerOff();
   enableI2CPullups();
   myWire.end();           //Power down I2C
   mySpi.end();            //Power down SPI
+}
+
+
+// POWER DOWN AND WAIT FOR INTERRUPT
+void goToSleep() {
+  # if DEBUG
+    Serial.end();
+  #endif 
+  
   power_adc_disable();    // Disable ADC
   digitalWrite(LED, LOW); // Turn off LED
 
@@ -65,13 +78,6 @@ void wakeFromSleep() {
   am_hal_stimer_config(AM_HAL_STIMER_HFRC_3MHZ);
 
   // Turn on ADC
-//  ap3_adc_setup();
-  delay(10);
-  myWire.begin(); // I2C
-  delay(100);
-  mySpi.begin(); // SPI
-  delay(1);
-  
   petDog();
 
   #if DEBUG
