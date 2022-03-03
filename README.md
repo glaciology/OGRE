@@ -5,7 +5,7 @@ On-ice Greenland Research Experimental Network
 
 ![PCB Layout](Hardware/Silkscreen.png)
 
-** NOTE: DO NOT power board above 25V. Battery measurements are made with a voltage divider that must scale max voltage to 3.3V for ADC. V1.0 dividers use 68kOhm and 10kOhm resistors, limiting max power to 25V. 
+** ** NOTE: DO NOT power board above 25V. Battery measurements are made with a voltage divider that must scale max voltage to 3.3V for ADC. V1.0 dividers use 68kOhm and 10kOhm resistors, limiting max power to 25V. 
 
 ## How to Use This Software
 
