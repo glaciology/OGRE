@@ -66,7 +66,7 @@ void wakeFromSleep() {
   am_hal_stimer_config(AM_HAL_STIMER_HFRC_3MHZ);
 
   // Turn on ADC
-  ap3_adc_setup();
+//  ap3_adc_setup();
   delay(10);
   myWire.begin(); // I2C
   delay(100);
@@ -79,6 +79,12 @@ void wakeFromSleep() {
     Serial.begin(115200); // open serial port
   #endif
   delay(2500);
+
+  if (measureBattery == true){
+    ap3_adc_setup();
+    ap3_set_pin_to_analog(BAT);
+    
+  }
 }
 
 ///////// AUXILIARLY OFF/ON FUNCTIONS

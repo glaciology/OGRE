@@ -85,7 +85,7 @@ int logGLO                  = 1;
 int logGAL                  = 0;
 int logBDS                  = 0;
 int logQZSS                 = 0;
-bool logNav                 = true;     // TRUE if SFRBX (satellite nav) included in logging
+int logNav                  = 1;     
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;     // If FALSE, all LED indicators during log/sleep disabled

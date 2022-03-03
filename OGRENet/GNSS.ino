@@ -53,7 +53,7 @@ void configureGNSS(){
   gnss.setAutoRXMRAWX(true, false);                // Enable automatic RXM RAWX (RAW) messages 
   gnss.logRXMRAWX();                               // Enable RXM RAWX (RAW) data logging
   
-  if (logNav) {
+  if (logNav == 1) {
     gnss.setAutoRXMSFRBX(true, false);            // Enable automatic RXM SFRBX (NAV) messages 
     gnss.logRXMSFRBX();                           // Enable RXM SFRBX (NAV) data logging
   }
@@ -68,6 +68,7 @@ void configureGNSS(){
       if (! sd.exists(logFileName)) {
         DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileName);
         myFile.open(logFileName, O_CREAT | O_APPEND | O_WRITE);
+        online.logGnss = true;
         break;
       }
     }

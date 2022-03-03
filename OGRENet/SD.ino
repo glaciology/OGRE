@@ -32,7 +32,7 @@ void getConfig() {
   // OPEN CONFIG file
   configFile.open("CONFIG.TXT", O_READ);
   
-  // check for open error
+  // IF SD ERROR, ABORT getConfig
   if (!configFile.isOpen()){
     DEBUG_PRINTLN("Warning: Could not open CONFIG.TXT");
     DEBUG_PRINTLN("Warning: Using hard-coded settings");
@@ -70,19 +70,30 @@ void getConfig() {
   } else  {
     measureBattery = true;
   }
+
+  logGPS = settings[6];
+  logGLO = settings[7];
+  logGAL = settings[8];
+  logBDS = settings[9];
+  logQZSS = settings[10];
+  logNav = settings[11];
   
   DEBUG_PRINTLN("Info: Settings read from SD:");
-  DEBUG_PRINT("Info: Log Mode: "); DEBUG_PRINTLN(logMode);
-  DEBUG_PRINT("Info: Log Battery?: "); DEBUG_PRINTLN(measureBattery);
-  DEBUG_PRINT("Info: Flash LED?: "); DEBUG_PRINTLN(ledBlink);
+  DEBUG_PRINT("1. Log Mode: "); DEBUG_PRINTLN(logMode);
+  DEBUG_PRINT("2. Log Battery?: "); DEBUG_PRINTLN(measureBattery);
+  DEBUG_PRINT("3. Flash LED?: "); DEBUG_PRINTLN(ledBlink);
 
   if (logMode == 1 ){
-    DEBUG_PRINT("Info: Start/End Hours: "); DEBUG_PRINT(logStartHr); DEBUG_PRINT(", ");DEBUG_PRINTLN(logEndHr);
+    DEBUG_PRINT("Log Mode 1 - Start/End Hours: "); DEBUG_PRINT(logStartHr); DEBUG_PRINT(", ");DEBUG_PRINTLN(logEndHr);
   }
   
   if (logMode == 3 ){
-    DEBUG_PRINT("Day of Month to Log: "); DEBUG_PRINTLN(logStartDay);
+    DEBUG_PRINT("Log Mode 3 - Day of Month to Log: "); DEBUG_PRINTLN(logStartDay);
   }
+
+  DEBUG_PRINT("4. Constellations: "); DEBUG_PRINT("GPS "); DEBUG_PRINT(logGPS); DEBUG_PRINT("GLO "); DEBUG_PRINTLN(logGLO);
+  DEBUG_PRINT("GAL "); DEBUG_PRINT(logGAL); DEBUG_PRINT("BDS "); DEBUG_PRINT(logBDS); DEBUG_PRINT("QZSS "); DEBUG_PRINT(logQZSS);
+  DEBUG_PRINT("NAV "); DEBUG_PRINTLN(logNav);
   
   if (!configFile.close()) {
     DEBUG_PRINTLN("Warning: Failed to close config file.");
