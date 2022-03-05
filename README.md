@@ -1,12 +1,12 @@
 # OGRENet
 On-ice Greenland Research Experimental Network
 
-## Introduction
+## Introduction/Hardware Overview
 Designed for logging raw GNSS data in remote regions of the Arctic, this custom PCB features a Ublox ZED-F9P and Sparkfun Artemis Module (featuring Ambiq Apollo3 MCU, Cortex-M4) which communicates with the GNSS module over I2C, with data logged to a uSD card. Input power is from a 12V lead acid batteries, although any power supply in the 6V-25V range is acceptable. Nominal current consumption with a 12V supply is 45mA (tracking GPS and GLONASS constellations and logging 1Hz data), while consuming 0.07mA during sleep. An on board battery voltage measurement circuit and temperature sensor provide corresponding readings for each GNSS data logging session. Additional optional peripherals and pins include RX/TX for serial programming, 3-Wire Temperature sensor, an additional I2C bus for peripheral communication and several GPIO pins that can be configured as ADC, UART, etc. 
 
-![PCB Layout](Hardware/Silkscreen.png)
+<img src="https://user-images.githubusercontent.com/37055625/156889824-d95c58e6-8be3-41f7-8ab4-701e75ca4c8e.jpg" width="350"/> <img src="Hardware/Silkscreen.png" width="600"/>
 
-**NOTE: DO NOT power board above 25V. Battery measurements are made with a voltage divider that must scale max voltage to 3.3V for ADC. V1.0 dividers use 68kOhm and 10kOhm resistors, limiting max power to 25V.**
+**NOTE: DO NOT power board above 25V. Battery measurements are made with a voltage divider that must scale max voltage to 3.3V for ADC. V1.0 dividers use 68kOhm and 10kOhm resistors, limiting max power to 25V. If higher power desired, change voltage divider resistors.**
 
 ## How to Use This Software
 
