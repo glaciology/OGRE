@@ -2,6 +2,7 @@
 On-ice Greenland Research Experimental Network
 
 ## Introduction
+Designed for logging raw GNSS data in remote regions of the Arctic, this custom PCB features a Ublox ZED-F9P and Sparkfun Artemis Module (featuring Ambiq Apollo3 MCU, Cortex-M4) which communicates with the GNSS module over I2C, with data logged to a uSD card. Input power is from a 12V lead acid batteries, although any power supply in the 6V-25V range is acceptable. Nominal current consumption with a 12V supply is 45mA (tracking GPS and GLONASS constellations and logging 1Hz data), while consuming 0.07mA during sleep. An on board battery voltage measurement circuit and temperature sensor provide corresponding readings for each GNSS data logging session. Additional optional peripherals and pins include RX/TX for serial programming, 3-Wire Temperature sensor, an additional I2C bus for peripheral communication and several GPIO pins that can be configured as ADC, UART, etc. 
 
 ![PCB Layout](Hardware/Silkscreen.png)
 
