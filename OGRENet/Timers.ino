@@ -3,8 +3,10 @@
 
 void configureWdt() {
   
-  wdt.configure(WDT_16HZ, 128, 240); // 16 Hz clock, 10-second interrupt period, 15-second reset period
-
+//  wdt.configure(WDT_16HZ, 160, 240); // 16 Hz clock, 10-second interrupt period, 15-second reset period
+  //wdt.configure(WDT_16HZ, 240, 240); // 15 second interrupts, 15 second reset period
+  wdt.configure(WDT_1HZ, 12, 24); // 12 second interrupts, 24 second reset period
+  
   // Start the watchdog timer
   wdt.start();
 }
@@ -18,7 +20,7 @@ void petDog() {
   wdtCounter = 0;
 }
 
-
+  
 // RTC CONFIGURATION/START:
 void configureLogAlarm() {
   /* ALARM MODES
@@ -70,7 +72,7 @@ void configureSleepAlarm() {
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM);
   
   if (logMode == 1){
-    rtc.setAlarm(logStartHr, 16, 0, 0, 0, 0);
+    rtc.setAlarm(logStartHr, 0, 0, 0, 0, 0);
     rtc.setAlarmMode(4); // match every day
   }
 
@@ -133,13 +135,13 @@ void syncRtc() {
   
             DEBUG_PRINT("Info: RTC drift: "); DEBUG_PRINTLN(rtcDrift);
             DEBUG_PRINT("Info: RTC time synced to "); printDateTime();
-            blinkLed(5, 1000);
+//            blinkLed(5, 1000);
           }
         }
       }
       if (!rtcSyncFlag){
         DEBUG_PRINTLN("Warning: Unable to sync RTC!");
-        blinkLed(10, 500);
+//        blinkLed(10, 500);
       }
     }
     else {

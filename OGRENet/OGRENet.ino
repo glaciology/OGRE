@@ -76,8 +76,8 @@ byte logEndHr               = 20;       // UTC Hour
 byte logStartDay            = 1;        // Day of month between 1 and 28
 
 // LOG MODE 4: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 10;       // SLEEP INTERVAL (Seconds)
-uint32_t secondsLog         = 10;       // LOGGING INTERVAL (Seconds)
+uint32_t secondsSleep       = 50;       // SLEEP INTERVAL (Seconds)
+uint32_t secondsLog         = 50;       // LOGGING INTERVAL (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;        // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
@@ -100,7 +100,6 @@ volatile bool wdtFlag             = false;    // ISR WatchDog
 volatile bool rtcSyncFlag         = false;    // Flag to indicate if RTC has been synced with GNSS
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
-volatile bool sleepFlag           = false;
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 int           settings[7]         = {};       // Array that holds USER settings on SD
 char line[25];                                // Temporary array for parsing USER settings
@@ -125,7 +124,7 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 ///////// DEBUGGING MACROS
-#define DEBUG                     true  // Output messages to Serial monitor
+#define DEBUG                     false  // Output messages to Serial monitor
 #define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
@@ -152,18 +151,8 @@ void setup() {
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
-//  myWire.begin(); // I2C
-//  delay(100);
-//  mySpi.begin(); // SPI
-//  delay(1);
-
   initializeBuses();
-  pinMode(ZED_POWER, OUTPUT);
-  pinMode(PER_POWER, OUTPUT);
   pinMode(LED, OUTPUT);
-  zedPowerOn();
-  peripheralPowerOn();
-  disableI2CPullups();
   configureWdt();      
   configureSD();                     // BLINK 2x pattern - FAILED SETUP
   getConfig();                       // Read LOG settings from Config.txt on uSD
@@ -188,14 +177,13 @@ void loop() {
       DEBUG_PRINTLN("Info: Alarm Triggered: Configuring System");
       petDog();
 
-      initializeBuses();
-      delay(2500);
-      zedPowerOn();                 // TURN UBLOX ON
-      peripheralPowerOn();          // TURN SD & PERIPHERALS ON
-      disableI2CPullups();
+      if (!initSetup){
+        initializeBuses();
+      }
+      
       configureSD();                // CONFIGURE SD
       configureGNSS();              // CONFIGURE GNSS SETTINGS
-      
+
       if (logMode == 1 || logMode == 3) {
         syncRtc();                  // SYNC RTC W/ GPS (3 min MAX)
       }
@@ -212,7 +200,6 @@ void loop() {
       closeGNSS(); 
       logDebug();                 
       configureSleepAlarm();
-      
       deinitializeBuses();
       
       DEBUG_PRINT("Info: Sleeping until "); printAlarm();
@@ -240,7 +227,7 @@ extern "C" void am_watchdog_isr(void) {
 
   if (wdtCounter < 10) { 
     wdt.restart();  // Restart the watchdog timer
-  }                 // ELSE, if wdtCounter > 10 (dog not pet 10 times), system reset after 15s
+  }                 // ELSE, if WDT will keep counting until it reaches RESET period
   
   wdtFlag = true;   // Set the watchdog flag
   wdtCounter++;     // Increment watchdog interrupt counter

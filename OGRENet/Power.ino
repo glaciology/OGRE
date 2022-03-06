@@ -1,11 +1,24 @@
 void initializeBuses(){
-  myWire.begin(); // I2C
+  pinMode(25, INPUT_PULLUP);
+  pinMode(27, INPUT_PULLUP);
   delay(100);
-  mySpi.begin(); // SPI
-  delay(1);
+  
   pinMode(ZED_POWER, OUTPUT);
+  zedPowerOn();
+  myWire.begin();
+  disableI2CPullups();
+  
+  pinMode(38, INPUT_PULLUP);
+  pinMode(41, INPUT_PULLUP);
+  pinMode(42, INPUT_PULLUP);
+  pinMode(43, INPUT_PULLUP);
+  delay(100);
   pinMode(PER_POWER, OUTPUT);
+  peripheralPowerOn();
+  mySpi.begin();
+  delay(1);
 }
+
 
 void deinitializeBuses(){
   zedPowerOff(); 
@@ -21,12 +34,7 @@ void goToSleep() {
   # if DEBUG
     Serial.end();
   #endif 
-  
-//  zedPowerOff(); 
-//  peripheralPowerOff();
-//  enableI2CPullups();
-//  myWire.end();           //Power down I2C
-//  mySpi.end();            //Power down SPI
+ 
   power_adc_disable();    // Disable ADC
   digitalWrite(LED, LOW); // Turn off LED
 
@@ -86,21 +94,15 @@ void wakeFromSleep() {
   // Turn on ADC
   petDog();
 
-//  delay(10);
-//  myWire.begin(); // I2C
-//  delay(100);
-//  mySpi.begin(); // SPI
-//  delay(1);
-
   #if DEBUG
     Serial.begin(115200); // open serial port
+    delay(2500);
   #endif
-//  delay(2500);
+
 
   if (measureBattery == true){
     ap3_adc_setup();
     ap3_set_pin_to_analog(BAT);
-    
   }
 }
 
@@ -128,7 +130,7 @@ void zedPowerOn() {
   } else {
     digitalWrite(ZED_POWER, LOW);
   }
-  delay(2500);
+  delay(500);
 }
 
 void peripheralPowerOn() {
