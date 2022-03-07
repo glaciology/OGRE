@@ -4,8 +4,7 @@
    V0.?.0 (beta-release)
 
    Hardware:
-   - Sparkfun Artemis
-   - Ublox ZED-F9P
+   - OGRENet PCB or Sparkfun Artemis & Ublox ZED-F9P
 
    Dependencies:
    - SparkFun_u-blox_GNSS_Arduino_Library v2.0.5
@@ -17,8 +16,9 @@
    - LED indicators:
         *2 Blink Pattern: uSD failed
         *3 Blink Pattern: Ublox failed
-        *10 Blinks: System Configuration Complete (After Initial Power On or Reset Only)
-        *1 Blink every 10 seconds: Sleeping 
+        *5 Rapid Blinks: RTC sync fail
+        *10 Blinks: RTC synced and System Configuration Complete (After Initial Power On or Reset Only)
+        *1 Blink every 12 seconds: Sleeping 
 
    TODO: 
    - HOTSTART UBX-SOS?
@@ -33,13 +33,12 @@
 #include <SPI.h>                                   // 
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.0.5: http://librarymanager/All#SparkFun_u-blox_GNSS
 SFE_UBLOX_GNSS gnss;                               //
-SdFs sd;                                           // SdFs = supports FAT16/FAT32 and exFAT (4GB+), corresponding to FsFile class
-APM3_RTC rtc;
-APM3_WDT wdt;
-FsFile myFile;
-FsFile debugFile;
-FsFile configFile;
-//////////////////
+SdFs sd;                                           // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
+APM3_RTC rtc;                                      //
+APM3_WDT wdt;                                      //
+FsFile myFile;                                     // RAW UBX LOG FILE
+FsFile debugFile;                                  // DEBUG LOG FILE
+FsFile configFile;                                 // USER INPUT CONFIG FILE
 
 ///////// HARDWARE SPECIFIC PINOUTS & OBJECTS
 #if HARDWARE_VERSION == 0
@@ -64,7 +63,7 @@ SPIClass mySpi(3);                       // Use SPI 3
 #define SD_CONFIG SdSpiConfig(PIN_SD_CS, SHARED_SPI, SD_SCK_MHZ(24), &mySpi)
 
 //////////////////////////////////////////////////////
-//----------- USERS SPECIFY CONFIGURATION HERE ------------
+//----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
 byte logMode                = 4;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
 
@@ -101,7 +100,7 @@ volatile bool rtcSyncFlag         = false;    // Flag to indicate if RTC has bee
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
-int           settings[7]         = {};       // Array that holds USER settings on SD
+int           settings[15]        = {};       // Array that holds USER settings on SD
 char line[25];                                // Temporary array for parsing USER settings
 char logFileName[]                = "RAWX000.ubx";
 
@@ -130,14 +129,11 @@ struct struct_online {
 #if DEBUG
 #define DEBUG_PRINTLN(x)    Serial.println(x)
 #define DEBUG_PRINT(x)      Serial.print(x)
-#define DEBUG_SERIALFLUSH() Serial.flush()
-#define PROG_TIMER()        millis()
 
 #else
 #define DEBUG_PRINTLN(x)
 #define DEBUG_PRINT(x)
-#define DEBUG_SERIALFLUSH()
-#define PROG_TIMER()
+
 #endif
 //////////////////////////////////////////////////////
 
@@ -151,22 +147,22 @@ void setup() {
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
-  initializeBuses();
-  pinMode(LED, OUTPUT);
-  configureWdt();      
+  initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
+  pinMode(LED, OUTPUT);              //
+  configureWdt();                    // 12s interrupt, 24s reset period
   configureSD();                     // BLINK 2x pattern - FAILED SETUP
   getConfig();                       // Read LOG settings from Config.txt on uSD
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   createDebugFile();        
 
   if (logMode == 1 || logMode == 3){ // GET GPS TIME if MONTHLY or DAILY logging
-       syncRtc();                    // 1Hz BLINK-AQUIRING; x10-FAIL; x5-SUCCESS (3 min MAX)
+       syncRtc();                    // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
        deinitializeBuses();
   }
 
-  blinkLed(10, 100);                 // BLINK 10x- SETUP COMPLETE
+  blinkLed(10, 100);                 // BLINK 10x - SETUP COMPLETE
   DEBUG_PRINTLN("Info: SETUP COMPLETE");
 }
 
@@ -177,10 +173,7 @@ void loop() {
       DEBUG_PRINTLN("Info: Alarm Triggered: Configuring System");
       petDog();
 
-      if (!initSetup){
-        initializeBuses();
-      }
-      
+      initializeBuses();            // CONFIGURE I2C, SPI, ZED, uSD
       configureSD();                // CONFIGURE SD
       configureGNSS();              // CONFIGURE GNSS SETTINGS
 
@@ -205,18 +198,15 @@ void loop() {
       DEBUG_PRINT("Info: Sleeping until "); printAlarm();
     }
 
-    if (wdtFlag) {
+    if (wdtFlag) {                 // IF WDT interrupt, restart timer by petting dog
       petDog(); 
-    }
-    
-    DEBUG_PRINTLN("Info: WDT Interrupt. Going back to Sleep");  
+    }  
 
-    if (ledBlink) {
+    if (ledBlink) {               // Only if User wants blinking
       blinkLed(1, 100);           // BLINK once every WDT trigger
     }
  
-    goToSleep();
-    
+    goToSleep();  
 }
 
 ///////// INTERRUPT HANDLERS

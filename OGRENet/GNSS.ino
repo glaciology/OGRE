@@ -59,7 +59,7 @@ void configureGNSS(){
   }
   
   if (logMode == 1 || logMode == 3) {
-    gnss.setAutoPVT(true);
+    gnss.setAutoPVT(true);                        // Enable PVT messages for syncing RTC
   }
 
   if (!initSetup) {                               // Create LOG file, but only when not in SETUP Mode
@@ -118,7 +118,7 @@ void logGNSS() {
     }
   }
 
-  if (millis() - prevMillis > 10000) {                             // Periodically save data
+  if (millis() - prevMillis > 10000) {                             // Save data every 10 seconds
     if (!myFile.sync()) {
       DEBUG_PRINTLN("Warning: Failed to sync log file!");
       syncFailCounter++;                                           // Count number of failed file syncs

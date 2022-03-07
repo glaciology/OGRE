@@ -135,13 +135,12 @@ void syncRtc() {
   
             DEBUG_PRINT("Info: RTC drift: "); DEBUG_PRINTLN(rtcDrift);
             DEBUG_PRINT("Info: RTC time synced to "); printDateTime();
-//            blinkLed(5, 1000);
           }
         }
       }
       if (!rtcSyncFlag){
         DEBUG_PRINTLN("Warning: Unable to sync RTC!");
-//        blinkLed(10, 500);
+        blinkLed(5, 500);
       }
     }
     else {
