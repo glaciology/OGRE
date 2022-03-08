@@ -65,7 +65,7 @@ SPIClass mySpi(3);                       // Use SPI 3
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 4;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
+byte logMode                = 2;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 16;       // UTC Hour 
