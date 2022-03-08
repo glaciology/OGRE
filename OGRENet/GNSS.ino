@@ -35,6 +35,7 @@ void configureGNSS(){
 
   if (initSetup) {                                                       // ONLY run this once, during initialization
     bool success = true;
+    delay(1000);
     success &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, logGPS);     // Enable GPS (define in USER SETTINGS)
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
@@ -42,7 +43,18 @@ void configureGNSS(){
     success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
     delay(2000);
     if (!success){
-      DEBUG_PRINTLN("Warning: GNSS CONSTELLATIONS FAILED TO CONFIGURE"); 
+      DEBUG_PRINTLN("Warning: GNSS CONSTELLATIONS FAILED TO CONFIGURE - ATTEMPTING AGAIN"); 
+      delay(2000);
+      bool success = true;
+      success &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, logGPS);     // Enable GPS (define in USER SETTINGS)
+      success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
+      success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
+      success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);     // Enable BeiDou
+      success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
+      delay(2000);
+      if (!success){
+        DEBUG_PRINTLN("Warning: GNSS CONSTELLATIONS FAILED AGAIN");
+      }
     }
   }
   
@@ -62,7 +74,7 @@ void configureGNSS(){
   }
 
   if (!initSetup) {                               // Create LOG file, but only when not in SETUP Mode
-    if (logMode == 1 || logMode == 2 || logMode == 3){
+    if (logMode == 1 || logMode == 2 || logMode == 3 || logMode == 4){
       getLogFileName();
       myFile.open(logFileNameDate,O_CREAT | O_APPEND | O_WRITE);
       DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileNameDate);
@@ -78,7 +90,6 @@ void configureGNSS(){
         }
       }     
     }
-
     
     if (!myFile) {
       DEBUG_PRINTLN(F("Warning: Failed to create UBX data file! Freezing..."));

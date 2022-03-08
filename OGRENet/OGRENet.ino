@@ -65,7 +65,7 @@ SPIClass mySpi(3);                       // Use SPI 3
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 2;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
+byte logMode                = 4;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 16;       // UTC Hour 
@@ -126,7 +126,7 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 ///////// DEBUGGING MACROS
-#define DEBUG                     false  // Output messages to Serial monitor
+#define DEBUG                     true  // Output messages to Serial monitor
 #define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
@@ -156,10 +156,11 @@ void setup() {
   configureSD();                     // BLINK 2x pattern - FAILED SETUP
   getConfig();                       // Read LOG settings from Config.txt on uSD
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
-  createDebugFile();        
+  createDebugFile();                 //
+  syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
   if (logMode == 1 || logMode == 3){ // GET GPS TIME if MONTHLY or DAILY logging
-       syncRtc();                    // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
+//       syncRtc();                    
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
        deinitializeBuses();

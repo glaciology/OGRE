@@ -56,6 +56,7 @@ void logDebug() {
 
   // Create datetime string
   char dateTime[30];
+  rtc.getTime();
   sprintf(dateTime, "20%02d-%02d-%02d %02d:%02d:%02d",
           rtc.year, rtc.month, rtc.dayOfMonth,
           rtc.hour, rtc.minute, rtc.seconds);
