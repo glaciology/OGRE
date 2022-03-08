@@ -102,7 +102,10 @@ volatile bool initSetup           = true;     // False once GNSS messages config
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 int           settings[15]        = {};       // Array that holds USER settings on SD
 char line[25];                                // Temporary array for parsing USER settings
-char logFileName[]                = "RAWX000.ubx";
+int stationName                   = 1111;     // Station name, 4 digits
+char logFileName[12]              = "";
+char logFileNameDate[30]          = ""; // Log file name
+
 
 // DEBUGGING
 uint16_t      maxBufferBytes      = 0;        // How full the file buffer has been

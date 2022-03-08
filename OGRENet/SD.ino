@@ -1,4 +1,4 @@
-void configureSD(){
+void configureSD() {
   ///////// SD CARD INITIALIZATION
   if (!sd.begin(SD_CONFIG)) { // 
     DEBUG_PRINTLN("Warning: Card failed, or not present. Trying again...");
@@ -21,6 +21,13 @@ void configureSD(){
     DEBUG_PRINTLN("Info: SD card initialized.");
     online.uSD = true;
   }
+}
+
+// Create timestamped log file name
+void getLogFileName() { 
+  sprintf(logFileName, char(stationName) + "_20%02d%02d%02d_%02d%02d%02d.ubx",
+          rtc.year, rtc.month, rtc.dayOfMonth,
+          rtc.hour, rtc.minute, rtc.seconds);
 }
 
 
@@ -77,6 +84,7 @@ void getConfig() {
   logBDS = settings[9];
   logQZSS = settings[10];
   logNav = settings[11];
+  stationName = settings[12];
   
   DEBUG_PRINTLN("Info: Settings read from SD:");
   DEBUG_PRINT("1. Log Mode: "); DEBUG_PRINTLN(logMode);
