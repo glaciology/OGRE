@@ -74,7 +74,7 @@ void configureGNSS(){
   }
 
   if (!initSetup) {                               // Create LOG file, but only when not in SETUP Mode
-    if (logMode == 1 || logMode == 2 || logMode == 3 || logMode == 4){
+    if (logMode == 1 || logMode == 2 || logMode == 3){
       getLogFileName();
       myFile.open(logFileNameDate,O_CREAT | O_APPEND | O_WRITE);
       DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileNameDate);
@@ -98,7 +98,7 @@ void configureGNSS(){
   }
   
   initSetup = false;
-
+    
   // Reset debug counters
   bytesWritten      = 0;
   writeFailCounter  = 0;

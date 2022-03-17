@@ -55,7 +55,7 @@ void configureLogAlarm() {
   }
   
   if (logMode == 4) {
-    //rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, 1/1/21
+    rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, 1/1/21
     rtc.setAlarm(0, 0, secondsLog, 0, 0, 0); 
     rtc.setAlarmMode(6);
     rtc.attachInterrupt();
@@ -82,7 +82,7 @@ void configureSleepAlarm() {
   }
     
   if (logMode == 4){
-    //rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, Jan 1, 2021 
+    rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, Jan 1, 2021 
     rtc.setAlarm(0, 0, secondsSleep, 0, 0, 0); // No year alarm register
     rtc.setAlarmMode(6);
   }

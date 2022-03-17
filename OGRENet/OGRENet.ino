@@ -23,7 +23,8 @@
    TODO: 
    - HOTSTART UBX-SOS?
 */
-#define HARDWARE_VERSION 0 // 0 = CUSTOM DARTMOUTH HARDWARE, 1 = SPARKFUN ARTEMIS MICROMOD DATA LOGGER 
+#define HARDWARE_VERSION 0    // 0 = CUSTOM DARTMOUTH HARDWARE, 1 = SPARKFUN ARTEMIS MICROMOD DATA LOGGER 
+#define SOFTWARE_VERSION 0.9  // print this to determine which version of software used on device
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
 #include <Wire.h>                                  // 
@@ -126,7 +127,7 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 ///////// DEBUGGING MACROS
-#define DEBUG                     true  // Output messages to Serial monitor
+#define DEBUG                     false  // Output messages to Serial monitor
 #define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
