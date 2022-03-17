@@ -4,7 +4,7 @@ On-ice Greenland Research Experimental Network :: A low-power, low-cost GNSS raw
 ## Overview
 Designed for logging raw GNSS data in remote regions of the Arctic, this PCB-software package features a Ublox ZED-F9P and Sparkfun Artemis Module ( Ambiq Apollo3 MCU, Cortex-M4). Input power is from 12V lead acid battery (batteries), although any power supply in the 3.3V-25V range is acceptable with hardware modifications. Nominal current consumption with a 3.3V supply is 45mA (tracking GPS and GLONASS constellations and logging 1Hz data), while consuming 0.07mA during sleep. An on board battery voltage measurement circuit and temperature sensor provide corresponding readings for each GNSS data logging session. Pin-outs and optional peripherals include RX/TX for serial programming, 3-Wire Temperature sensor, an additional I2C bus for peripheral communication and several GPIO pins that can be configured for analog readings, another UART bus, switches, etc. 
 
-<img src="https://user-images.githubusercontent.com/37055625/156889824-d95c58e6-8be3-41f7-8ab4-701e75ca4c8e.jpg" width="300"/> <img src="Hardware/Silkscreen.png" width="550"/>
+<img src="https://user-images.githubusercontent.com/37055625/156889824-d95c58e6-8be3-41f7-8ab4-701e75ca4c8e.jpg" width="300"/> <img src="Hardware/Archive/V1/Silkscreen.png" width="550"/>
 
 ## How to Use This Software [(Software Files)](OGRENet)
 
