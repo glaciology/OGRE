@@ -1,10 +1,10 @@
 # OGRENet
-On-ice Greenland Research Experimental Network :: A low-power, low-cost GNSS raw data logger.
+On-ice Greenland Research Experimental Network :: A low-power, low-cost GNSS raw data logger for monitoring the cryosphere.
 
 ## Overview
-Designed for logging raw GNSS data in remote regions of the Arctic, this PCB-software package features a Ublox ZED-F9P and Sparkfun Artemis Module ( Ambiq Apollo3 MCU, Cortex-M4). Input power is from 12V lead acid battery (batteries), although any power supply in the 3.3V-25V range is acceptable with hardware modifications. Nominal current consumption with a 3.3V supply is 45mA (tracking GPS and GLONASS constellations and logging 1Hz data), while consuming 0.07mA during sleep. An on board battery voltage measurement circuit and temperature sensor provide corresponding readings for each GNSS data logging session. Pin-outs and optional peripherals include RX/TX for serial programming, 3-Wire Temperature sensor, an additional I2C bus for peripheral communication and several GPIO pins that can be configured for analog readings, another UART bus, switches, etc. 
+Designed for logging raw GNSS data in remote regions of the Arctic, this PCB-software package receives and logs raw, multi-GNSS data and features a Ublox ZED-F9P and Sparkfun Artemis Module ( Ambiq Apollo3 MCU, Cortex-M4). Input power is from a 12V lead acid battery, although any power supply in the 3.3V-25V range is acceptable with hardware modifications. Nominal current consumption with a 12V supply is 45mA (.54W) (tracking GPS and GLONASS constellations and logging 1Hz data), while consuming 0.07mA (.84mW) during sleep. An on board battery voltage measurement circuit and temperature sensor provide corresponding readings for each GNSS data logging session. Optional peripherals include RX/TX for serial programming, 3-Wire Temperature sensor, an additional I2C bus for peripheral communication and several GPIO pins that can be configured for analog readings, a second UART bus, switches, etc. 
 
-<img src="https://user-images.githubusercontent.com/37055625/156889824-d95c58e6-8be3-41f7-8ab4-701e75ca4c8e.jpg" width="300"/> <img src="Hardware/Archive/V1/Silkscreen.png" width="550"/>
+<img src="https://user-images.githubusercontent.com/37055625/156889824-d95c58e6-8be3-41f7-8ab4-701e75ca4c8e.jpg" width="300"/> <img src="https://user-images.githubusercontent.com/37055625/159164258-056cc197-e42d-48bf-8e59-d1279da0c638.png" width="500"/>
 
 ## How to Use This Software [(Software Files)](OGRENet)
 
@@ -17,7 +17,7 @@ This Software has 4 modes of operation:
 OUTPUTs: With all modes, GNSS data is logged to a uSD card in raw .ubx (UBLOX) proprietary format. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery health, logging errors, etc.).
   
 INPUTs: USERS specify settings in the [CONFIG.txt](OGRENet/CONFIG) file, which, if uploaded to the SD card, will be read into the software. 
-Otherwise, software will default to hardcoded values **SPECIFY HERE**
+Otherwise, software will default to hardcoded values: LOG_MODE 1, UTC_START 12, UTC_END 14, LED 1, MEASURE_BATTERY 0, GPS/GLO/NAV 1, STATION 0000.
 
 The CONFIG.TXT file is formatted as follows: 
 
@@ -38,11 +38,11 @@ STATION_NUMERIC_NAME(0000)=1234
 break;
 ```
 
-If the USER selects LOG_MODE=1, then LOG_START_HOUR_UTC and LOG_END_HOUR_UTC must be specified. 
-If the USER selects LOG_MODE=3, then LOG_START_DAY must also be specified (day of each month GNSS data is logged). 
-LED_INDICATORS, if false, will disable all LEDs, excluding those present during initialization. 
-MEASURE_BATTERY can be enabled if the user has installed the Battery Circuit and desires battery voltage measurements included in the DEBUG file.
-STATION_NUMERIC_NAME is a number between 0001 and 9999, and will be appended to the timestamped file names for each GNSS file. 
+If the USER selects LOG_MODE=1, then LOG_START_HOUR_UTC and LOG_END_HOUR_UTC must be specified. <br>
+If the USER selects LOG_MODE=3, then LOG_START_DAY must also be specified (day of each month GNSS data is logged). <br>
+LED_INDICATORS, if false, will disable all LEDs, excluding those present during initialization. <br>
+MEASURE_BATTERY can be enabled if the user has installed the Battery Circuit and desires battery voltage measurements included in the DEBUG file. <br>
+STATION_NUMERIC_NAME is a number between 0001 and 9999, and will be appended to the timestamped file names for each GNSS file. <br>
 
 OPERATION:  
 After plugging in the PCB and inserting the uSD card, the system will attempt to initialize and following LED indicators will flash: 
@@ -50,8 +50,8 @@ After plugging in the PCB and inserting the uSD card, the system will attempt to
   - 10 rapid Blinks: System Configuration Complete!
   
  The following indicate failure of initialization: 
-  - 2 Blink Pattern: uSD initialization failed - system awaiting automatic reset to try again.
-  - 3 Blink Pattern: Ublox initialization failed - system awaiting automatic reset to try again.
+  - 2 Blink Pattern: uSD initialization failed - system awaiting automatic reset to try again (120 seconds).
+  - 3 Blink Pattern: Ublox initialization failed - system awaiting automatic reset to try again (120 seconds).
 
 Once the system is initialized, it will either sleep or begin logging data, depending on the mode. 
 If the USER has enabled LED_INDICATORS, the following additional lights will flash: 
@@ -61,7 +61,7 @@ If the USER has enabled LED_INDICATORS, the following additional lights will fla
 INSTALLATION:
 details coming soon...
 
-## How to Use This Hardware [(Hardware Files)](Hardware)
+## Hardware Notes [(Hardware Files)](Hardware)
 
 POWER REQUIREMENTS: 
 In standard configuration, this system is powered by a 12V lead-acid battery. 
@@ -73,9 +73,6 @@ While this system is optimized for 12V batteries, input voltage can range from 5
 
 MATERIALS:
  details coming soon...
-
-HOOKUP GUIDE: 
-details coming soon...
 
 ## License & Credits
 This project is released under the [MIT License](http://opensource.org/licenses/MIT).
