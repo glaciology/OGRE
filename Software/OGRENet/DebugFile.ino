@@ -10,7 +10,7 @@ void createDebugFile() {
   }
 
   // Write header to file
-  debugFile.println("datetime, debugCounter, onlineGNSS, onlineLogGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten, maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, settings, Temperature, Battery");
+  debugFile.println("datetime, debugCounter, onlineGNSS, onlineLogGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten, maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, Temperature, Battery");
 
   // Sync the debug file
   if (!debugFile.sync()) {
@@ -75,7 +75,7 @@ void logDebug() {
   debugFile.print(writeFailCounter);    debugFile.print(",");
   debugFile.print(syncFailCounter);     debugFile.print(",");
   debugFile.print(closeFailCounter);    debugFile.print(",");
-  debugFile.print(logMode);             debugFile.print(","); // refine this option
+  debugFile.print(logMode);             debugFile.print(","); 
   debugFile.print(getInternalTemp(), 2); debugFile.print(",");
   if (measureBattery == true){
     debugFile.print(measBat(), 2);

@@ -139,13 +139,19 @@ void syncRtc() {
         }
       }
       if (!rtcSyncFlag){
-        DEBUG_PRINTLN("Warning: Unable to sync RTC!");
-        blinkLed(5, 500);
+        DEBUG_PRINTLN("Warning: Unable to sync RTC! Awaiting System Reset");
+        while(1){  //Awaiting WDT Reset
+          blinkLed(5, 500); 
+        }
       }
     }
+    
     else {
-      DEBUG_PRINTLN("Warning: microSD or GNSS offline!");
+      DEBUG_PRINTLN("Warning: microSD or GNSS offline! Awaiting System Reset");
       rtcSyncFlag = false;
+      while(1){
+        blinkLed(5, 500);
+      }
     }
 }
 

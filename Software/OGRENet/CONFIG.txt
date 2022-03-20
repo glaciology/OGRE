@@ -9,5 +9,5 @@ ENABLE_GLO(0-false, 1-true)=0
 ENABLE_GAL(0-false, 1-true)=0
 ENABLE_BDS(0-false, 1-true)=0
 ENABLE_QZSS(0-false, 1-true)=0
-ENABLE_NAV_SFRBX((0-false, 1-true)=1
+ENABLE_NAV_SFRBX(0-false, 1-true)=1
 break;

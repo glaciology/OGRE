@@ -108,7 +108,7 @@ void wakeFromSleep() {
 
 ///////// AUXILIARLY OFF/ON FUNCTIONS
 void zedPowerOff() {
-  if (HARDWARE_VERSION == 1){
+  if (HARDWARE_VERSION == 1 || 2){
     digitalWrite(ZED_POWER, LOW);
   } else {
     digitalWrite(ZED_POWER, HIGH);
@@ -117,7 +117,7 @@ void zedPowerOff() {
 
 void peripheralPowerOff() {
   delay(250); 
-  if (HARDWARE_VERSION == 1){
+  if (HARDWARE_VERSION == 1 || 2){
     digitalWrite(PER_POWER, LOW);
   } else {
     digitalWrite(PER_POWER, HIGH);
@@ -125,7 +125,7 @@ void peripheralPowerOff() {
 }
 
 void zedPowerOn() {
-  if (HARDWARE_VERSION == 1){
+  if (HARDWARE_VERSION == 1 || 2){
     digitalWrite(ZED_POWER, HIGH);
   } else {
     digitalWrite(ZED_POWER, LOW);
@@ -134,7 +134,7 @@ void zedPowerOn() {
 }
 
 void peripheralPowerOn() {
-  if (HARDWARE_VERSION == 1){
+  if (HARDWARE_VERSION == 1 || 2){
     digitalWrite(PER_POWER, HIGH);
   } else {
     digitalWrite(PER_POWER, LOW);
@@ -144,18 +144,16 @@ void peripheralPowerOn() {
 }
 
 void disableI2CPullups() {
-  #if HARDWARE_VERSION == 3   // NOT fully impolemented yet
-    ///////// On Apollo3 v2 MANUALLY DISABLE PULLUPS - IOM and pin #s specific to Artemis MicroMod
-    am_hal_gpio_pincfg_t sclPinCfg = g_AM_BSP_GPIO_IOM4_SCL;  // Artemis MicroMod Processor Board uses IOM4 for I2C communication
-    am_hal_gpio_pincfg_t sdaPinCfg = g_AM_BSP_GPIO_IOM4_SDA;  //
-    sclPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          // Disable the SCL/SDA pull-ups
-    sdaPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          //
-    pin_config(39, sclPinCfg);                                // Artemis MicroMod Processor Board uses Pin/Pad 39 for SCL
-    pin_config(40, sdaPinCfg);                                // Artemis MicroMod Processor Board uses Pin/Pad 40 for SDA
-  #else
-    myWire.setPullups(0);
-    myWire.setClock(400000); 
-  #endif
+//  ///////// On Apollo3 v2 MANUALLY DISABLE PULLUPS - IOM and pin #s specific to Artemis MicroMod
+//  am_hal_gpio_pincfg_t sclPinCfg = g_AM_BSP_GPIO_IOM4_SCL;  // Artemis MicroMod Processor Board uses IOM4 for I2C communication
+//  am_hal_gpio_pincfg_t sdaPinCfg = g_AM_BSP_GPIO_IOM4_SDA;  //
+//  sclPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          // Disable the SCL/SDA pull-ups
+//  sdaPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          //
+//  pin_config(39, sclPinCfg);                                // 
+//  pin_config(40, sdaPinCfg);                                // 
+
+  myWire.setPullups(0);
+  myWire.setClock(400000); 
 }
 
 void enableI2CPullups() {

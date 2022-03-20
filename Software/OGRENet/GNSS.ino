@@ -14,12 +14,11 @@ void configureGNSS(){
     delay(2000);
 
     if (gnss.begin(myWire) == false) {    // TRYING AGAIN
-      DEBUG_PRINTLN("Warning: UBLOX not detected at default I2C address.");
+      DEBUG_PRINTLN("Warning: UBLOX not detected at default I2C address. Waiting for reset.");
       online.gnss = false;
       logDebug();
       while(1) {
         blinkLed(3, 250);
-        delay(2000);
       }
     }
     else{
@@ -31,8 +30,8 @@ void configureGNSS(){
     DEBUG_PRINTLN("Info: UBLOX initialized.");
     online.gnss = true;
   }
+  
   //////////////////////////////////////////
-
   if (initSetup) {                                                       // ONLY run this once, during initialization
     bool success = true;
     delay(1000);
@@ -43,7 +42,7 @@ void configureGNSS(){
     success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
     delay(2000);
     if (!success){
-      DEBUG_PRINTLN("Warning: GNSS CONSTELLATIONS FAILED TO CONFIGURE - ATTEMPTING AGAIN"); 
+      DEBUG_PRINTLN("Warning: GNSS CONSTELLATION CONFIG FAILED - ATTEMPTING AGAIN"); 
       delay(2000);
       bool success = true;
       success &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, logGPS);     // Enable GPS (define in USER SETTINGS)
@@ -53,10 +52,14 @@ void configureGNSS(){
       success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
       delay(2000);
       if (!success){
-        DEBUG_PRINTLN("Warning: GNSS CONSTELLATIONS FAILED AGAIN");
+        DEBUG_PRINTLN("Warning: GNSS CONSTELLATION CONFIG FAILED AGAIN. Waiting for system reset.");
+        while(1){
+          blinkLed(3, 250);
+        }
       }
     }
   }
+  //////////////////////////////////////////
   
   gnss.setI2COutput(COM_TYPE_UBX);                 // Set the I2C port to output UBX only (no NMEA)
   gnss.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); // Save communications port settings to flash and BBR

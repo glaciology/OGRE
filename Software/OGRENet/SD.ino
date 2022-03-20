@@ -46,6 +46,7 @@ void getConfig() {
   if (!configFile.isOpen()){
     DEBUG_PRINTLN("Warning: Could not open CONFIG.TXT");
     DEBUG_PRINTLN("Warning: Using hard-coded settings");
+    blink(5, 100);
     return;
   }
 

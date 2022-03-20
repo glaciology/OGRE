@@ -1,7 +1,7 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 1/19/22
-   V0.?.0 (beta-release)
+   Derek Pickell 3/22/22
+   V0.1.0 (beta-release)
 
    Hardware:
    - OGRENet PCB or Sparkfun Artemis & Ublox ZED-F9P
@@ -23,8 +23,8 @@
    TODO: 
    - HOTSTART UBX-SOS?
 */
-#define HARDWARE_VERSION 0    // 0 = CUSTOM DARTMOUTH HARDWARE, 1 = SPARKFUN ARTEMIS MICROMOD DATA LOGGER 
-#define SOFTWARE_VERSION 0.9  // print this to determine which version of software used on device
+#define HARDWARE_VERSION 0      // 0 = CUSTOM DARTMOUTH HARDWARE v1.0, 1 = CUSTOM DARTMOUTH HARDWARE v3/22, 2 = SPARKFUN ARTEMIS MICROMOD DATA LOGGER 
+#define SOFTWARE_VERSION 0.1    // print this to determine which version of software used on device
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
 #include <Wire.h>                                  // 
@@ -45,18 +45,23 @@ FsFile configFile;                                 // USER INPUT CONFIG FILE
 #if HARDWARE_VERSION == 0
 const byte LED                    = 33;  //
 const byte PER_POWER              = 18;  // Drive to turn off uSD
+const byte BAT                    = 32;  // ADC port for battery measure
 #elif HARDWARE_VERSION == 1
+const byte LED                    = 33;  //
+const byte PER_POWER              = 18;  // 
+const byte BAT                    = 32;  // 
+const byte BAT                    = 35;
+#elif HARDWARE_VERSION == 2
 const byte LED                    = 19;  //
-const byte PER_POWER              = 33;  // Drive to turn off uSD
+const byte PER_POWER              = 33;  // 
 #endif
 const byte ZED_POWER              = 34;  // Drive to turn off ZED
 const byte PIN_SD_CS              = 41;  //
-const byte BAT                    = 32;  // ADC port for battery measure
 const byte BAT_CNTRL              = 22;  // Drive high to turn on Bat measure
 
-#if HARDWARE_VERSION == 0
+#if HARDWARE_VERSION == 0 || 1
 TwoWire myWire(2);                       // USE I2C bus 2, SDA/SCL 25/27
-#elif HARDWARE_VERSION == 1              //
+#elif HARDWARE_VERSION == 2              //
 TwoWire myWire(4);                       // USE I2C bus 4, 39/40
 #endif
 
@@ -66,11 +71,11 @@ SPIClass mySpi(3);                       // Use SPI 3
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 4;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
+byte logMode                = 1;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
-byte logStartHr             = 16;       // UTC Hour 
-byte logEndHr               = 20;       // UTC Hour
+byte logStartHr             = 12;       // UTC Hour 
+byte logEndHr               = 14;       // UTC Hour
 
 // LOG MODE 3: ONCE/MONTH FOR 24 HOURS
 byte logStartDay            = 1;        // Day of month between 1 and 28
@@ -89,7 +94,7 @@ int logNav                  = 1;
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;     // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = true;    // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = true;     // If TRUE, uses battery circuit to measure V during debug logs
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
@@ -102,11 +107,10 @@ volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 int           settings[15]        = {};       // Array that holds USER settings on SD
-char line[25];                                // Temporary array for parsing USER settings
-int stationName                   = 1111;     // Station name, 4 digits
-char logFileName[12]              = "";
-char logFileNameDate[30]          = ""; // Log file name
-
+char          line[25];                       // Temporary array for parsing USER settings
+int           stationName         = 0000;     // Station name, 4 digits
+char          logFileName[12]     = "";       // Log file name for mode 4
+char          logFileNameDate[30] = "";       // Log file name for modes 1, 2, 3
 
 // DEBUGGING
 uint16_t      maxBufferBytes      = 0;        // How full the file buffer has been
@@ -131,13 +135,12 @@ struct struct_online {
 #define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
-#define DEBUG_PRINTLN(x)    Serial.println(x)
-#define DEBUG_PRINT(x)      Serial.print(x)
+#define DEBUG_PRINTLN(x)          Serial.println(x)
+#define DEBUG_PRINT(x)            Serial.print(x)
 
 #else
 #define DEBUG_PRINTLN(x)
 #define DEBUG_PRINT(x)
-
 #endif
 //////////////////////////////////////////////////////
 
@@ -155,13 +158,12 @@ void setup() {
   pinMode(LED, OUTPUT);              //
   configureWdt();                    // 12s interrupt, 24s reset period
   configureSD();                     // BLINK 2x pattern - FAILED SETUP
-  getConfig();                       // Read LOG settings from Config.txt on uSD
+  getConfig();                       // Read LOG settings from Config.txt on uSD; 5x - FAILED
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   createDebugFile();                 //
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
-  if (logMode == 1 || logMode == 3){ // GET GPS TIME if MONTHLY or DAILY logging
-//       syncRtc();                    
+  if (logMode == 1 || logMode == 3){                    
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
        deinitializeBuses();
@@ -175,7 +177,7 @@ void setup() {
 void loop() {
   
     if (alarmFlag) {                // SLEEP UNTIL alarmFlag = True
-      DEBUG_PRINTLN("Info: Alarm Triggered: Configuring System");
+      DEBUG_PRINTLN("Info: Alarm Triggered - Configuring System");
       petDog();
 
       initializeBuses();            // CONFIGURE I2C, SPI, ZED, uSD
@@ -220,7 +222,7 @@ extern "C" void am_watchdog_isr(void) {
   
   wdt.clear();      // Clear the watchdog interrupt
 
-  if (wdtCounter < 10) { 
+  if (wdtCounter < 5) { 
     wdt.restart();  // Restart the watchdog timer
   }                 // ELSE, if WDT will keep counting until it reaches RESET period
   
