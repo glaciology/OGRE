@@ -6,6 +6,16 @@ Designed for logging raw GNSS data in remote regions of the Arctic, this PCB-sof
 
 <img src="https://user-images.githubusercontent.com/37055625/156889824-d95c58e6-8be3-41f7-8ab4-701e75ca4c8e.jpg" width="300"/> <img src="https://user-images.githubusercontent.com/37055625/159164258-056cc197-e42d-48bf-8e59-d1279da0c638.png" width="500"/>
 
+## Project Organization 
+[Software: Contains Arduino Code and Test Script](Software)
+- [OGRENet: Software and software config files for upload to MCU](OGRENet) <br>
+[Hardware: Hardware & manufacturing files](Hardware)
+- [Components.md: List of PCB parts](Hardware/Components.md)
+- [OGRENET_3/22_Manufacturing_Files: PCB Computer Aided Manufacturing Files](Hardware/OGRENET_3/22_Manufacturing_Files.zip)
+- [Hardware Docs: Documentation for critical components](Hardware/HardwareDocs)
+- [Schematic: Electrical connection schematic](Hardware/GNSS_Schematic2.pdf)
+
+
 ## How to Use This Software [(Software Files)](OGRENet)
 
 This Software has 4 modes of operation: 
@@ -63,6 +73,9 @@ details coming soon...
 
 ## Hardware Notes [(Hardware Files)](Hardware)
 
+MATERIALS
+Cost of PCB and all components totals ~$260. Detailed list of components found [here](Hardware/Components.md). <br>
+
 POWER REQUIREMENTS: 
 In standard configuration, this system is powered by a 12V lead-acid battery. 
   
@@ -71,8 +84,7 @@ While this system is optimized for 12V batteries, input voltage can range from 5
   - The Battery Measurement circuit features a voltage divider circuit that must scale max voltage to 3.3V for the ADC pin. Standard dividers for a 12V battery use 68kOhm and 10kOhm resistors. 
   - The reverse polarity protection system has a limit of 20V. **Do not exeed 20V.**
 
-MATERIALS:
- details coming soon...
+
 
 ## License & Credits
 This project is released under the [MIT License](http://opensource.org/licenses/MIT).
