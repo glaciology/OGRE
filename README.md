@@ -69,8 +69,8 @@ Insert the uSD card (with or without CONFIG file), then connect battery. The sys
   - 10 rapid Blinks: System Configuration Complete!
   
  The following indicate failure of initialization: 
-  - 2 Blink Pattern: uSD initialization failed - system awaiting automatic reset to try again (120 seconds).
-  - 3 Blink Pattern: Ublox initialization failed - system awaiting automatic reset to try again (120 seconds).
+  - 2 Blink Pattern: uSD initialization failed - system awaiting automatic reset to try again (60 seconds).
+  - 3 Blink Pattern: Ublox initialization failed - system awaiting automatic reset to try again (60 seconds).
 
 Once the system is initialized, it will either sleep or begin logging data, depending on the specified log mode. 
 If the USER has enabled LED_INDICATORS, the following additional lights will flash: 
