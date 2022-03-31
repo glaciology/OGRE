@@ -49,8 +49,7 @@ const byte BAT                    = 32;  // ADC port for battery measure
 #elif HARDWARE_VERSION == 1
 const byte LED                    = 33;  //
 const byte PER_POWER              = 18;  // 
-const byte BAT                    = 32;  // 
-const byte BAT                    = 35;
+const byte BAT                    = 35;  //
 #elif HARDWARE_VERSION == 2
 const byte LED                    = 19;  //
 const byte PER_POWER              = 33;  // 
@@ -131,7 +130,7 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 ///////// DEBUGGING MACROS
-#define DEBUG                     false  // Output messages to Serial monitor
+#define DEBUG                     true  // Output messages to Serial monitor
 #define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
