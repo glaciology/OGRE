@@ -1,5 +1,8 @@
 # OGRENet
 On-ice Greenland Research Experimental Network :: A low-power, low-cost GNSS raw data logger for monitoring the cryosphere.
+<p align="center">
+<img src="https://user-images.githubusercontent.com/37055625/161155794-8e4619df-977a-4cc8-ab37-04bb2754a40c.jpg" width="250"/>
+</p>
 
 ## Overview
 Designed for logging raw multi-GNSS data in remote regions of the Arctic, this PCB-software package incorporates low power, low cost components onto a single PCB and features a Ublox ZED-F9P GNSS module and Sparkfun Artemis MCU ( Ambiq Apollo3 MCU, Cortex-M4). 
