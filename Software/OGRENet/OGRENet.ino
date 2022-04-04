@@ -23,7 +23,7 @@
    TODO: 
    - HOTSTART UBX-SOS?
 */
-#define HARDWARE_VERSION 0      // 0 = CUSTOM DARTMOUTH HARDWARE v1.0, 1 = CUSTOM DARTMOUTH HARDWARE v3/22, 2 = SPARKFUN ARTEMIS MICROMOD DATA LOGGER 
+#define HARDWARE_VERSION 1      // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22 
 #define SOFTWARE_VERSION 0.1    // print this to determine which version of software used on device
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
@@ -43,28 +43,18 @@ FsFile configFile;                                 // USER INPUT CONFIG FILE
 
 ///////// HARDWARE SPECIFIC PINOUTS & OBJECTS
 #if HARDWARE_VERSION == 0
-const byte LED                    = 33;  //
-const byte PER_POWER              = 18;  // Drive to turn off uSD
 const byte BAT                    = 32;  // ADC port for battery measure
 #elif HARDWARE_VERSION == 1
-const byte LED                    = 33;  //
-const byte PER_POWER              = 18;  // 
 const byte BAT                    = 35;  //
-#elif HARDWARE_VERSION == 2
-const byte LED                    = 19;  //
-const byte PER_POWER              = 33;  // 
 #endif
+const byte PER_POWER              = 18;  // Drive to turn off uSD
 const byte ZED_POWER              = 34;  // Drive to turn off ZED
+const byte LED                    = 33;  //
 const byte PIN_SD_CS              = 41;  //
 const byte BAT_CNTRL              = 22;  // Drive high to turn on Bat measure
 
-#if HARDWARE_VERSION == 0 || 1
 TwoWire myWire(2);                       // USE I2C bus 2, SDA/SCL 25/27
-#elif HARDWARE_VERSION == 2              //
-TwoWire myWire(4);                       // USE I2C bus 4, 39/40
-#endif
-
-SPIClass mySpi(3);                       // Use SPI 3
+SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
 #define SD_CONFIG SdSpiConfig(PIN_SD_CS, SHARED_SPI, SD_SCK_MHZ(24), &mySpi)
 
 //////////////////////////////////////////////////////
@@ -160,9 +150,10 @@ void setup() {
   getConfig();                       // Read LOG settings from Config.txt on uSD; 5x - FAILED
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   createDebugFile();                 //
-  syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
-  if (logMode == 1 || logMode == 3){                    
+
+  if (logMode == 1 || logMode == 3){
+       syncRtc();                    // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)                    
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
        deinitializeBuses();

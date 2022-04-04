@@ -108,7 +108,7 @@ void wakeFromSleep() {
 
 ///////// AUXILIARLY OFF/ON FUNCTIONS
 void zedPowerOff() {
-  if (HARDWARE_VERSION == 1 || 2){
+  if (HARDWARE_VERSION == 1){
     digitalWrite(ZED_POWER, LOW);
   } else {
     digitalWrite(ZED_POWER, HIGH);
@@ -117,7 +117,7 @@ void zedPowerOff() {
 
 void peripheralPowerOff() {
   delay(250); 
-  if (HARDWARE_VERSION == 1 || 2){
+  if (HARDWARE_VERSION == 1){
     digitalWrite(PER_POWER, LOW);
   } else {
     digitalWrite(PER_POWER, HIGH);
@@ -125,7 +125,7 @@ void peripheralPowerOff() {
 }
 
 void zedPowerOn() {
-  if (HARDWARE_VERSION == 1 || 2){
+  if (HARDWARE_VERSION == 1){
     digitalWrite(ZED_POWER, HIGH);
   } else {
     digitalWrite(ZED_POWER, LOW);
@@ -134,7 +134,7 @@ void zedPowerOn() {
 }
 
 void peripheralPowerOn() {
-  if (HARDWARE_VERSION == 1 || 2){
+  if (HARDWARE_VERSION == 1){
     digitalWrite(PER_POWER, HIGH);
   } else {
     digitalWrite(PER_POWER, LOW);
