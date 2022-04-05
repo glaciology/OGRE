@@ -49,8 +49,8 @@ void configureLogAlarm() {
 
   if (logMode == 3) {
     // WILL LOG FOR 24 HOURS ON SPECIFIED DAY OF MONTH
-    //rtc.setAlarm(23, 59, 59, 0, 0, 0); 
-    rtc.setAlarmMode(2);
+    rtc.setAlarm(23, 59, 59, 59, 0, 0); 
+    rtc.setAlarmMode(4);
     rtc.attachInterrupt();
   }
   
