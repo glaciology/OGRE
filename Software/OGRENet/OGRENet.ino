@@ -7,7 +7,7 @@
    - OGRENet PCB or Sparkfun Artemis & Ublox ZED-F9P
 
    Dependencies:
-   - SparkFun_u-blox_GNSS_Arduino_Library v2.0.5
+   - SparkFun_u-blox_GNSS_Arduino_Library v2.2.8
    - Apollo3 Arduino Core v1.2.3
    - SdFat Library v2.0.6
 
