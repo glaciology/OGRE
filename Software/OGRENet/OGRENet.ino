@@ -24,7 +24,6 @@
    - HOTSTART UBX-SOS?
 */
 #define HARDWARE_VERSION 1      // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22 
-#define SOFTWARE_VERSION 0.1    // print this to determine which version of software used on device
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
 #include <Wire.h>                                  // 
@@ -60,14 +59,14 @@ SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 1;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
+byte logMode                = 3;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;       // UTC Hour 
 byte logEndHr               = 14;       // UTC Hour
 
 // LOG MODE 3: ONCE/MONTH FOR 24 HOURS
-byte logStartDay            = 1;        // Day of month between 1 and 28
+byte logStartDay            = 8;        // Day of month between 1 and 28
 
 // LOG MODE 4: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 50;       // SLEEP INTERVAL (Seconds)
@@ -121,7 +120,7 @@ struct struct_online {
 
 ///////// DEBUGGING MACROS
 #define DEBUG                     true  // Output messages to Serial monitor
-#define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
+#define DEBUG_GNSS                true  // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
 #define DEBUG_PRINTLN(x)          Serial.println(x)
