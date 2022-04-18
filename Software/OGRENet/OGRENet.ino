@@ -9,7 +9,7 @@
    Dependencies:
    - SparkFun_u-blox_GNSS_Arduino_Library v2.2.8
    - Apollo3 Arduino Core v1.2.3
-   - SdFat Library v2.0.6
+   - SdFat Library v2.1.0
 
    INSTRUCTIONS:
    - Enter user defined variables in "USER DEFINED" Section below
@@ -59,7 +59,7 @@ SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 3;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
+byte logMode                = 1;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;       // UTC Hour 
