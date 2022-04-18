@@ -153,7 +153,7 @@ void disableI2CPullups() {
 //  pin_config(40, sdaPinCfg);                                // 
 
   myWire.setPullups(0);
-  myWire.setClock(400000); 
+  myWire.setClock(100000); 
 }
 
 void enableI2CPullups() {
