@@ -141,7 +141,7 @@ void logGNSS() {
     }
   }
 
-  if (millis() - prevMillis > 10000) {                             // Save data every 10 seconds
+  if (millis() - prevMillis > 5000) {                             // Save data every 5 seconds
     if (!myFile.sync()) {
       DEBUG_PRINTLN("Warning: Failed to sync log file!");
       syncFailCounter++;                                           // Count number of failed file syncs
@@ -149,9 +149,6 @@ void logGNSS() {
 
     DEBUG_PRINT(F("Bytes written to SD card: "));                  // Print how many bytes have been written to SD card
     DEBUG_PRINTLN(bytesWritten);
-
-    DEBUG_PRINT(F("The maximum number of bytes which the file buffer has contained is: ")); // It is a fun thing to watch how full the buffer gets
-    DEBUG_PRINTLN(maxBufferBytes);
     
     maxBufferBytes = gnss.getMaxFileBufferAvail();                 // Get how full the file buffer has been (not how full it is now)
     if (maxBufferBytes > ((fileBufferSize / 5) * 4)) {             // Warn the user if fileBufferSize was more than 80% full

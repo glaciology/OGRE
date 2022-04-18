@@ -54,7 +54,7 @@ const byte BAT_CNTRL              = 22;  // Drive high to turn on Bat measure
 
 TwoWire myWire(2);                       // USE I2C bus 2, SDA/SCL 25/27
 SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
-#define SD_CONFIG SdSpiConfig(PIN_SD_CS, SHARED_SPI, SD_SCK_MHZ(24), &mySpi)
+#define SD_CONFIG SdSpiConfig(PIN_SD_CS, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
 
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
