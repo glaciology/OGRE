@@ -83,6 +83,10 @@ int logNav                  = 1;
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;     // If FALSE, all LED indicators during log/sleep disabled
 bool measureBattery         = true;     // If TRUE, uses battery circuit to measure V during debug logs
+
+// BATTERY PARAMETERS
+float converter             = 17.5;     // If using battery > 12.6V, needs to be tuned
+float shutdownThreshold     = 10.0;     // Shutdown if battery dips below this
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
@@ -142,6 +146,7 @@ void setup() {
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
+  checkBattery();                    // IF battery LOW, send back to sleep until next log date
   initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
   pinMode(LED, OUTPUT);              //
   configureWdt();                    // 12s interrupt, 24s reset period
@@ -168,6 +173,7 @@ void loop() {
     if (alarmFlag) {                // SLEEP UNTIL alarmFlag = True
       DEBUG_PRINTLN("Info: Alarm Triggered - Configuring System");
       petDog();
+      checkBattery();               // IF battery LOW, SLEEP
 
       initializeBuses();            // CONFIGURE I2C, SPI, ZED, uSD
       configureSD();                // CONFIGURE SD
@@ -226,5 +232,5 @@ extern "C" void am_watchdog_isr(void) {
 //// RTC
 extern "C" void am_rtc_isr(void) {
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM); // Clear the RTC alarm interrupt
-  alarmFlag = true; // Set RTC flag
+  alarmFlag = true;                         // Set RTC flag
 }

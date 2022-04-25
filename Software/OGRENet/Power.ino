@@ -160,6 +160,21 @@ void enableI2CPullups() {
    myWire.setPullups(24);
 }
 
+void checkBattery() {
+    if (measureBattery == true) {
+      voltage = measBat();
+      delay(10);
+      voltage2 - measBat();
+      voltageFinal = (voltage + voltage2)/2 // take average
+
+      if (voltageFinal < thresholdVoltage) {
+        DEBUG_PRINTLN("Info: BATTERY LOW. SLEEPING");
+        configureSleepAlarm();
+        goToSleep(); 
+      }
+  }
+}
+
 // Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)
 void blinkLed(byte ledFlashes, unsigned int ledDelay) {
   byte i = 0;

@@ -26,7 +26,7 @@ void createDebugFile() {
 
 float measBat() {
   float converter = 17.5;    // THIS MUST BE TUNED DEPENDING ON WHAT RESISTORS USED IN VOLTAGE DIVIDER
-  analogReadResolution(14); //Set resolution to 14 bit
+  analogReadResolution(14);  //Set resolution to 14 bit
   pinMode(BAT_CNTRL, OUTPUT);
   digitalWrite(BAT_CNTRL, HIGH);
   delay(1);
@@ -42,8 +42,6 @@ float measBat() {
 void logDebug() {
   // Increment debug counter
   debugCounter++;
-
-  analogReadResolution(14); //Set resolution to 14 bit
 
   if (!debugFile.open("debug.csv", O_APPEND | O_WRITE)) {
     DEBUG_PRINTLN("Warning: Failed to open debug file.");
