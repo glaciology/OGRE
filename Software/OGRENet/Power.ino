@@ -179,7 +179,7 @@ void checkBattery() {
   if (measureBattery == true) {
      voltage = measBat();
      delay(10);
-     voltage2 - measBat();
+     voltage2 = measBat();
      voltageFinal = (voltage + voltage2)/2 // take average
 
      if (voltageFinal < thresholdVoltage) {
