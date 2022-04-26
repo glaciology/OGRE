@@ -47,6 +47,7 @@ void getConfig() {
     DEBUG_PRINTLN("Warning: Could not open CONFIG.TXT");
     DEBUG_PRINTLN("Warning: Using hard-coded settings");
     blinkLed(5, 100);
+    delay(1000);
     return;
   }
 
@@ -110,5 +111,7 @@ void getConfig() {
   if (!configFile.close()) {
     DEBUG_PRINTLN("Warning: Failed to close config file.");
     closeFailCounter++; // Count number of failed file closes
+    while(1){
+    }
   }
 }

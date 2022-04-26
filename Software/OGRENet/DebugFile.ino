@@ -10,7 +10,8 @@ void createDebugFile() {
   }
 
   // Write header to file
-  debugFile.println("datetime, debugCounter, onlineGNSS, onlineLogGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten, maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, Temperature, Battery");
+  debugFile.println("datetime, debugCounter, onlineGNSS, onlineLogGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
+  "maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, Temperature, Battery");
 
   // Sync the debug file
   if (!debugFile.sync()) {

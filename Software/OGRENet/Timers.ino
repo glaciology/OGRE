@@ -1,6 +1,3 @@
-
-// DEV NOTES: https://forum.sparkfun.com/viewtopic.php?t=52431
-
 void configureWdt() {
   
 //  wdt.configure(WDT_16HZ, 160, 240); // 16 Hz clock, 10-second interrupt period, 15-second reset period
@@ -142,6 +139,7 @@ void syncRtc() {
         DEBUG_PRINTLN("Warning: Unable to sync RTC! Awaiting System Reset");
         while(1){  //Awaiting WDT Reset
           blinkLed(5, 500); 
+          delay(2000);
         }
       }
     }
@@ -151,6 +149,7 @@ void syncRtc() {
       rtcSyncFlag = false;
       while(1){
         blinkLed(5, 500);
+        delay(2000);
       }
     }
 }

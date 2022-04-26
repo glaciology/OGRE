@@ -14,10 +14,11 @@
    INSTRUCTIONS:
    - Enter user defined variables in "USER DEFINED" Section below
    - LED indicators:
-        *2 Blink Pattern: uSD failed
-        *3 Blink Pattern: Ublox failed
-        *5 Rapid Blinks: RTC sync fail
-        *10 Blinks: RTC synced and System Configuration Complete (After Initial Power On or Reset Only)
+        *2 Blink Pattern: uSD failed - waiting for RESET
+        *3 Blink Pattern: Ublox I2C or config failed - waiting for RESET
+        *5 Rapid Blinks: OONFIG file failed to read
+        *5 Blink Pattern: RTC sync fail - waiting for RESET
+        *10 Blinks: RTC synced and System Configuration COMPLETE (After Initial Power On or Reset Only)
         *1 Blink every 12 seconds: Sleeping 
 */
 
@@ -25,10 +26,10 @@
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
 #include <Wire.h>                                  // 
+#include <SPI.h>                                   // 
 #include <WDT.h>                                   //
 #include <RTC.h>                                   //
 #include <SdFat.h>                                 // https://github.com/greiman/SdFat v2.0.6
-#include <SPI.h>                                   // 
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
 SFE_UBLOX_GNSS gnss;                               //
 SdFs sd;                                           // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
@@ -38,7 +39,7 @@ FsFile myFile;                                     // RAW UBX LOG FILE
 FsFile debugFile;                                  // DEBUG LOG FILE
 FsFile configFile;                                 // USER INPUT CONFIG FILE
 
-///////// HARDWARE SPECIFIC PINOUTS & OBJECTS
+///////// HARDWARE-SPECIFIC PINOUTS & OBJECTS
 #if HARDWARE_VERSION == 0
 const byte BAT                    = 32;  // ADC port for battery measure
 #elif HARDWARE_VERSION == 1
@@ -83,8 +84,8 @@ bool ledBlink               = true;     // If FALSE, all LED indicators during l
 bool measureBattery         = true;     // If TRUE, uses battery circuit to measure V during debug logs
 
 // BATTERY PARAMETERS
-float converter             = 17.5;     // If using battery > 12.6V, needs to be tuned
-float shutdownThreshold     = 10.0;     // Shutdown if battery voltage dips below this
+float converter             = 17.5;     // If using battery > 12.6V, voltage divider GAIN needs to be tuned
+float shutdownThreshold     = 10.0;     // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 

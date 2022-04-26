@@ -1,5 +1,5 @@
 void initializeBuses(){
-  pinMode(25, INPUT_PULLUP);
+  pinMode(25, INPUT_PULLUP); // Seems to reduce current leak prior to start
   pinMode(27, INPUT_PULLUP);
   delay(100);
   
@@ -24,10 +24,9 @@ void deinitializeBuses(){
   zedPowerOff(); 
   peripheralPowerOff();
   enableI2CPullups();
-  myWire.end();           //Power down I2C
-  mySpi.end();            //Power down SPI
+  myWire.end();           // Power down I2C
+  mySpi.end();            // Power down SPI
 }
-
 
 // POWER DOWN AND WAIT FOR INTERRUPT
 void goToSleep() {
@@ -115,6 +114,7 @@ void zedPowerOff() {
   }
 }
 
+
 void peripheralPowerOff() {
   delay(250); 
   if (HARDWARE_VERSION == 1){
@@ -123,6 +123,7 @@ void peripheralPowerOff() {
     digitalWrite(PER_POWER, HIGH);
   }
 }
+
 
 void zedPowerOn() {
   if (HARDWARE_VERSION == 1){
@@ -133,6 +134,7 @@ void zedPowerOn() {
   delay(500);
 }
 
+
 void peripheralPowerOn() {
   if (HARDWARE_VERSION == 1){
     digitalWrite(PER_POWER, HIGH);
@@ -142,18 +144,12 @@ void peripheralPowerOn() {
   delay(500); 
 }
 
-void disableI2CPullups() {
-//  ///////// On Apollo3 v2 MANUALLY DISABLE PULLUPS - IOM and pin #s specific to Artemis MicroMod
-//  am_hal_gpio_pincfg_t sclPinCfg = g_AM_BSP_GPIO_IOM4_SCL;  // Artemis MicroMod Processor Board uses IOM4 for I2C communication
-//  am_hal_gpio_pincfg_t sdaPinCfg = g_AM_BSP_GPIO_IOM4_SDA;  //
-//  sclPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          // Disable the SCL/SDA pull-ups
-//  sdaPinCfg.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;          //
-//  pin_config(39, sclPinCfg);                                // 
-//  pin_config(40, sdaPinCfg);                                // 
 
+void disableI2CPullups() {
   myWire.setPullups(0);
   myWire.setClock(100000); 
 }
+
 
 void enableI2CPullups() {
    myWire.setPullups(24);
@@ -161,7 +157,6 @@ void enableI2CPullups() {
 
 
 float measBat() {
-  float converter = 17.5;    // THIS MUST BE TUNED DEPENDING ON WHAT RESISTORS USED IN VOLTAGE DIVIDER
   analogReadResolution(14);  //Set resolution to 14 bit
   pinMode(BAT_CNTRL, OUTPUT);
   digitalWrite(BAT_CNTRL, HIGH);
@@ -177,15 +172,22 @@ float measBat() {
 
 void checkBattery() {
   if (measureBattery == true) {
-     voltage = measBat();
+     float voltage = measBat();
      delay(10);
-     voltage2 = measBat();
-     voltageFinal = (voltage + voltage2)/2 // take average
+     float voltage2 = measBat();
+     float voltageFinal = (voltage + voltage2)/2; // take average
+     //DEBUG_PRINTLN(voltageFinal);
 
-     if (voltageFinal < thresholdVoltage) {
+     if (voltageFinal < shutdownThreshold) {
        DEBUG_PRINTLN("Info: BATTERY LOW. SLEEPING");
        configureSleepAlarm();
+       wdt.clear();
+       DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
        goToSleep(); 
+       configureWdt();
+       while(1){
+        // WAIT FOR SYSTEM RESET
+       }
      }
   }
 }
@@ -203,17 +205,4 @@ void blinkLed(byte ledFlashes, unsigned int ledDelay) {
   }
   // Turn off LED
   digitalWrite(LED, LOW);
-}
-
-// Non-blocking delay (ms: duration)
-// https://arduino.stackexchange.com/questions/12587/how-can-i-handle-the-millis-rollover
-void myDelay(unsigned long ms) {
-  unsigned long start = millis();         // Start: timestamp
-  for (;;) {
-    petDog();                             // Reset watchdog timer
-    unsigned long now = millis();         // Now: timestamp
-    unsigned long elapsed = now - start;  // Elapsed: duration
-    if (elapsed >= ms)                    // Comparing durations: OK
-      return;
-  }
 }
