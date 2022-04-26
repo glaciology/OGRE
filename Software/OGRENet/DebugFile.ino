@@ -24,21 +24,6 @@ void createDebugFile() {
 }
 
 
-float measBat() {
-  float converter = 17.5;    // THIS MUST BE TUNED DEPENDING ON WHAT RESISTORS USED IN VOLTAGE DIVIDER
-  analogReadResolution(14);  //Set resolution to 14 bit
-  pinMode(BAT_CNTRL, OUTPUT);
-  digitalWrite(BAT_CNTRL, HIGH);
-  delay(1);
-  int measure = analogRead(BAT);
-  delay(1);
-  digitalWrite(BAT_CNTRL, LOW);
-  float vcc = (float)measure * converter / 16384.0; // convert to normal number
-  
-  return vcc;
-}
-
-
 void logDebug() {
   // Increment debug counter
   debugCounter++;

@@ -1,10 +1,10 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 3/22/22
+   Derek Pickell 5/22/22
    V0.1.0 (beta-release)
 
    Hardware:
-   - OGRENet PCB or Sparkfun Artemis & Ublox ZED-F9P
+   - OGRENet PCB w/ ZED-F9P
 
    Dependencies:
    - SparkFun_u-blox_GNSS_Arduino_Library v2.2.8
@@ -19,10 +19,8 @@
         *5 Rapid Blinks: RTC sync fail
         *10 Blinks: RTC synced and System Configuration Complete (After Initial Power On or Reset Only)
         *1 Blink every 12 seconds: Sleeping 
-
-   TODO: 
-   - HOTSTART UBX-SOS?
 */
+
 #define HARDWARE_VERSION 1      // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
@@ -31,11 +29,11 @@
 #include <RTC.h>                                   //
 #include <SdFat.h>                                 // https://github.com/greiman/SdFat v2.0.6
 #include <SPI.h>                                   // 
-#include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.0.5: http://librarymanager/All#SparkFun_u-blox_GNSS
+#include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
 SFE_UBLOX_GNSS gnss;                               //
 SdFs sd;                                           // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
 APM3_RTC rtc;                                      //
-APM3_WDT wdt;                                      //
+APM3_WDT wdt;                                      // 
 FsFile myFile;                                     // RAW UBX LOG FILE
 FsFile debugFile;                                  // DEBUG LOG FILE
 FsFile configFile;                                 // USER INPUT CONFIG FILE
@@ -59,7 +57,7 @@ SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 1;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
+byte logMode                = 3;        // 1 = daily fixed, 2 = continous, 3 = monthly , 4 = test mode
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;       // UTC Hour 
@@ -86,7 +84,7 @@ bool measureBattery         = true;     // If TRUE, uses battery circuit to meas
 
 // BATTERY PARAMETERS
 float converter             = 17.5;     // If using battery > 12.6V, needs to be tuned
-float shutdownThreshold     = 10.0;     // Shutdown if battery dips below this
+float shutdownThreshold     = 10.0;     // Shutdown if battery voltage dips below this
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
@@ -123,8 +121,8 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 ///////// DEBUGGING MACROS
-#define DEBUG                     true  // Output messages to Serial monitor
-#define DEBUG_GNSS                true  // Output GNSS debug messages to Serial monitor
+#define DEBUG                     true   // Output messages to Serial monitor
+#define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
 #define DEBUG_PRINTLN(x)          Serial.println(x)
@@ -155,7 +153,6 @@ void setup() {
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   createDebugFile();                 //
 
-
   if (logMode == 1 || logMode == 3){
        syncRtc();                    // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)                    
        configureSleepAlarm();
@@ -174,7 +171,6 @@ void loop() {
       DEBUG_PRINTLN("Info: Alarm Triggered - Configuring System");
       petDog();
       checkBattery();               // IF battery LOW, SLEEP
-
       initializeBuses();            // CONFIGURE I2C, SPI, ZED, uSD
       configureSD();                // CONFIGURE SD
       configureGNSS();              // CONFIGURE GNSS SETTINGS

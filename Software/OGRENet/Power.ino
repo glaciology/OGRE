@@ -140,7 +140,6 @@ void peripheralPowerOn() {
     digitalWrite(PER_POWER, LOW);
   }
   delay(500); 
-  
 }
 
 void disableI2CPullups() {
@@ -160,18 +159,34 @@ void enableI2CPullups() {
    myWire.setPullups(24);
 }
 
-void checkBattery() {
-    if (measureBattery == true) {
-      voltage = measBat();
-      delay(10);
-      voltage2 - measBat();
-      voltageFinal = (voltage + voltage2)/2 // take average
 
-      if (voltageFinal < thresholdVoltage) {
-        DEBUG_PRINTLN("Info: BATTERY LOW. SLEEPING");
-        configureSleepAlarm();
-        goToSleep(); 
-      }
+float measBat() {
+  float converter = 17.5;    // THIS MUST BE TUNED DEPENDING ON WHAT RESISTORS USED IN VOLTAGE DIVIDER
+  analogReadResolution(14);  //Set resolution to 14 bit
+  pinMode(BAT_CNTRL, OUTPUT);
+  digitalWrite(BAT_CNTRL, HIGH);
+  delay(1);
+  int measure = analogRead(BAT);
+  delay(1);
+  digitalWrite(BAT_CNTRL, LOW);
+  float vcc = (float)measure * converter / 16384.0; // convert to normal number
+  
+  return vcc;
+}
+
+
+void checkBattery() {
+  if (measureBattery == true) {
+     voltage = measBat();
+     delay(10);
+     voltage2 - measBat();
+     voltageFinal = (voltage + voltage2)/2 // take average
+
+     if (voltageFinal < thresholdVoltage) {
+       DEBUG_PRINTLN("Info: BATTERY LOW. SLEEPING");
+       configureSleepAlarm();
+       goToSleep(); 
+     }
   }
 }
 
