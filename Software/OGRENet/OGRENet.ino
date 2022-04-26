@@ -1,6 +1,6 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 5/22/22
+   Derek Pickell 5/01/22
    V0.1.0 (beta-release)
 
    Hardware:
