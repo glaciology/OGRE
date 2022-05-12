@@ -1,6 +1,6 @@
 void configureWdt() {
   
-//  wdt.configure(WDT_16HZ, 160, 240); // 16 Hz clock, 10-second interrupt period, 15-second reset period
+  //wdt.configure(WDT_16HZ, 160, 240); // 16 Hz clock, 10-second interrupt period, 15-second reset period
   //wdt.configure(WDT_16HZ, 240, 240); // 15 second interrupts, 15 second reset period
   wdt.configure(WDT_1HZ, 12, 24); // 12 second interrupts, 24 second reset period
   
@@ -50,8 +50,15 @@ void configureLogAlarm() {
     rtc.setAlarmMode(4);
     rtc.attachInterrupt();
   }
-  
+
   if (logMode == 4) {
+    // WILL LOG FOR 24 HOURS IMMEDIATELY
+    rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
+    rtc.setAlarmMode(4);
+    rtc.attachInterrupt();
+  }
+  
+  if (logMode == 99) {
     rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, 1/1/21
     rtc.setAlarm(0, 0, secondsLog, 0, 0, 0); 
     rtc.setAlarmMode(6);
@@ -69,7 +76,7 @@ void configureSleepAlarm() {
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM);
   
   if (logMode == 1){
-    rtc.setAlarm(logStartHr, 0, 0, 0, 0, 0);
+    rtc.setAlarm(logStartHr, 0, 0, 0, 0, 0); // (HR, MIN, SEC, HUND, DAY, MON)
     rtc.setAlarmMode(4); // match every day
   }
 
@@ -77,8 +84,17 @@ void configureSleepAlarm() {
     rtc.setAlarm(0, 0, 0, 0, logStartDay, 0); 
     rtc.setAlarmMode(2); // match every month
   }
+
+  if (logMode == 4) {
+    // sleeps for specified interval
+    time_t c;
+    c = rtc.getEpoch() + secondsSleep;
+    rtc.setAlarm(gmtime(&c)->tm_hour, gmtime(&c)->tm_min, gmtime(&c)->tm_sec, 0, gmtime(&c)->tm_mday, gmtime(&c)->tm_mon+1); 
+    rtc.setAlarmMode(4);
+    rtc.attachInterrupt();
+  }
     
-  if (logMode == 4){
+  if (logMode == 99){
     rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, Jan 1, 2021 
     rtc.setAlarm(0, 0, secondsSleep, 0, 0, 0); // No year alarm register
     rtc.setAlarmMode(6);

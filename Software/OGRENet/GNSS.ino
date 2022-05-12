@@ -73,28 +73,26 @@ void configureGNSS(){
     gnss.setAutoRXMSFRBX(true, false);            // Enable automatic RXM SFRBX (NAV) messages 
     gnss.logRXMSFRBX();                           // Enable RXM SFRBX (NAV) data logging
   }
-  
-  if (logMode == 1 || logMode == 3) {
-    gnss.setAutoPVT(true);                        // Enable PVT messages for syncing RTC
-  }
+
+  gnss.setAutoPVT(true);                          // Enable PVT messages for syncing RTC
 
   if (!initSetup) {                               // Create LOG file, but only when not in SETUP Mode
-    if (logMode == 1 || logMode == 2 || logMode == 3){
-      getLogFileName();
-      myFile.open(logFileNameDate,O_CREAT | O_APPEND | O_WRITE);
-      DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileNameDate);
-      online.logGnss = true; 
-    } else {
-       for (int i = 1; i < 1000; i++) {
-        sprintf(logFileName, "RAWX%03d.ubx", i);
-        if (! sd.exists(logFileName)) {
-          DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileName);
-          myFile.open(logFileName, O_CREAT | O_APPEND | O_WRITE);
-          online.logGnss = true;
-          break;
-        }
-      }     
-    }
+//    if (logMode == 1 || logMode == 2 || logMode == 3){
+    getLogFileName();
+    myFile.open(logFileNameDate,O_CREAT | O_APPEND | O_WRITE);
+    DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileNameDate);
+    online.logGnss = true; 
+//    } else {
+//       for (int i = 1; i < 1000; i++) {
+//        sprintf(logFileName, "RAWX%03d.ubx", i);
+//        if (! sd.exists(logFileName)) {
+//          DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileName);
+//          myFile.open(logFileName, O_CREAT | O_APPEND | O_WRITE);
+//          online.logGnss = true;
+//          break;
+//        }
+//      }     
+//    }
     
     if (!myFile) {
       DEBUG_PRINTLN(F("Warning: Failed to create UBX data file! Freezing..."));

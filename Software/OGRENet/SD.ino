@@ -29,8 +29,6 @@ void getLogFileName() {
   sprintf(logFileNameDate, "%04d_20%02d%02d%02d_%02d%02d%02d.ubx", stationName,
           rtc.year, rtc.month, rtc.dayOfMonth,
           rtc.hour, rtc.minute, rtc.seconds);
-
-  DEBUG_PRINTLN(logFileNameDate);
 }
 
 
@@ -66,30 +64,31 @@ void getConfig() {
     }
   }
   
-  logMode     = settings[0];
-  logStartHr  = settings[1];
-  logEndHr    = settings[2];
-  logStartDay = settings[3];
+  logMode         = settings[0];
+  logStartHr      = settings[1];
+  logEndHr        = settings[2];
+  logStartDay     = settings[3];
+  epochSleep      = settings[4];
 
-  if (settings[4] == 0){
+  if (settings[5] == 0){
     ledBlink = false;
   } else {
     ledBlink = true;
   }
 
-  if (settings[5] == 0){
+  if (settings[6] == 0){
     measureBattery = false;
   } else  {
     measureBattery = true;
   }
 
-  logGPS = settings[6];
-  logGLO = settings[7];
-  logGAL = settings[8];
-  logBDS = settings[9];
-  logQZSS = settings[10];
-  logNav = settings[11];
-  stationName = settings[12];
+  logGPS = settings[7];
+  logGLO = settings[8];
+  logGAL = settings[9];
+  logBDS = settings[10];
+  logQZSS = settings[11];
+  logNav = settings[12];
+  stationName = settings[13];
   
   DEBUG_PRINTLN("Info: Settings read from SD:");
   DEBUG_PRINT("1. Log Mode: "); DEBUG_PRINTLN(logMode);
@@ -102,6 +101,10 @@ void getConfig() {
   
   if (logMode == 3 ){
     DEBUG_PRINT("Log Mode 3 - Day of Month to Log: "); DEBUG_PRINTLN(logStartDay);
+  }
+
+  if (logMode == 4 ){
+    DEBUG_PRINT("Log Mode 4 - Sleep Interval "); DEBUG_PRINTLN(epochSleep);
   }
 
   DEBUG_PRINT("4. Constellations: "); DEBUG_PRINT("GPS "); DEBUG_PRINT(logGPS); DEBUG_PRINT(" GLO "); DEBUG_PRINTLN(logGLO);
