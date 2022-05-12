@@ -76,7 +76,7 @@ void configureSleepAlarm() {
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM);
   
   if (logMode == 1){
-    rtc.setAlarm(logStartHr, 0, 0, 0, 0, 0); // (HR, MIN, SEC, HUND, DAY, MON)
+    rtc.setAlarm(logStartHr, 0, 0, 0, 0, 0); // (HR, MIN, SEC, HUND, DAY, MON) NO YR
     rtc.setAlarmMode(4); // match every day
   }
 
@@ -91,12 +91,11 @@ void configureSleepAlarm() {
     c = rtc.getEpoch() + secondsSleep;
     rtc.setAlarm(gmtime(&c)->tm_hour, gmtime(&c)->tm_min, gmtime(&c)->tm_sec, 0, gmtime(&c)->tm_mday, gmtime(&c)->tm_mon+1); 
     rtc.setAlarmMode(4);
-    rtc.attachInterrupt();
   }
     
   if (logMode == 99){
-    rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, Jan 1, 2021 
-    rtc.setAlarm(0, 0, secondsSleep, 0, 0, 0); // No year alarm register
+    rtc.setTime(13, 0, 0, 0, 1, 1, 21); 
+    rtc.setAlarm(0, 0, secondsSleep, 0, 0, 0); 
     rtc.setAlarmMode(6);
   }
 

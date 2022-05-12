@@ -181,13 +181,6 @@ void checkBattery() {
     if (voltageFinal < shutdownThreshold) {
       DEBUG_PRINTLN("Info: BATTERY LOW. SLEEPING");
       configureSleepAlarm();
-
-  // Clear the RTC alarm interrupt
-      am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM);
-      rtc.setAlarm(0, 0, 0, 0, 0, 0);
-      rtc.setAlarmMode(4); // match every day
-      rtc.attachInterrupt();
-      alarmFlag = false;
       wdt.clear();
       DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
       goToSleep();
