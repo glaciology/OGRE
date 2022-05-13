@@ -50,18 +50,15 @@ void getConfig() {
   }
 
   while ((n = configFile.fgets(line, sizeof(line))) > 0) {
+
     if (line[n - 1] == '\n') {
-      // remove '\n'
       line[n-1] = 0;
-      char* parse1 = strtok(line, "=");
-      int hold = strtol(strtok(NULL,"="), NULL, 10); //first split at '=', then take right-side data in base 10
-      settings[i] = hold;
-      i++;
-      
-    } else {
-      // no '\n' - line too long or missing '\n' at EOF
-      //DEBUG_PRINTLN("Warning: Line too long or missing '\n' at EOF: Check formatting");
     }
+    
+    char* parse1 = strtok(line, "=");               // split at '='
+    int hold = strtol(strtok(NULL, "="), NULL, 10); // take remaining string, convert to base 10
+    settings[i] = hold;
+    i++;
   }
   
   logMode         = settings[0];

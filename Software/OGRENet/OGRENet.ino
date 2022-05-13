@@ -31,6 +31,7 @@
 #include <SPI.h>                                   // 
 #include <WDT.h>                                   //
 #include <RTC.h>                                   //
+#include <time.h>
 #include <SdFat.h>                                 // https://github.com/greiman/SdFat v2.0.6
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
 SFE_UBLOX_GNSS gnss;                               //
@@ -60,7 +61,7 @@ SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 2;        // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
+byte logMode                = 4;        // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
                                         // 99 = test mode
         
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
@@ -90,8 +91,8 @@ bool ledBlink               = true;     // If FALSE, all LED indicators during l
 bool measureBattery         = false;     // If TRUE, uses battery circuit to measure V during debug logs
 
 // BATTERY PARAMETERS
-float converter             = 17.5;     // If using battery > 12.6V, voltage divider GAIN needs to be tuned
-float shutdownThreshold     = 10.0;     // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
+float converter              = 17.5;     // If using battery > 12.6V, voltage divider GAIN needs to be tuned
+float shutdownThreshold     = 10.6;     // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
@@ -104,7 +105,7 @@ volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 int           settings[15]        = {};       // Array that holds USER settings on SD
-char          line[25];                       // Temporary array for parsing USER settings
+char          line[100];                      // Temporary array for parsing USER settings
 int           stationName         = 0000;     // Station name, 4 digits
 char          logFileName[12]     = "";       // Log file name for mode 4
 char          logFileNameDate[30] = "";       // Log file name for modes 1, 2, 3

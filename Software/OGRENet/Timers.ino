@@ -88,7 +88,7 @@ void configureSleepAlarm() {
   if (logMode == 4) {
     // sleeps for specified interval
     time_t c;
-    c = rtc.getEpoch() + secondsSleep;
+    c = rtc.getEpoch() + epochSleep;
     rtc.setAlarm(gmtime(&c)->tm_hour, gmtime(&c)->tm_min, gmtime(&c)->tm_sec, 0, gmtime(&c)->tm_mday, gmtime(&c)->tm_mon+1); 
     rtc.setAlarmMode(4);
   }
