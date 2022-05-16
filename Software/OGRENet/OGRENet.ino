@@ -162,7 +162,7 @@ void setup() {
   createDebugFile();                 //
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
-  if (logMode == 1 || logMode == 3){                    
+  if (logMode == 1 || logMode == 3 || logMode == 4){                    
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
        deinitializeBuses();
@@ -183,7 +183,7 @@ void loop() {
       configureSD();                // CONFIGURE SD
       configureGNSS();              // CONFIGURE GNSS SETTINGS
 
-      if (logMode == 1 || logMode == 3) {
+      if (logMode == 1 || logMode == 3 || logMode == 4) {
         syncRtc();                  // SYNC RTC W/ GPS (3 min MAX)
       }
 

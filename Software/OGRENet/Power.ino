@@ -1,4 +1,5 @@
 void initializeBuses() {
+#if HARDWARE_VERSION == 0
   pinMode(25, INPUT_PULLUP); // Seems to reduce current leak prior to start
   pinMode(27, INPUT_PULLUP);
   delay(100);
@@ -17,13 +18,24 @@ void initializeBuses() {
   peripheralPowerOn();
   mySpi.begin();
   delay(1);
+  
+#elif HARDWARE_VERSION == 1
+  pinMode(ZED_POWER, OUTPUT);
+  zedPowerOn();
+  myWire.begin();
+  disableI2CPullups();
+
+  pinMode(PER_POWER, OUTPUT);
+  peripheralPowerOn();
+  mySpi.begin();
+  delay(1);
 }
 
 
 void deinitializeBuses() {
   zedPowerOff();
   peripheralPowerOff();
-  enableI2CPullups();
+//  enableI2CPullups();
   myWire.end();           // Power down I2C
   mySpi.end();            // Power down SPI
 }
