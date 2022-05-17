@@ -59,8 +59,7 @@ void configureLogAlarm() {
   }
   
   if (logMode == 99) {
-    rtc.setTime(13, 0, 0, 0, 1, 1, 21); // 13:00:00.000, 1/1/21
-    rtc.setAlarm(0, 0, secondsLog, 0, 0, 0); 
+    rtc.setAlarm(0, 0, (secondsLog + rtc.seconds) % 60, 0, 0, 0); 
     rtc.setAlarmMode(6);
     rtc.attachInterrupt();
   }
@@ -94,8 +93,7 @@ void configureSleepAlarm() {
   }
     
   if (logMode == 99){
-    rtc.setTime(13, 0, 0, 0, 1, 1, 21); 
-    rtc.setAlarm(0, 0, secondsSleep, 0, 0, 0); 
+    rtc.setAlarm(0, 0, (secondsSleep + rtc.seconds) % 60, 0, 0, 0); 
     rtc.setAlarmMode(6);
   }
 

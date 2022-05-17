@@ -88,11 +88,11 @@ int logNav                  = 1;
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;     // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = false;     // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = true;     // If TRUE, uses battery circuit to measure V during debug logs
 
 // BATTERY PARAMETERS
 float converter              = 17.5;     // If using battery > 12.6V, voltage divider GAIN needs to be tuned
-float shutdownThreshold     = 10.6;     // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
+float shutdownThreshold      = 11.8;     // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
@@ -162,7 +162,7 @@ void setup() {
   createDebugFile();                 //
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
-  if (logMode == 1 || logMode == 3 || logMode == 4){                    
+  if (logMode == 1 || logMode == 3){                    
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
        deinitializeBuses();
@@ -182,11 +182,7 @@ void loop() {
       initializeBuses();            // CONFIGURE I2C, SPI, ZED, uSD
       configureSD();                // CONFIGURE SD
       configureGNSS();              // CONFIGURE GNSS SETTINGS
-
-      if (logMode == 1 || logMode == 3 || logMode == 4) {
-        syncRtc();                  // SYNC RTC W/ GPS (3 min MAX)
-      }
-
+      syncRtc();                    //
       configureLogAlarm();          // RTC INTERRUPT WHEN DONE LOGGING
       DEBUG_PRINT("Info: Logging until "); printAlarm();
       

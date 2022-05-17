@@ -3,12 +3,10 @@ void initializeBuses() {
   pinMode(25, INPUT_PULLUP); // Seems to reduce current leak prior to start
   pinMode(27, INPUT_PULLUP);
   delay(100);
-
   pinMode(ZED_POWER, OUTPUT);
   zedPowerOn();
   myWire.begin();
   disableI2CPullups();
-
   pinMode(38, INPUT_PULLUP);
   pinMode(41, INPUT_PULLUP);
   pinMode(42, INPUT_PULLUP);
@@ -24,11 +22,12 @@ void initializeBuses() {
   zedPowerOn();
   myWire.begin();
   disableI2CPullups();
-
   pinMode(PER_POWER, OUTPUT);
   peripheralPowerOn();
   mySpi.begin();
   delay(1);
+  
+#endif
 }
 
 
