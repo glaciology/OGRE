@@ -88,7 +88,7 @@ int logNav                  = 1;
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;     // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = true;     // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = false;    // If TRUE, uses battery circuit to measure V during debug logs
 
 // BATTERY PARAMETERS
 float converter              = 17.5;     // If using battery > 12.6V, voltage divider GAIN needs to be tuned
