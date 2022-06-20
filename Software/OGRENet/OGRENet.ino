@@ -148,7 +148,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER***");
+    Serial.println("***WELCOME TO GNSS LOGGER v1.0.0***");
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
