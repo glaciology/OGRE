@@ -44,15 +44,8 @@ void configureLogAlarm() {
   if (logMode == 2){ // empty - continuous
   }
 
-  if (logMode == 3) {
-    // WILL LOG FOR 24 HOURS ON SPECIFIED DAY OF MONTH
-    rtc.setAlarm(0, 0, 0, 0, 0, 0); 
-    rtc.setAlarmMode(4);
-    rtc.attachInterrupt();
-  }
-
-  if (logMode == 4) {
-    // WILL LOG FOR 24 HOURS IMMEDIATELY
+  if (logMode == 3 || logMode == 4 || logMode == 5) {
+    // WILL LOG FOR 24 HOURS
     rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
     rtc.setAlarmMode(4);
     rtc.attachInterrupt();
@@ -84,12 +77,34 @@ void configureSleepAlarm() {
     rtc.setAlarmMode(2); // match every month
   }
 
-  if (logMode == 4) {
+  if (logMode == 4){
     // sleeps for specified interval
     time_t c;
     c = rtc.getEpoch() + epochSleep;
     rtc.setAlarm(gmtime(&c)->tm_hour, gmtime(&c)->tm_min, gmtime(&c)->tm_sec, 0, gmtime(&c)->tm_mday, gmtime(&c)->tm_mon+1); 
     rtc.setAlarmMode(1);
+  }
+
+  if (logMode == 5){
+    // sleeps until specified unix epoch; if no longer specified defaults to epochSleep interval
+    // note that a maximum of 15 dates can be provided. 
+    time_t a;
+    time_t b;
+    for(int i=0; i< 15; i++){
+      if(dates[i] > rtc.getEpoch()){
+        Serial.print("Info: next date found: "); Serial.println(dates[i]);
+        b = dates[i];
+        rtc.setAlarm(gmtime(&b)->tm_hour, gmtime(&b)->tm_min, gmtime(&b)->tm_sec, 0, gmtime(&b)->tm_mday, gmtime(&b)->tm_mon+1);
+        rtc.setAlarmMode(1); // Set the RTC alarm to match on minutes rollover
+        rtc.attachInterrupt(); // Attach RTC alarm interrupt
+        alarmFlag = false;
+        return;
+      }
+    }
+    a = rtc.getEpoch() + epochSleep;
+    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+    rtc.setAlarmMode(1); // Set the RTC alarm to match on minutes rollover
+    
   }
     
   if (logMode == 99){

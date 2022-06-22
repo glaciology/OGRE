@@ -13,12 +13,12 @@ void configureSD() {
         delay(2000);
       }
     }
-    else{
+    else {
       DEBUG_PRINTLN("Info: microSD initialized.");
       online.uSD = true;
     }
   }
-  else{
+  else {
     DEBUG_PRINTLN("Info: SD card initialized.");
     online.uSD = true;
   }
@@ -112,7 +112,53 @@ void getConfig() {
   if (!configFile.close()) {
     DEBUG_PRINTLN("Warning: Failed to close config file.");
     closeFailCounter++; // Count number of failed file closes
-    while(1){
+    while(1) {
     }
+  }
+}
+
+
+void getDates() {
+  if (logMode == 5) {
+    int n;
+    int i = 0;
+    
+    // OPEN CONFIG file
+    dateFile.open("EPOCH.TXT", O_READ);
+    
+    // IF SD ERROR, ABORT getConfig
+    if (!configFile.isOpen()){
+      DEBUG_PRINTLN("Warning: Could not open EPOCH.TXT");
+      DEBUG_PRINTLN("Warning: Using hard-coded settings");
+      blinkLed(5, 100);
+      delay(1000);
+      return;
+    }
+  
+    while ((n = configFile.fgets(line, sizeof(line))) > 0) {
+  
+      if (line[n - 1] == '\n') {
+        line[n-1] = 0;
+      }
+      
+      char* parse1 = strtok(line, "=");               // split at '='
+      int hold = strtol(strtok(NULL, "="), NULL, 10); // take remaining string, convert to base 10
+      dates[i] = hold;
+      i++;
+    }
+    
+  
+    for(int i=0; i<15; i++) {
+      DEBUG_PRINT(dates[i]); DEBUG_PRINTLN(" ");
+    }
+    
+    if (!dateFile.close()) {
+      DEBUG_PRINTLN("Warning: Failed to close dates file.");
+      closeFailCounter++; // Count number of failed file closes
+      while(1) {
+      }
+    }
+  } else {
+    
   }
 }

@@ -41,6 +41,7 @@ APM3_WDT wdt;                                      //
 FsFile myFile;                                     // RAW UBX LOG FILE
 FsFile debugFile;                                  // DEBUG LOG FILE
 FsFile configFile;                                 // USER INPUT CONFIG FILE
+FsFile dateFile;                                   // USER INPUT EPOCHS FILE
 
 ///////// HARDWARE-SPECIFIC PINOUTS & OBJECTS
 #if HARDWARE_VERSION == 0
@@ -62,7 +63,7 @@ SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
 byte logMode                = 4;        // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
-                                        // 99 = test mode
+                                        // 5 = specified Unix Epochs for 24 hrs (defaults to epochSleep after), 99 = test mode
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;       // UTC Hour 
 byte logEndHr               = 14;       // UTC Hour
@@ -103,6 +104,7 @@ volatile bool rtcSyncFlag         = false;    // Flag to indicate if RTC has bee
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
+unsigned long dates[15]           = {};       // Array with Unix Epochs of log dates !!! MAX 15 !!!
 int           settings[15]        = {};       // Array that holds USER settings on SD
 char          line[100];                      // Temporary array for parsing USER settings
 int           stationName         = 0000;     // Station name, 4 digits
@@ -146,7 +148,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.0.1 (6/22/22)***");
+    Serial.println("***WELCOME TO GNSS LOGGER v1.0.2 (6/22/22)***");
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
@@ -165,6 +167,10 @@ void setup() {
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
        deinitializeBuses();
+  }
+
+  if (logMode == 5){
+    getDates();
   }
 //************************************************//  
 

@@ -49,7 +49,7 @@ void configureGNSS(){
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);     // Enable BeiDou
     success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
     delay(2000);
-    if (!success){
+    if (!success) {
       DEBUG_PRINTLN("Warning: GNSS CONSTELLATION CONFIG FAILED - ATTEMPTING AGAIN"); 
       delay(2000);
       bool success = true;
@@ -59,7 +59,7 @@ void configureGNSS(){
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);     // Enable BeiDou
       success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
       delay(2000);
-      if (!success){
+      if (!success) {
         DEBUG_PRINTLN("Warning: GNSS CONSTELLATION CONFIG FAILED AGAIN. Waiting for system reset.");
         logDebug("CFG");
         while(1){
