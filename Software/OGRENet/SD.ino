@@ -7,6 +7,7 @@ void configureSD() {
     if (!sd.begin(SD_CONFIG)) { // 
       DEBUG_PRINTLN("Warning: Card failed, or not present...");
       online.uSD = false;
+      peripheralPowerOff();
       while (1) {
         blinkLed(2, 250);
         delay(2000);

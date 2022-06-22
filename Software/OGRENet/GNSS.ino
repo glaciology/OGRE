@@ -16,7 +16,8 @@ void configureGNSS(){
     if (gnss.begin(myWire) == false) {    // TRYING AGAIN
       DEBUG_PRINTLN("Warning: UBLOX not detected at default I2C address. Waiting for reset.");
       online.gnss = false;
-      logDebug();
+      logDebug("I2C");
+      zedPowerOff();
       while(1) {
         blinkLed(3, 250);
         delay(2000);
@@ -36,6 +37,12 @@ void configureGNSS(){
   if (initSetup) {                                                       // ONLY run this once, during initialization
     bool success = true;
     delay(1000);
+//    setValueSuccess &= gnss.newCfgValset8(UBLOX_CFG_I2C_ENABLED, 1);    // Enable I2C
+//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_SPI_ENABLED, 0);    // Disable SPI
+//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_UART1_ENABLED, 0);  // Disable UART1
+//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_UART2_ENABLED, 0);  // Disable UART2
+//    setValueSuccess &= gnss.sendCfgValset8(UBLOX_CFG_USB_ENABLED, 0);   // Disable USB
+    
     success &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, logGPS);     // Enable GPS (define in USER SETTINGS)
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
@@ -54,6 +61,7 @@ void configureGNSS(){
       delay(2000);
       if (!success){
         DEBUG_PRINTLN("Warning: GNSS CONSTELLATION CONFIG FAILED AGAIN. Waiting for system reset.");
+        logDebug("CFG");
         while(1){
           blinkLed(3, 250);
           delay(2000);
@@ -81,14 +89,12 @@ void configureGNSS(){
     getLogFileName();
     myFile.open(logFileNameDate,O_CREAT | O_APPEND | O_WRITE);
     DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileNameDate);
-    online.logGnss = true; 
 //    } else {
 //       for (int i = 1; i < 1000; i++) {
 //        sprintf(logFileName, "RAWX%03d.ubx", i);
 //        if (! sd.exists(logFileName)) {
 //          DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileName);
 //          myFile.open(logFileName, O_CREAT | O_APPEND | O_WRITE);
-//          online.logGnss = true;
 //          break;
 //        }
 //      }     
@@ -96,7 +102,11 @@ void configureGNSS(){
     
     if (!myFile) {
       DEBUG_PRINTLN(F("Warning: Failed to create UBX data file! Freezing..."));
-      while (1); 
+      logDebug("GNSS_FILE_CREATE");
+      while (1){
+        blinkLed(3, 250);
+        delay(2000); 
+      }
     }
   }
   

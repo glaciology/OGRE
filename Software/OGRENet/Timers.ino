@@ -54,7 +54,7 @@ void configureLogAlarm() {
   if (logMode == 4) {
     // WILL LOG FOR 24 HOURS IMMEDIATELY
     rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
-    rtc.setAlarmMode(4);
+    rtc.setAlarmMode(5);
     rtc.attachInterrupt();
   }
   
@@ -89,7 +89,7 @@ void configureSleepAlarm() {
     time_t c;
     c = rtc.getEpoch() + epochSleep;
     rtc.setAlarm(gmtime(&c)->tm_hour, gmtime(&c)->tm_min, gmtime(&c)->tm_sec, 0, gmtime(&c)->tm_mday, gmtime(&c)->tm_mon+1); 
-    rtc.setAlarmMode(4);
+    rtc.setAlarmMode(1);
   }
     
   if (logMode == 99){
@@ -103,26 +103,22 @@ void configureSleepAlarm() {
 
 
 void syncRtc() {
+  unsigned long loopStartTime = millis();
+  rtcSyncFlag = false;
+  
+  DEBUG_PRINTLN("Info: Attempting to synchronize RTC with GNSS...");
 
-    unsigned long loopStartTime = millis();
-    
-   // Check u-blox GNSS initialized successfully
-   if (online.gnss) {
-     rtcSyncFlag = false;
-  
-     DEBUG_PRINTLN("Info: Attempting to synchronize RTC with GNSS...");
-  
-     // Attempt to acquire a valid GNSS position fix for up to 3 minutes
-     while (!rtcSyncFlag && millis() - loopStartTime < 3 * 60UL * 1000UL) {
-       petDog(); 
-  
-       // Check for UBX-NAV-PVT messages
-       if (gnss.getPVT()) {
-         digitalWrite(LED, !digitalRead(LED)); // Blink LED
-  
-         bool dateValidFlag = gnss.getConfirmedDate();
-         bool timeValidFlag = gnss.getConfirmedTime();
-         byte fixType = gnss.getFixType();
+  // Attempt to acquire a valid GNSS position fix for up to 3 minutes
+  while (!rtcSyncFlag && millis() - loopStartTime < 3 * 60UL * 1000UL) {
+    petDog(); 
+
+    // Check for UBX-NAV-PVT messages
+    if (gnss.getPVT()) {
+       digitalWrite(LED, !digitalRead(LED)); // Blink LED
+
+       bool dateValidFlag = gnss.getConfirmedDate();
+       bool timeValidFlag = gnss.getConfirmedTime();
+       byte fixType = gnss.getFixType();
   
 #if DEBUG_GNSS
          char gnssBuffer[100];
@@ -135,33 +131,24 @@ void syncRtc() {
          DEBUG_PRINTLN(gnssBuffer);
 #endif
 
-          // Check if date and time are valid and sync RTC with GNSS
-          if (fixType == 3 && dateValidFlag && timeValidFlag) {
-            unsigned long rtcEpoch = rtc.getEpoch();        // Get RTC epoch time
-            unsigned long gnssEpoch = gnss.getUnixEpoch();  // Get GNSS epoch time
-            rtc.setEpoch(gnssEpoch);                        // Set RTC date and time
-            rtcDrift = gnssEpoch - rtcEpoch;                // Calculate RTC drift (debug)
-            rtcSyncFlag = true;                             // Set flag, end SYNC
-  
-            DEBUG_PRINT("Info: RTC drift: "); DEBUG_PRINTLN(rtcDrift);
-            DEBUG_PRINT("Info: RTC time synced to "); printDateTime();
-          }
-        }
-      }
-      if (!rtcSyncFlag){
-        DEBUG_PRINTLN("Warning: Unable to sync RTC! Awaiting System Reset");
-        while(1){  //Awaiting WDT Reset
-          blinkLed(5, 500); 
-          delay(2000);
-        }
-      }
-    }
-    
-    else {
-      DEBUG_PRINTLN("Warning: microSD or GNSS offline! Awaiting System Reset");
-      rtcSyncFlag = false;
-      while(1){
-        blinkLed(5, 500);
+       // Check if date and time are valid and sync RTC with GNSS
+       if (fixType == 3 && dateValidFlag && timeValidFlag) {
+         unsigned long rtcEpoch = rtc.getEpoch();        // Get RTC epoch time
+         unsigned long gnssEpoch = gnss.getUnixEpoch();  // Get GNSS epoch time
+         rtc.setEpoch(gnssEpoch);                        // Set RTC date and time
+         rtcDrift = gnssEpoch - rtcEpoch;                // Calculate RTC drift (debug)
+         rtcSyncFlag = true;                             // Set flag, end SYNC
+
+         DEBUG_PRINT("Info: RTC drift: "); DEBUG_PRINTLN(rtcDrift);
+         DEBUG_PRINT("Info: RTC time synced to "); printDateTime();
+       }
+     }
+   }
+    if (!rtcSyncFlag){
+      DEBUG_PRINTLN("Warning: Unable to sync RTC! Awaiting System Reset");
+      logDebug("RTC_SYNC");
+      while(1){  //Awaiting WDT Reset
+        blinkLed(5, 500); 
         delay(2000);
       }
     }

@@ -10,8 +10,8 @@ void createDebugFile() {
   }
 
   // Write header to file
-  debugFile.println("datetime, debugCounter, onlineGNSS, onlineLogGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
-  "maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, Temperature, Battery");
+  debugFile.println("datetime, debugCounter, onlineGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
+  "maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, errorCode, Temperature, Battery");
 
   // Sync the debug file
   if (!debugFile.sync()) {
@@ -25,7 +25,7 @@ void createDebugFile() {
 }
 
 
-void logDebug() {
+void logDebug(const char* errorCode) {
   // Increment debug counter
   debugCounter++;
 
@@ -49,7 +49,6 @@ void logDebug() {
   debugFile.print(dateTime);            debugFile.print(",");
   debugFile.print(debugCounter);        debugFile.print(",");
   debugFile.print(online.gnss);         debugFile.print(",");
-  debugFile.print(online.logGnss);      debugFile.print(",");
   debugFile.print(online.uSD);          debugFile.print(",");
   debugFile.print(rtcSyncFlag);         debugFile.print(",");
   debugFile.print(rtcDrift);            debugFile.print(",");
@@ -60,6 +59,7 @@ void logDebug() {
   debugFile.print(syncFailCounter);     debugFile.print(",");
   debugFile.print(closeFailCounter);    debugFile.print(",");
   debugFile.print(logMode);             debugFile.print(","); 
+  debugFile.print(errorCode);           debugFile.print(",");
   debugFile.print(getInternalTemp(), 2); debugFile.print(",");
   if (measureBattery == true){
     debugFile.print(measBat(), 2);

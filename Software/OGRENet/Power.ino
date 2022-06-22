@@ -26,17 +26,16 @@ void initializeBuses() {
   peripheralPowerOn();
   mySpi.begin();
   delay(1);
-  
 #endif
 }
 
 
 void deinitializeBuses() {
+  myWire.end();           // Power down I2C
+  mySpi.end();            // Power down SPI
   zedPowerOff();
   peripheralPowerOff();
 //  enableI2CPullups();
-  myWire.end();           // Power down I2C
-  mySpi.end();            // Power down SPI
 }
 
 // POWER DOWN AND WAIT FOR INTERRUPT
@@ -71,7 +70,6 @@ void goToSleep() {
   // Clear online/offline flags
   online.gnss = false;
   online.uSD = false;
-  online.logGnss = false;
 
   // Use the lower power 32kHz clock.
   am_hal_stimer_config(AM_HAL_STIMER_CFG_CLEAR | AM_HAL_STIMER_CFG_FREEZE);
@@ -105,8 +103,8 @@ void wakeFromSleep() {
   petDog();
 
 #if DEBUG
-  Serial.begin(115200); // open serial port
-  delay(2500);
+  Serial.begin(115200); 
+  //delay(2500);
 #endif
 
 
@@ -142,7 +140,7 @@ void zedPowerOn() {
   } else {
     digitalWrite(ZED_POWER, LOW);
   }
-  delay(500);
+  delay(1000);
 }
 
 

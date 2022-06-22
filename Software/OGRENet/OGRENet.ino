@@ -63,7 +63,6 @@ SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
 // LOG MODE: ROLLING OR DAILY
 byte logMode                = 4;        // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
                                         // 99 = test mode
-        
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;       // UTC Hour 
 byte logEndHr               = 14;       // UTC Hour
@@ -124,7 +123,6 @@ long          rtcDrift            = 0;        // Tracks drift of RTC
 struct struct_online {
   bool uSD      = false;
   bool gnss     = false;
-  bool logGnss  = false;
 } online;
 //////////////////////////////////////////////////////
 
@@ -148,7 +146,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.0.0***");
+    Serial.println("***WELCOME TO GNSS LOGGER v1.0.1 (6/22/22)***");
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
@@ -162,11 +160,13 @@ void setup() {
   createDebugFile();                 //
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
+//***************LOG MODE SETTINGS******************//
   if (logMode == 1 || logMode == 3){                    
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
        deinitializeBuses();
   }
+//************************************************//  
 
   blinkLed(10, 100);                 // BLINK 10x - SETUP COMPLETE
   DEBUG_PRINTLN("Info: SETUP COMPLETE");
@@ -177,7 +177,7 @@ void loop() {
   
     if (alarmFlag) {                // SLEEP UNTIL alarmFlag = True
       DEBUG_PRINTLN("Info: Alarm Triggered - Configuring System");
-      petDog();
+      petDog();                     //
       checkBattery();               // IF battery LOW, SLEEP
       initializeBuses();            // CONFIGURE I2C, SPI, ZED, uSD
       configureSD();                // CONFIGURE SD
@@ -193,10 +193,9 @@ void loop() {
       
       DEBUG_PRINTLN("Info: Logging Terminated");   
       closeGNSS(); 
-      logDebug();                 
+      logDebug("success");                 
       configureSleepAlarm();
       deinitializeBuses();
-      
       DEBUG_PRINT("Info: Sleeping until "); printAlarm();
     }
 
