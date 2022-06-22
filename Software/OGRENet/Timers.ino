@@ -54,7 +54,7 @@ void configureLogAlarm() {
   if (logMode == 4) {
     // WILL LOG FOR 24 HOURS IMMEDIATELY
     rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
-    rtc.setAlarmMode(5);
+    rtc.setAlarmMode(4);
     rtc.attachInterrupt();
   }
   
