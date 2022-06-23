@@ -158,10 +158,10 @@ void setup() {
   pinMode(LED, OUTPUT);              //
   configureSD();                     // BLINK 2x pattern - FAILED SETUP
   getConfig();                       // Read LOG settings from Config.txt on uSD; 5x - FAILED
+  getDates();                        // Read Dates (in unix epoch format) for log mode 5
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   createDebugFile();                 //
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
-  getDates();
 
 //***************LOG MODE SETTINGS******************//
   if (logMode == 1 || logMode == 3) {                    

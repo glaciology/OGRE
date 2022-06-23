@@ -127,7 +127,7 @@ void getDates() {
     dateFile.open("EPOCH.TXT", O_READ);
     
     // IF SD ERROR, ABORT getConfig
-    if (!configFile.isOpen()){
+    if (!dateFile.isOpen()){
       DEBUG_PRINTLN("Warning: Could not open EPOCH.TXT");
       DEBUG_PRINTLN("Warning: Using hard-coded sleep duration");
       blinkLed(5, 100);
@@ -135,7 +135,7 @@ void getDates() {
       return;
     }
   
-    while ((n = configFile.fgets(line, sizeof(line))) > 0) {
+    while ((n = dateFile.fgets(line, sizeof(line))) > 0) {
   
       if (line[n - 1] == '\n') {
         line[n-1] = 0;
@@ -147,10 +147,9 @@ void getDates() {
       i++;
     }
     
-  
-    for(int i=0; i<15; i++) {
-      DEBUG_PRINT(dates[i]); DEBUG_PRINTLN(" ");
-    }
+//    for(int i=0; i<15; i++) {
+//      DEBUG_PRINT(dates[i]); DEBUG_PRINTLN(" ");
+//    }
     
     if (!dateFile.close()) {
       DEBUG_PRINTLN("Warning: Failed to close dates file.");
