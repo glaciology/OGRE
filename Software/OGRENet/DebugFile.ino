@@ -11,7 +11,8 @@ void createDebugFile() {
 
   // Write header to file
   debugFile.println("datetime, debugCounter, onlineGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
-  "maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, errorCode, Temperature, Battery");
+  "maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, errorCode," 
+  "lowBattery, Temperature, Battery");
 
   // Sync the debug file
   if (!debugFile.sync()) {
@@ -46,20 +47,21 @@ void logDebug(const char* errorCode) {
           rtc.hour, rtc.minute, rtc.seconds);
 
   // Log debugging information
-  debugFile.print(dateTime);            debugFile.print(",");
-  debugFile.print(debugCounter);        debugFile.print(",");
-  debugFile.print(online.gnss);         debugFile.print(",");
-  debugFile.print(online.uSD);          debugFile.print(",");
-  debugFile.print(rtcSyncFlag);         debugFile.print(",");
-  debugFile.print(rtcDrift);            debugFile.print(",");
-  debugFile.print(bytesWritten);        debugFile.print(",");
-  debugFile.print(maxBufferBytes);      debugFile.print(",");
-  debugFile.print(wdtCounterMax);       debugFile.print(",");
-  debugFile.print(writeFailCounter);    debugFile.print(",");
-  debugFile.print(syncFailCounter);     debugFile.print(",");
-  debugFile.print(closeFailCounter);    debugFile.print(",");
-  debugFile.print(logMode);             debugFile.print(","); 
-  debugFile.print(errorCode);           debugFile.print(",");
+  debugFile.print(dateTime);             debugFile.print(",");
+  debugFile.print(debugCounter);         debugFile.print(",");
+  debugFile.print(online.gnss);          debugFile.print(",");
+  debugFile.print(online.uSD);           debugFile.print(",");
+  debugFile.print(rtcSyncFlag);          debugFile.print(",");
+  debugFile.print(rtcDrift);             debugFile.print(",");
+  debugFile.print(bytesWritten);         debugFile.print(",");
+  debugFile.print(maxBufferBytes);       debugFile.print(",");
+  debugFile.print(wdtCounterMax);        debugFile.print(",");
+  debugFile.print(writeFailCounter);     debugFile.print(",");
+  debugFile.print(syncFailCounter);      debugFile.print(",");
+  debugFile.print(closeFailCounter);     debugFile.print(",");
+  debugFile.print(logMode);              debugFile.print(","); 
+  debugFile.print(errorCode);            debugFile.print(",");
+  debugFile.print(lowBatteryCounter);    debugFile.print(",");
   debugFile.print(getInternalTemp(), 2); debugFile.print(",");
   if (measureBattery == true){
     debugFile.print(measBat(), 2);

@@ -196,6 +196,7 @@ void checkBattery() {
         DEBUG_PRINT("Info: Battery: "); DEBUG_PRINTLN(measBat());
       }
       DEBUG_PRINT("Info: Battery Charged."); 
+      lowBatteryCounter++;
     }
   }
 }

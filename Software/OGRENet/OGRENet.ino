@@ -24,7 +24,8 @@
         *No Blinks: System deep sleep due to low battery, or battery dead.
 */
 
-#define HARDWARE_VERSION 1      // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22 
+#define HARDWARE_VERSION 1      // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22
+#define SOFTWARE_VERSION "1.0.3" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
 #include <Wire.h>                                  // 
@@ -118,6 +119,7 @@ unsigned long bytesWritten        = 0;        // used for printing to Serial Mon
 unsigned long syncFailCounter     = 0;        // Counts RTC sync failures
 unsigned long writeFailCounter    = 0;        // Counts uSD write failures
 unsigned long closeFailCounter    = 0;        // Counts uSD close failures
+unsigned int  lowBatteryCounter   = 0;        // Counts # times system sleeps due to low battery
 unsigned int  debugCounter        = 0;        // Counts Debug messages
 volatile int  wdtCounter          = 0;        // Counts WDT triggers
 volatile int  wdtCounterMax       = 0;        // Tracks Max times WDT interrupts

@@ -87,7 +87,7 @@ void configureGNSS(){
   if (!initSetup) {                               // Create LOG file, but only when not in SETUP Mode
 //    if (logMode == 1 || logMode == 2 || logMode == 3){
     getLogFileName();
-    myFile.open(logFileNameDate,O_CREAT | O_APPEND | O_WRITE);
+    myFile.open(logFileNameDate, O_CREAT | O_APPEND | O_WRITE);
     DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileNameDate);
 //    } else {
 //       for (int i = 1; i < 1000; i++) {
