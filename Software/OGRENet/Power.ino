@@ -61,7 +61,7 @@ void goToSleep() {
   // Disable all pads except LED and PWR CONTROL PINS
   for (int x = 0; x < 50; x++)
   {
-    if ((x != LED) && (x != ZED_POWER) && (x != PER_POWER))
+    if ((x != LED) && (x != ZED_POWER) && (x != PER_POWER) )
     {
       am_hal_gpio_pinconfig(x, g_AM_HAL_GPIO_DISABLE);
     }
@@ -170,33 +170,32 @@ float measBat() {
   pinMode(BAT_CNTRL, OUTPUT);
   digitalWrite(BAT_CNTRL, HIGH);
   delay(1);
-  int measure = analogRead(BAT);
+  int measure0 = analogRead(BAT);
+  delay(10);
+  int measure1 = analogRead(BAT);
   delay(1);
   digitalWrite(BAT_CNTRL, LOW);
-  float vcc = (float)measure * converter / 16384.0; // convert to normal number
-
-  return vcc;
+  float vcc0 = (float)measure0 * converter / 16384.0; // convert to normal number
+  float vcc1 = (float)measure1 * converter / 16384.0; // convert to normal number
+  float voltageFinal = (vcc0 + vcc1) / 2;
+  return voltageFinal;
 }
 
 
 void checkBattery() {
   if (measureBattery == true) {
-    float voltage = measBat();
-    delay(10);
-    float voltage2 = measBat();
-    float voltageFinal = (voltage + voltage2) / 2; // take average
-    //DEBUG_PRINTLN(voltageFinal);
-
-    if (voltageFinal < shutdownThreshold) {
+    if (measBat() < shutdownThreshold) {
       DEBUG_PRINTLN("Info: BATTERY LOW. SLEEPING");
-      configureSleepAlarm();
-      wdt.clear();
-      DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
-      goToSleep();
-      configureWdt();
-      while (1) {
-        // WAIT FOR SYSTEM RESET
+      pinMode(PER_POWER, OUTPUT);
+      pinMode(ZED_POWER, OUTPUT);
+      zedPowerOff();
+      peripheralPowerOff();
+      while((measBat() < shutdownThreshold + .2)) { // IMPORTANT - RECHARGE THRESHOLD SET HERE
+        goToSleep();
+        petDog(); 
+        DEBUG_PRINT("Info: Battery: "); DEBUG_PRINTLN(measBat());
       }
+      DEBUG_PRINT("Info: Battery Charged."); 
     }
   }
 }

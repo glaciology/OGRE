@@ -5,7 +5,7 @@ void configureSD() {
     delay(2000);
 
     if (!sd.begin(SD_CONFIG)) { // 
-      DEBUG_PRINTLN("Warning: Card failed, or not present...");
+      DEBUG_PRINTLN("Warning: Card failed, or not present. Restarting...");
       online.uSD = false;
       peripheralPowerOff();
       while (1) {
@@ -129,7 +129,7 @@ void getDates() {
     // IF SD ERROR, ABORT getConfig
     if (!configFile.isOpen()){
       DEBUG_PRINTLN("Warning: Could not open EPOCH.TXT");
-      DEBUG_PRINTLN("Warning: Using hard-coded settings");
+      DEBUG_PRINTLN("Warning: Using hard-coded sleep duration");
       blinkLed(5, 100);
       delay(1000);
       return;
@@ -158,7 +158,5 @@ void getDates() {
       while(1) {
       }
     }
-  } else {
-    
   }
 }

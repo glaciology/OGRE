@@ -31,7 +31,7 @@
 #include <SPI.h>                                   // 
 #include <WDT.h>                                   //
 #include <RTC.h>                                   //
-#include <time.h>
+#include <time.h>                                  //
 #include <SdFat.h>                                 // https://github.com/greiman/SdFat v2.0.6
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
 SFE_UBLOX_GNSS gnss;                               //
@@ -62,7 +62,7 @@ SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 4;        // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
+byte logMode                = 99;        // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
                                         // 5 = specified Unix Epochs for 24 hrs (defaults to epochSleep after), 99 = test mode
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;       // UTC Hour 
@@ -71,7 +71,7 @@ byte logEndHr               = 14;       // UTC Hour
 // LOG MODE 3: ONCE/MONTH FOR 24 HOURS
 byte logStartDay            = 8;        // Day of month between 1 and 28
 
-// LOG MODE 4: ONCE/MONTH, FOR 24 HOURS, ROLLING
+// LOG MODE 4/5: SLEEP FOR SPECIFIED DURATION
 uint32_t epochSleep         = 2628000;  // Sleep duration (Seconds) (ie, 2628000 ~ 1 month)
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
@@ -88,11 +88,12 @@ int logNav                  = 1;
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;     // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = false;    // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = true;     // If TRUE, uses battery circuit to measure V during debug logs
 
 // BATTERY PARAMETERS
 float converter              = 17.5;     // If using battery > 12.6V, voltage divider GAIN needs to be tuned
 float shutdownThreshold      = 11.8;     // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
+                                         // SYSTEM WILL SLEEP IF DIPS BELOW HERE, WAKES after shutdownThreshold + 0.2V reached
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
@@ -144,33 +145,29 @@ struct struct_online {
 
 
 void setup() {
-  
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.0.2 (6/22/22)***");
+    Serial.println("***WELCOME TO GNSS LOGGER v1.0.3 (6/23/22)***");
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
+  configureWdt();                    // 12s interrupt, 24s reset period
   checkBattery();                    // IF battery LOW, send back to sleep until next log date
   initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
   pinMode(LED, OUTPUT);              //
-  configureWdt();                    // 12s interrupt, 24s reset period
   configureSD();                     // BLINK 2x pattern - FAILED SETUP
   getConfig();                       // Read LOG settings from Config.txt on uSD; 5x - FAILED
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   createDebugFile();                 //
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
+  getDates();
 
 //***************LOG MODE SETTINGS******************//
-  if (logMode == 1 || logMode == 3){                    
+  if (logMode == 1 || logMode == 3) {                    
        configureSleepAlarm();
        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
        deinitializeBuses();
-  }
-
-  if (logMode == 5){
-    getDates();
   }
 //************************************************//  
 
@@ -182,9 +179,9 @@ void setup() {
 void loop() {
   
     if (alarmFlag) {                // SLEEP UNTIL alarmFlag = True
+      checkBattery();
       DEBUG_PRINTLN("Info: Alarm Triggered - Configuring System");
       petDog();                     //
-      checkBattery();               // IF battery LOW, SLEEP
       initializeBuses();            // CONFIGURE I2C, SPI, ZED, uSD
       configureSD();                // CONFIGURE SD
       configureGNSS();              // CONFIGURE GNSS SETTINGS
