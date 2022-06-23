@@ -58,7 +58,7 @@ void configureLogAlarm() {
   }
   
   alarmFlag = false;
-  
+  DEBUG_PRINT("Info: Logging until "); printAlarm();
 }
 
 
@@ -77,15 +77,7 @@ void configureSleepAlarm() {
     rtc.setAlarmMode(2); // match every month
   }
 
-  if (logMode == 4){
-    // sleeps for specified interval
-    time_t c;
-    c = rtc.getEpoch() + epochSleep;
-    rtc.setAlarm(gmtime(&c)->tm_hour, gmtime(&c)->tm_min, gmtime(&c)->tm_sec, 0, gmtime(&c)->tm_mday, gmtime(&c)->tm_mon+1); 
-    rtc.setAlarmMode(1);
-  }
-
-  if (logMode == 5){
+  if (logMode == 4 || logMode == 5){
     // sleeps until specified unix epoch; if no longer specified defaults to epochSleep interval
     // note that a maximum of 15 dates can be provided. 
     time_t a;
@@ -98,6 +90,7 @@ void configureSleepAlarm() {
         rtc.setAlarmMode(1); // Set the RTC alarm to match on minutes rollover
         rtc.attachInterrupt(); // Attach RTC alarm interrupt
         alarmFlag = false;
+        DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
         return;
       }
     }
@@ -114,6 +107,7 @@ void configureSleepAlarm() {
 
   rtc.attachInterrupt();
   alarmFlag = false;
+  DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
 }
 
 

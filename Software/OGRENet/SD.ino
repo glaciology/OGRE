@@ -34,7 +34,7 @@ void getLogFileName() {
 
 
 void getConfig() {
-  
+  ///////// gets configuration settings from user via SD card
   int n;
   int i = 0;
   
@@ -119,6 +119,7 @@ void getConfig() {
 
 
 void getDates() {
+  ///////// Gets Dates in Unix Epoch format from user via SD if using log mode 5
   if (logMode == 5) {
     int n;
     int i = 0;

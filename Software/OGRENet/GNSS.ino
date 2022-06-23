@@ -36,7 +36,6 @@ void configureGNSS(){
   //////////////////////////////////////////
   if (initSetup) {                                                       // ONLY run this once, during initialization
     bool success = true;
-    delay(1000);
 //    setValueSuccess &= gnss.newCfgValset8(UBLOX_CFG_I2C_ENABLED, 1);    // Enable I2C
 //    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_SPI_ENABLED, 0);    // Disable SPI
 //    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_UART1_ENABLED, 0);  // Disable UART1

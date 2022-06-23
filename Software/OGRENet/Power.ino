@@ -36,6 +36,8 @@ void deinitializeBuses() {
   zedPowerOff();
   peripheralPowerOff();
 //  enableI2CPullups();
+  online.gnss = false;   // Clear online/offline flags
+  online.uSD = false;
 }
 
 // POWER DOWN AND WAIT FOR INTERRUPT
@@ -67,10 +69,6 @@ void goToSleep() {
     }
   }
 
-  // Clear online/offline flags
-  online.gnss = false;
-  online.uSD = false;
-
   // Use the lower power 32kHz clock.
   am_hal_stimer_config(AM_HAL_STIMER_CFG_CLEAR | AM_HAL_STIMER_CFG_FREEZE);
   am_hal_stimer_config(AM_HAL_STIMER_XTAL_32KHZ);
@@ -99,14 +97,12 @@ void wakeFromSleep() {
   am_hal_stimer_config(AM_HAL_STIMER_CFG_CLEAR | AM_HAL_STIMER_CFG_FREEZE);
   am_hal_stimer_config(AM_HAL_STIMER_HFRC_3MHZ);
 
-  // Turn on ADC
   petDog();
 
 #if DEBUG
   Serial.begin(115200); 
   //delay(2500);
 #endif
-
 
   if (measureBattery == true) {
     ap3_adc_setup();
@@ -188,8 +184,7 @@ void checkBattery() {
       DEBUG_PRINTLN("Info: BATTERY LOW. SLEEPING");
       pinMode(PER_POWER, OUTPUT);
       pinMode(ZED_POWER, OUTPUT);
-      zedPowerOff();
-      peripheralPowerOff();
+      deinitializeBuses();
       while((measBat() < shutdownThreshold + .2)) { // IMPORTANT - RECHARGE THRESHOLD SET HERE
         goToSleep();
         petDog(); 

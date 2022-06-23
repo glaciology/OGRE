@@ -1,7 +1,7 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 5/11/22
-   V1.0.0
+   Derek Pickell 6/23/22
+   V1.0.4
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T
@@ -25,7 +25,7 @@
 */
 
 #define HARDWARE_VERSION 1      // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22
-#define SOFTWARE_VERSION "1.0.3" 
+#define SOFTWARE_VERSION "1-0-4" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
 #include <Wire.h>                                  // 
@@ -63,8 +63,8 @@ SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: ROLLING OR DAILY
-byte logMode                = 99;        // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
-                                        // 5 = specified Unix Epochs for 24 hrs (defaults to epochSleep after), 99 = test mode
+byte logMode                = 5;        // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
+                                        // 5 = specified Unix Epochs for 24 hrs (defaults to mode 4 after), 99 = test mode
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;       // UTC Hour 
 byte logEndHr               = 14;       // UTC Hour
@@ -132,8 +132,8 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 ///////// DEBUGGING MACROS
-#define DEBUG                     true   // Output messages to Serial monitor
-#define DEBUG_GNSS                false  // Output GNSS debug messages to Serial monitor
+#define DEBUG                     true       // Output messages to Serial monitor
+#define DEBUG_GNSS                false      // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
 #define DEBUG_PRINTLN(x)          Serial.println(x)
@@ -150,25 +150,24 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.0.3 (6/23/22)***");
+    Serial.println("***WELCOME TO GNSS LOGGER v1.0.4 (6/23/22)***");
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
-  configureWdt();                    // 12s interrupt, 24s reset period
-  checkBattery();                    // IF battery LOW, send back to sleep until next log date
-  initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
   pinMode(LED, OUTPUT);              //
+  configureWdt();                    // 12s interrupt, 24s reset period
+  checkBattery();                    // IF battery LOW, send back to sleep until recharged
+  initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
   configureSD();                     // BLINK 2x pattern - FAILED SETUP
   getConfig();                       // Read LOG settings from Config.txt on uSD; 5x - FAILED
+  createDebugFile();                 // Creates debug file headers
   getDates();                        // Read Dates (in unix epoch format) for log mode 5
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
-  createDebugFile();                 //
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
-//***************LOG MODE SETTINGS******************//
+//***********LOG MODE-SPECIFC SETTINGS***************//
   if (logMode == 1 || logMode == 3) {                    
-       configureSleepAlarm();
-       DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
+       configureSleepAlarm();        // Get ready to sleep for these modes
        deinitializeBuses();
   }
 //************************************************//  
@@ -180,36 +179,35 @@ void setup() {
 
 void loop() {
   
-    if (alarmFlag) {                // SLEEP UNTIL alarmFlag = True
-      checkBattery();
-      DEBUG_PRINTLN("Info: Alarm Triggered - Configuring System");
-      petDog();                     //
-      initializeBuses();            // CONFIGURE I2C, SPI, ZED, uSD
-      configureSD();                // CONFIGURE SD
-      configureGNSS();              // CONFIGURE GNSS SETTINGS
-      syncRtc();                    //
-      configureLogAlarm();          // RTC INTERRUPT WHEN DONE LOGGING
-      DEBUG_PRINT("Info: Logging until "); printAlarm();
-      
-      while(!alarmFlag) {           // LOG DATA UNTIL alarmFlag = True
-        petDog();
-        logGNSS();
-      }
+    if (alarmFlag) {                 // SLEEPS until alarmFlag = True
+      checkBattery();                //
+      DEBUG_PRINTLN("Info: Alarm Triggered - Beginning Logging");
+      petDog();                      //
+      if (online.gnss == false || online.uSD == false) {
+        initializeBuses();           // Reconfigure GNSS/SD if necessary
+        configureSD();               //
+        configureGNSS();             //
+        syncRtc();                   //
+      }                              //
+      configureLogAlarm();           // 
+      while(!alarmFlag) {            // LOG DATA UNTIL alarmFlag = True
+        petDog();                    //
+        logGNSS();                   // 
+      }                              //
       
       DEBUG_PRINTLN("Info: Logging Terminated");   
       closeGNSS(); 
       logDebug("success");                 
       configureSleepAlarm();
       deinitializeBuses();
-      DEBUG_PRINT("Info: Sleeping until "); printAlarm();
     }
 
-    if (wdtFlag) {                 // IF WDT interrupt, restart timer by petting dog
+    if (wdtFlag) {                  // IF WDT interrupt, restart timer by petting dog
       petDog(); 
     }  
 
-    if (ledBlink) {               // Only if User wants blinking
-      blinkLed(1, 100);           // BLINK once every WDT trigger
+    if (ledBlink) {                // Only if User wants blinking every WDT interrupt
+      blinkLed(1, 100);      
     }
  
     goToSleep();  

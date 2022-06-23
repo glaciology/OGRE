@@ -27,8 +27,8 @@ void createDebugFile() {
 
 
 void logDebug(const char* errorCode) {
-  // Increment debug counter
-  debugCounter++;
+  
+  debugCounter++; // Increment debug counter
 
   if (!debugFile.open("debug.csv", O_APPEND | O_WRITE)) {
     DEBUG_PRINTLN("Warning: Failed to open debug file.");
