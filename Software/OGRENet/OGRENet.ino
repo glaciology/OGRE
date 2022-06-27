@@ -12,7 +12,7 @@
    - SdFat Library v2.1.0
 
    INSTRUCTIONS:
-   - Enter user defined variables in "USER DEFINED" Section below
+   - See github.com/glaciology/OGRENet/ for detailed instructions.
    - LED indicators:
         *2 Blink Pattern: uSD failed - waiting for RESET
         *3 Blink Pattern: Ublox I2C or config failed - waiting for RESET
@@ -110,7 +110,7 @@ unsigned long dates[15]           = {};       // Array with Unix Epochs of log d
 int           settings[15]        = {};       // Array that holds USER settings on SD
 char          line[100];                      // Temporary array for parsing USER settings
 int           stationName         = 0000;     // Station name, 4 digits
-char          logFileName[12]     = "";       // Log file name for mode 4
+//char          logFileName[12]     = "";     // Log file name for mode 99
 char          logFileNameDate[30] = "";       // Log file name for modes 1, 2, 3
 
 // DEBUGGING
@@ -189,6 +189,7 @@ void loop() {
         configureGNSS();             //
         syncRtc();                   //
       }                              //
+      getLogFileName();              //
       configureLogAlarm();           // 
       while(!alarmFlag) {            // LOG DATA UNTIL alarmFlag = True
         petDog();                    //

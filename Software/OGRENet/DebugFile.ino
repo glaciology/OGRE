@@ -36,7 +36,7 @@ void logDebug(const char* errorCode) {
   }
   
   else {
-    DEBUG_PRINT("Info: Debug Dumped to: "); DEBUG_PRINTLN("debug.csv");
+    DEBUG_PRINT("Info: Debug Dumped to: debug.csv");
   }
 
   // Create datetime string

@@ -35,7 +35,9 @@ void deinitializeBuses() {
   mySpi.end();            // Power down SPI
   zedPowerOff();
   peripheralPowerOff();
-//  enableI2CPullups();
+#if HARDWARE_VERSION == 0
+  enableI2CPullups();   
+#endif
   online.gnss = false;   // Clear online/offline flags
   online.uSD = false;
 }

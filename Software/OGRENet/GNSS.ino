@@ -82,32 +82,6 @@ void configureGNSS(){
   }
 
   gnss.setAutoPVT(true);                          // Enable PVT messages for syncing RTC
-
-  if (!initSetup) {                               // Create LOG file, but only when not in SETUP Mode
-//    if (logMode == 1 || logMode == 2 || logMode == 3){
-    getLogFileName();
-    myFile.open(logFileNameDate, O_CREAT | O_APPEND | O_WRITE);
-    DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileNameDate);
-//    } else {
-//       for (int i = 1; i < 1000; i++) {
-//        sprintf(logFileName, "RAWX%03d.ubx", i);
-//        if (! sd.exists(logFileName)) {
-//          DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileName);
-//          myFile.open(logFileName, O_CREAT | O_APPEND | O_WRITE);
-//          break;
-//        }
-//      }     
-//    }
-    
-    if (!myFile) {
-      DEBUG_PRINTLN(F("Warning: Failed to create UBX data file! Freezing..."));
-      logDebug("GNSS_FILE_CREATE");
-      while (1){
-        blinkLed(3, 250);
-        delay(2000); 
-      }
-    }
-  }
   
   initSetup = false;
     
