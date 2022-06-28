@@ -19,7 +19,7 @@ void configureSD() {
     }
   }
   else {
-    DEBUG_PRINTLN("Info: SD card initialized.");
+    DEBUG_PRINTLN("Info: microSD initialized.");
     online.uSD = true;
   }
 }

@@ -83,7 +83,7 @@ void configureSleepAlarm() {
     time_t a;
     time_t b;
     for(int i=0; i< 15; i++){
-      if(dates[i] > rtc.getEpoch()){
+      if(dates[i] > rtc.getEpoch()) {
         Serial.print("Info: next date found: "); Serial.println(dates[i]);
         b = dates[i];
         rtc.setAlarm(gmtime(&b)->tm_hour, gmtime(&b)->tm_min, gmtime(&b)->tm_sec, 0, gmtime(&b)->tm_mday, gmtime(&b)->tm_mon+1);
@@ -91,7 +91,7 @@ void configureSleepAlarm() {
         rtc.attachInterrupt(); // Attach RTC alarm interrupt
         alarmFlag = false;
         DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
-        return;
+        return;  
       }
     }
     a = rtc.getEpoch() + epochSleep;
@@ -156,7 +156,7 @@ void syncRtc() {
     if (!rtcSyncFlag){
       DEBUG_PRINTLN("Warning: Unable to sync RTC! Awaiting System Reset");
       logDebug("RTC_SYNC");
-      while(1){  //Awaiting WDT Reset
+      while(1) {  //Awaiting WDT Reset
         blinkLed(5, 500); 
         delay(2000);
       }

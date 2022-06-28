@@ -68,6 +68,8 @@ void configureGNSS(){
       }
     }
   }
+
+  initSetup = false;
   //////////////////////////////////////////
   
   gnss.setI2COutput(COM_TYPE_UBX);                 // Set the I2C port to output UBX only (no NMEA)
@@ -82,61 +84,65 @@ void configureGNSS(){
   }
 
   gnss.setAutoPVT(true);                          // Enable PVT messages for syncing RTC
-  
-  initSetup = false;
+ 
+}
+
+
+void logGNSS() {
+  ///////// RECEIVE AND LOG GNSS MESSAGES
     
-  // Reset debug counters
-  bytesWritten      = 0;
+  bytesWritten      = 0;          // Reset debug counters
   writeFailCounter  = 0;
   syncFailCounter   = 0;
   closeFailCounter  = 0;
 
   gnss.clearFileBuffer();         // Clear file buffer
   gnss.clearMaxFileBufferAvail(); // Reset max file buffer size
-}
-
-
-void logGNSS() {
-  ///////// RECEIVE AND LOG GNSS MESSAGES
-  gnss.checkUblox();                                               // Check for arrival of new data and process it.
-  while (gnss.fileBufferAvailable() >= sdWriteSize) {              // Check to see if we have at least sdWriteSize waiting in the buffer
+  
+  while(!alarmFlag) { 
+    
     petDog();
-
-    if (ledBlink){
-      digitalWrite(LED, HIGH);
-    }
+    gnss.checkUblox();                                               // Check for arrival of new data and process it.
     
-    uint8_t myBuffer[sdWriteSize];                                 // Create our own buffer to hold the data while we write it to SD card
-    gnss.extractFileBufferData((uint8_t *)&myBuffer, sdWriteSize); // Extract exactly sdWriteSize bytes from the UBX file buffer and put them into myBuffer
-    
-    if (!myFile.write(myBuffer, sdWriteSize)) {                    // Write exactly sdWriteSize bytes from myBuffer to the ubxDataFile on the SD card
-        DEBUG_PRINTLN("Warning: Failed to write to log file!");
-        writeFailCounter++;
+    while (gnss.fileBufferAvailable() >= sdWriteSize) {              // Check to see if we have at least sdWriteSize waiting in the buffer
+      petDog();
+  
+      if (ledBlink){
+        digitalWrite(LED, HIGH);
+      }
+      
+      uint8_t myBuffer[sdWriteSize];                                 // Create our own buffer to hold the data while we write it to SD card
+      gnss.extractFileBufferData((uint8_t *)&myBuffer, sdWriteSize); // Extract exactly sdWriteSize bytes from the UBX file buffer and put them into myBuffer
+      
+      if (!myFile.write(myBuffer, sdWriteSize)) {                    // Write exactly sdWriteSize bytes from myBuffer to the ubxDataFile on the SD card
+          DEBUG_PRINTLN("Warning: Failed to write to log file!");
+          writeFailCounter++;
+      }
+      
+      bytesWritten += sdWriteSize;                                   // Update bytesWritten
+      gnss.checkUblox();                                             // Check for the arrival of new data and process it if SD slow
+  
+      if (ledBlink){
+        digitalWrite(LED, LOW);
+      }
     }
-    
-    bytesWritten += sdWriteSize;                                   // Update bytesWritten
-    gnss.checkUblox();                                             // Check for the arrival of new data and process it if SD slow
-
-    if (ledBlink){
-      digitalWrite(LED, LOW);
+  
+    if (millis() - prevMillis > 5000) {                             // Save data every 5 seconds
+      if (!myFile.sync()) {
+        DEBUG_PRINTLN("Warning: Failed to sync log file!");
+        syncFailCounter++;                                           // Count number of failed file syncs
+      }
+  
+      DEBUG_PRINT(F("Bytes written to SD card: "));                  // Print how many bytes have been written to SD card
+      DEBUG_PRINTLN(bytesWritten);
+      
+      maxBufferBytes = gnss.getMaxFileBufferAvail();                 // Get how full the file buffer has been (not how full it is now)
+      if (maxBufferBytes > ((fileBufferSize / 5) * 4)) {             // Warn the user if fileBufferSize was more than 80% full
+          DEBUG_PRINTLN("Warning: the file buffer > 80% full. Some data may have been lost.");
+      }
+      
+      prevMillis = millis();
     }
-  }
-
-  if (millis() - prevMillis > 5000) {                             // Save data every 5 seconds
-    if (!myFile.sync()) {
-      DEBUG_PRINTLN("Warning: Failed to sync log file!");
-      syncFailCounter++;                                           // Count number of failed file syncs
-    }
-
-    DEBUG_PRINT(F("Bytes written to SD card: "));                  // Print how many bytes have been written to SD card
-    DEBUG_PRINTLN(bytesWritten);
-    
-    maxBufferBytes = gnss.getMaxFileBufferAvail();                 // Get how full the file buffer has been (not how full it is now)
-    if (maxBufferBytes > ((fileBufferSize / 5) * 4)) {             // Warn the user if fileBufferSize was more than 80% full
-        DEBUG_PRINTLN("Warning: the file buffer > 80% full. Some data may have been lost.");
-    }
-    
-    prevMillis = millis();
   }
 }
 

@@ -1,7 +1,7 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
    Derek Pickell 6/23/22
-   V1.0.4
+   V1.0.5
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T
@@ -25,7 +25,7 @@
 */
 
 #define HARDWARE_VERSION 1      // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22
-#define SOFTWARE_VERSION "1-0-4" 
+#define SOFTWARE_VERSION "1-0-5" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS
 #include <Wire.h>                                  // 
@@ -150,7 +150,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.0.4 (6/23/22)***");
+    Serial.println("***WELCOME TO GNSS LOGGER v1.0.5 (6/28/22)***");
   #endif
 
   ///////// CONFIGURE INITIAL SETTINGS
@@ -191,10 +191,11 @@ void loop() {
       }                              //
       getLogFileName();              //
       configureLogAlarm();           // 
-      while(!alarmFlag) {            // LOG DATA UNTIL alarmFlag = True
-        petDog();                    //
-        logGNSS();                   // 
-      }                              //
+      logGNSS();
+//      while(!alarmFlag) {            // LOG DATA UNTIL alarmFlag = True
+//        petDog();                    //
+//        logGNSS();                   // 
+//      }                              //
       
       DEBUG_PRINTLN("Info: Logging Terminated");   
       closeGNSS(); 
