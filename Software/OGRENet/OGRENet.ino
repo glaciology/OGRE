@@ -202,10 +202,8 @@ void loop() {
       configureSleepAlarm();
       deinitializeBuses();
     }
-
-    if (wdtFlag) {                   // IF WDT interrupt, restart timer by petting dog
-      petDog(); 
-    }  
+    
+    petDog();
 
     if (ledBlink) {                  // Only if User wants blinking every WDT interrupt
       blinkLed(1, 100);      

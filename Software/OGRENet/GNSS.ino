@@ -134,7 +134,7 @@ void logGNSS() {
       }
   
       DEBUG_PRINT(F("Bytes written to SD card: "));                  // Print how many bytes have been written to SD card
-      DEBUG_PRINT(bytesWritten); DEBUG_PRINT("Buffer: ");
+      DEBUG_PRINT(bytesWritten); DEBUG_PRINT(" Buffer: ");
       
       maxBufferBytes = gnss.getMaxFileBufferAvail();                 // Get how full the file buffer has been (not how full it is now)
       DEBUG_PRINTLN(maxBufferBytes);
