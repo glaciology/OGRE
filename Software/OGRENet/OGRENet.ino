@@ -90,6 +90,7 @@ int logNav                  = 1;
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;     // If FALSE, all LED indicators during log/sleep disabled
 bool measureBattery         = true;     // If TRUE, uses battery circuit to measure V during debug logs
+int  stationName            = 0000;     // Station name, 4 digits
 
 // BATTERY PARAMETERS
 float converter              = 17.5;     // If using battery > 12.6V, voltage divider GAIN needs to be tuned
@@ -107,10 +108,8 @@ volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 unsigned long dates[15]           = {};       // Array with Unix Epochs of log dates !!! MAX 15 !!!
-int           settings[15]        = {};       // Array that holds USER settings on SD
-char          line[100];                      // Temporary array for parsing USER settings
-int           stationName         = 0000;     // Station name, 4 digits
-//char          logFileName[12]     = "";     // Log file name for mode 99
+int           settings[15]        = {};       // Array that holds user settings on SD
+char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name for modes 1, 2, 3
 
 // DEBUGGING

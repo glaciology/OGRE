@@ -101,9 +101,9 @@ void getConfig() {
   stationName = settings[13];
   
   DEBUG_PRINTLN("Info: Settings read from SD:");
-  DEBUG_PRINT("1. Log Mode: "); DEBUG_PRINTLN(logMode);
-  DEBUG_PRINT("2. Log Battery?: "); DEBUG_PRINTLN(measureBattery);
-  DEBUG_PRINT("3. Flash LED?: "); DEBUG_PRINTLN(ledBlink);
+  DEBUG_PRINT(" - Log Mode: "); DEBUG_PRINTLN(logMode);
+  DEBUG_PRINT(" - Log Battery?: "); DEBUG_PRINTLN(measureBattery);
+  DEBUG_PRINT(" - Flash LED?: "); DEBUG_PRINTLN(ledBlink);
 
   if (logMode == 1 ){
     DEBUG_PRINT("Log Mode 1 - Start/End Hours: "); DEBUG_PRINT(logStartHr); DEBUG_PRINT(", ");DEBUG_PRINTLN(logEndHr);
@@ -117,9 +117,9 @@ void getConfig() {
     DEBUG_PRINT("Log Mode 4 - Sleep Interval "); DEBUG_PRINTLN(epochSleep);
   }
 
-  DEBUG_PRINT("4. Constellations: "); DEBUG_PRINT("GPS "); DEBUG_PRINT(logGPS); DEBUG_PRINT(" GLO "); DEBUG_PRINTLN(logGLO);
-  DEBUG_PRINT(" GAL "); DEBUG_PRINT(logGAL); DEBUG_PRINT(" BDS "); DEBUG_PRINT(logBDS); DEBUG_PRINT(" QZSS "); DEBUG_PRINT(logQZSS);
-  DEBUG_PRINT(" NAV "); DEBUG_PRINTLN(logNav);
+  DEBUG_PRINT(" - Constellations: "); DEBUG_PRINT("GPS "); DEBUG_PRINT(logGPS); DEBUG_PRINT(" GLO "); DEBUG_PRINT(logGLO);
+  DEBUG_PRINT(" GAL "); DEBUG_PRINTLN(logGAL); DEBUG_PRINT("                   BDS "); DEBUG_PRINT(logBDS); DEBUG_PRINT(" QZSS "); 
+  DEBUG_PRINT(logQZSS); DEBUG_PRINT(" NAV "); DEBUG_PRINTLN(logNav);
   
   if (!configFile.close()) {
     DEBUG_PRINTLN("Warning: Failed to close config file.");
