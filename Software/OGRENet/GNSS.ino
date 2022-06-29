@@ -36,11 +36,11 @@ void configureGNSS() {
   //////////////////////////////////////////
   if (initSetup) {                                                       // ONLY run this once, during initialization
     bool success = true;
-//    setValueSuccess &= gnss.newCfgValset8(UBLOX_CFG_I2C_ENABLED, 1);    // Enable I2C
-//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_SPI_ENABLED, 0);    // Disable SPI
-//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_UART1_ENABLED, 0);  // Disable UART1
-//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_UART2_ENABLED, 0);  // Disable UART2
-//    setValueSuccess &= gnss.sendCfgValset8(UBLOX_CFG_USB_ENABLED, 0);   // Disable USB
+//    setValueSuccess &= gnss.newCfgValset8(UBLOX_CFG_I2C_ENABLED, 1);   // Enable I2C
+//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_SPI_ENABLED, 0);   // Disable SPI
+//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_UART1_ENABLED, 0); // Disable UART1
+//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_UART2_ENABLED, 0); // Disable UART2
+//    setValueSuccess &= gnss.sendCfgValset8(UBLOX_CFG_USB_ENABLED, 0);  // Disable USB
     
     success &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, logGPS);     // Enable GPS (define in USER SETTINGS)
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
@@ -90,7 +90,20 @@ void configureGNSS() {
 
 void logGNSS() {
   ///////// RECEIVE AND LOG GNSS MESSAGES
-    
+
+  getLogFileName();
+
+  if (!myFile.open(logFileNameDate, O_CREAT | O_APPEND | O_WRITE)) {
+    DEBUG_PRINTLN(F("Warning: Failed to create UBX data file! Freezing..."));
+    logDebug("GNSS_FILE_CREATE");
+    while (1) {
+      blinkLed(3, 250);
+      delay(2000); 
+    }
+  }
+  
+  DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileNameDate);
+  
   bytesWritten      = 0;          // Reset debug counters
   writeFailCounter  = 0;
   syncFailCounter   = 0;

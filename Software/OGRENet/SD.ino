@@ -30,18 +30,6 @@ void getLogFileName() {
   sprintf(logFileNameDate, "%04d_20%02d%02d%02d_%02d%02d%02d.ubx", stationName,
           rtc.year, rtc.month, rtc.dayOfMonth,
           rtc.hour, rtc.minute, rtc.seconds);
-
-  myFile.open(logFileNameDate, O_CREAT | O_APPEND | O_WRITE);
-  DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileNameDate);
-    
-  if (!myFile) {
-    DEBUG_PRINTLN(F("Warning: Failed to create UBX data file! Freezing..."));
-    logDebug("GNSS_FILE_CREATE");
-    while (1) {
-      blinkLed(3, 250);
-      delay(2000); 
-    }
-  }
 }
 
 

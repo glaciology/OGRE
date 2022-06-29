@@ -21,7 +21,7 @@
         *10 Blinks: RTC synced and System Configuration COMPLETE (After Initial Power On or Reset Only)
         *1 Blink every 12 seconds: Sleeping 
         *Random Rapid Blinks: System logging data.
-        *No Blinks: System deep sleep due to low battery, or battery dead.
+        *No Blinks: System deep sleep due to low battery or battery dead.
 */
 
 #define HARDWARE_VERSION 1  // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22
@@ -188,13 +188,8 @@ void loop() {
         configureGNSS();             //
         syncRtc();                   //
       }                              //
-      getLogFileName();              //
       configureLogAlarm();           // 
-      logGNSS();
-//      while(!alarmFlag) {          // LOG DATA UNTIL alarmFlag = True
-//        petDog();                  //
-//        logGNSS();                 // 
-//      }                            //
+      logGNSS();                     //
       
       DEBUG_PRINTLN("Info: Logging Terminated");   
       closeGNSS(); 
