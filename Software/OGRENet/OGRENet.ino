@@ -24,82 +24,82 @@
         *No Blinks: System deep sleep due to low battery, or battery dead.
 */
 
-#define HARDWARE_VERSION 1      // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22
+#define HARDWARE_VERSION 1  // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22
 #define SOFTWARE_VERSION "1-0-5" 
 
-///////// LIBRARIES & OBJECT INSTANTIATIONS
-#include <Wire.h>                                  // 
-#include <SPI.h>                                   // 
-#include <WDT.h>                                   //
-#include <RTC.h>                                   //
-#include <time.h>                                  //
-#include <SdFat.h>                                 // https://github.com/greiman/SdFat v2.0.6
+///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
+#include <Wire.h>                             // 
+#include <SPI.h>                              // 
+#include <WDT.h>                              //
+#include <RTC.h>                              //
+#include <time.h>                             //
+#include <SdFat.h>                            // https://github.com/greiman/SdFat v2.0.6
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
-SFE_UBLOX_GNSS gnss;                               //
-SdFs sd;                                           // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
-APM3_RTC rtc;                                      //
-APM3_WDT wdt;                                      // 
-FsFile myFile;                                     // RAW UBX LOG FILE
-FsFile debugFile;                                  // DEBUG LOG FILE
-FsFile configFile;                                 // USER INPUT CONFIG FILE
-FsFile dateFile;                                   // USER INPUT EPOCHS FILE
+SFE_UBLOX_GNSS gnss;                          //
+SdFs sd;                                      // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
+APM3_RTC rtc;                                 //
+APM3_WDT wdt;                                 // 
+FsFile myFile;                                // RAW UBX LOG FILE
+FsFile debugFile;                             // DEBUG LOG FILE
+FsFile configFile;                            // USER INPUT CONFIG FILE
+FsFile dateFile;                              // USER INPUT EPOCHS FILE
 
-///////// HARDWARE-SPECIFIC PINOUTS & OBJECTS
+///////// HARDWARE-SPECIFIC PINOUTS & OBJECTS ////////
 #if HARDWARE_VERSION == 0
-const byte BAT                    = 32;  // ADC port for battery measure
-#elif HARDWARE_VERSION == 1
-const byte BAT                    = 35;  //
-#endif
-const byte PER_POWER              = 18;  // Drive to turn off uSD
-const byte ZED_POWER              = 34;  // Drive to turn off ZED
-const byte LED                    = 33;  //
-const byte PIN_SD_CS              = 41;  //
-const byte BAT_CNTRL              = 22;  // Drive high to turn on Bat measure
+const byte BAT                    = 32;       // ADC port for battery measure
+#elif HARDWARE_VERSION == 1                   //
+const byte BAT                    = 35;       //
+#endif                                        //
+const byte PER_POWER              = 18;       // Drive to turn off uSD
+const byte ZED_POWER              = 34;       // Drive to turn off ZED
+const byte LED                    = 33;       //
+const byte PIN_SD_CS              = 41;       //
+const byte BAT_CNTRL              = 22;       // Drive high to turn on Bat measure
 
-TwoWire myWire(2);                       // USE I2C bus 2, SDA/SCL 25/27
-SPIClass mySpi(3);                       // Use SPI 3 - pins 38, 41, 42, 43
+TwoWire myWire(2);                            // USE I2C bus 2, SDA/SCL 25/27
+SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 41, 42, 43
 #define SD_CONFIG SdSpiConfig(PIN_SD_CS, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
 
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
-// LOG MODE: ROLLING OR DAILY
-byte logMode                = 5;        // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
-                                        // 5 = specified Unix Epochs for 24 hrs (defaults to mode 4 after), 99 = test mode
+// LOG MODE
+byte logMode                = 5;              // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
+                                              // 5 = specified Unix Epochs for 24 hrs (defaults to mode 4 after), 99 = test mode
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
-byte logStartHr             = 12;       // UTC Hour 
-byte logEndHr               = 14;       // UTC Hour
+byte logStartHr             = 12;             // UTC Hour 
+byte logEndHr               = 14;             // UTC Hour
 
 // LOG MODE 3: ONCE/MONTH FOR 24 HOURS
-byte logStartDay            = 8;        // Day of month between 1 and 28
+byte logStartDay            = 8;              // Day of month between 1 and 28
 
 // LOG MODE 4/5: SLEEP FOR SPECIFIED DURATION
-uint32_t epochSleep         = 2628000;  // Sleep duration (Seconds) (ie, 2628000 ~ 1 month)
+uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (ie, 2628000 ~ 1 month)
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 50;       // Sleep interval (Seconds)
-uint32_t secondsLog         = 50;       // Logging interval (Seconds)
+uint32_t secondsSleep       = 50;             // Sleep interval (Seconds)
+uint32_t secondsLog         = 50;             // Logging interval (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
-int logGPS                  = 1;        // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
-int logGLO                  = 1;
-int logGAL                  = 0;
-int logBDS                  = 0;
-int logQZSS                 = 0;
-int logNav                  = 1;     
+int logGPS                  = 1;              // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
+int logGLO                  = 1;              //
+int logGAL                  = 0;              //
+int logBDS                  = 0;              //
+int logQZSS                 = 0;              //
+int logNav                  = 1;              //
 
 // ADDITIONAL CONFIGURATION
-bool ledBlink               = true;     // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = true;     // If TRUE, uses battery circuit to measure V during debug logs
-int  stationName            = 0000;     // Station name, 4 digits
+bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
+bool measureBattery         = true;           // If TRUE, uses battery circuit to measure V during debug logs
+int  stationName            = 0000;           // Station name, 4 digits
 
 // BATTERY PARAMETERS
-float converter              = 17.5;     // If using battery > 12.6V, voltage divider GAIN needs to be tuned
-float shutdownThreshold      = 11.8;     // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
-                                         // SYSTEM WILL SLEEP IF DIPS BELOW HERE, WAKES after shutdownThreshold + 0.2V reached
+float converter              = 17.5;          // If using battery > 12.6V, voltage divider GAIN needs to be tuned
+float shutdownThreshold      = 11.8;          // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
+                                              // SYSTEM WILL SLEEP IF DIPS BELOW HERE, WAKES after shutdownThreshold + 0.2V reached
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
-///////// GLOBAL VARIABLES
+///////// GLOBAL VARIABLES ///////////////////////////
 const int     sdWriteSize         = 512;      // Write data to SD in blocks of 512 bytes
 const int     fileBufferSize      = 16384;    // Allocate 16KB RAM for UBX message storage
 volatile bool wdtFlag             = false;    // ISR WatchDog
@@ -130,9 +130,9 @@ struct struct_online {
 } online;
 //////////////////////////////////////////////////////
 
-///////// DEBUGGING MACROS
-#define DEBUG                     true       // Output messages to Serial monitor
-#define DEBUG_GNSS                false      // Output GNSS debug messages to Serial monitor
+///////// DEBUGGING MACROS ///////////////////////////
+#define DEBUG                     true        // Output messages to Serial monitor
+#define DEBUG_GNSS                false       // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
 #define DEBUG_PRINTLN(x)          Serial.println(x)
@@ -143,7 +143,7 @@ struct struct_online {
 #define DEBUG_PRINT(x)
 #endif
 //////////////////////////////////////////////////////
-
+//////////////////////////////////////////////////////
 
 void setup() {
   #if DEBUG
@@ -152,7 +152,7 @@ void setup() {
     Serial.println("***WELCOME TO GNSS LOGGER v1.0.5 (6/28/22)***");
   #endif
 
-  ///////// CONFIGURE INITIAL SETTINGS
+  //// CONFIGURE INITIAL SETTINGS  ////
   pinMode(LED, OUTPUT);              //
   configureWdt();                    // 12s interrupt, 24s reset period
   checkBattery();                    // IF battery LOW, send back to sleep until recharged
@@ -164,12 +164,12 @@ void setup() {
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
-//***********LOG MODE-SPECIFC SETTINGS***************//
+//------------LOG MODE-SPECIFC SETTINGS----------------
   if (logMode == 1 || logMode == 3) {                    
        configureSleepAlarm();        // Get ready to sleep for these modes
        deinitializeBuses();
   }
-//************************************************//  
+//----------------------------------------------------  
 
   blinkLed(10, 100);                 // BLINK 10x - SETUP COMPLETE
   DEBUG_PRINTLN("Info: SETUP COMPLETE");
@@ -191,10 +191,10 @@ void loop() {
       getLogFileName();              //
       configureLogAlarm();           // 
       logGNSS();
-//      while(!alarmFlag) {            // LOG DATA UNTIL alarmFlag = True
-//        petDog();                    //
-//        logGNSS();                   // 
-//      }                              //
+//      while(!alarmFlag) {          // LOG DATA UNTIL alarmFlag = True
+//        petDog();                  //
+//        logGNSS();                 // 
+//      }                            //
       
       DEBUG_PRINTLN("Info: Logging Terminated");   
       closeGNSS(); 
@@ -203,11 +203,11 @@ void loop() {
       deinitializeBuses();
     }
 
-    if (wdtFlag) {                  // IF WDT interrupt, restart timer by petting dog
+    if (wdtFlag) {                   // IF WDT interrupt, restart timer by petting dog
       petDog(); 
     }  
 
-    if (ledBlink) {                // Only if User wants blinking every WDT interrupt
+    if (ledBlink) {                  // Only if User wants blinking every WDT interrupt
       blinkLed(1, 100);      
     }
  

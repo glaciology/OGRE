@@ -1,4 +1,4 @@
-void configureGNSS(){
+void configureGNSS() {
   ///////// SEND GNSS SETTING CONFIG TO UBLOX
   #if DEBUG_GNSS
   //gnss.enableDebugging();               // Sparkfun_GNSS library debugging messages on Serial
@@ -23,7 +23,7 @@ void configureGNSS(){
         delay(2000);
       }
     }
-    else{
+    else {
       DEBUG_PRINTLN("Info: UBLOX initialized.");
       online.gnss = true;
     }
@@ -147,7 +147,7 @@ void logGNSS() {
   }
 }
 
-void closeGNSS(){
+void closeGNSS() {
     ///////// CALL ONCE DONE LOGGING GNSS
     uint16_t remainingBytes = gnss.fileBufferAvailable();         // Check if there are any bytes remaining in the file buffer
     while (remainingBytes > 0) {                                  // While there is still data in the file buffer
@@ -169,7 +169,7 @@ void closeGNSS(){
 
     delay(200); // CRITICAL - GIVE SD TIME TO WRITE
 
-    if (!myFile.close()){
+    if (!myFile.close()) {
       DEBUG_PRINTLN("Warning: failed to close log file.");
       closeFailCounter++; 
     }

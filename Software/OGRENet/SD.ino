@@ -54,7 +54,7 @@ void getConfig() {
   configFile.open("CONFIG.TXT", O_READ);
   
   // IF SD ERROR, ABORT getConfig
-  if (!configFile.isOpen()){
+  if (!configFile.isOpen()) {
     DEBUG_PRINTLN("Warning: Could not open CONFIG.TXT");
     DEBUG_PRINTLN("Warning: Using hard-coded settings");
     blinkLed(5, 100);
@@ -80,13 +80,13 @@ void getConfig() {
   logStartDay     = settings[3];
   epochSleep      = settings[4];
 
-  if (settings[5] == 0){
+  if (settings[5] == 0) {
     ledBlink = false;
   } else {
     ledBlink = true;
   }
 
-  if (settings[6] == 0){
+  if (settings[6] == 0) {
     measureBattery = false;
   } else  {
     measureBattery = true;
@@ -105,15 +105,15 @@ void getConfig() {
   DEBUG_PRINT(" - Log Battery?: "); DEBUG_PRINTLN(measureBattery);
   DEBUG_PRINT(" - Flash LED?: "); DEBUG_PRINTLN(ledBlink);
 
-  if (logMode == 1 ){
+  if (logMode == 1 ) {
     DEBUG_PRINT("Log Mode 1 - Start/End Hours: "); DEBUG_PRINT(logStartHr); DEBUG_PRINT(", ");DEBUG_PRINTLN(logEndHr);
   }
   
-  if (logMode == 3 ){
+  if (logMode == 3 ) {
     DEBUG_PRINT("Log Mode 3 - Day of Month to Log: "); DEBUG_PRINTLN(logStartDay);
   }
 
-  if (logMode == 4 ){
+  if (logMode == 4 ) {
     DEBUG_PRINT("Log Mode 4 - Sleep Interval "); DEBUG_PRINTLN(epochSleep);
   }
 

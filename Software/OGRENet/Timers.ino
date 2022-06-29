@@ -67,22 +67,22 @@ void configureSleepAlarm() {
   // Clear the RTC alarm interrupt
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM);
   
-  if (logMode == 1){
+  if (logMode == 1) {
     rtc.setAlarm(logStartHr, 0, 0, 0, 0, 0); // (HR, MIN, SEC, HUND, DAY, MON) NO YR
     rtc.setAlarmMode(4); // match every day
   }
 
-  if (logMode == 3){
+  if (logMode == 3) {
     rtc.setAlarm(0, 0, 0, 0, logStartDay, 0); 
     rtc.setAlarmMode(2); // match every month
   }
 
-  if (logMode == 4 || logMode == 5){
+  if (logMode == 4 || logMode == 5) {
     // sleeps until specified unix epoch; if no longer specified defaults to epochSleep interval
     // note that a maximum of 15 dates can be provided. 
     time_t a;
     time_t b;
-    for(int i=0; i< 15; i++){
+    for(int i=0; i< 15; i++) {
       if(dates[i] > rtc.getEpoch()) {
         Serial.print("Info: next date found: "); Serial.println(dates[i]);
         b = dates[i];
@@ -100,7 +100,7 @@ void configureSleepAlarm() {
     
   }
     
-  if (logMode == 99){
+  if (logMode == 99) {
     rtc.setAlarm(0, 0, (secondsSleep + rtc.seconds) % 60, 0, 0, 0); 
     rtc.setAlarmMode(6);
   }
@@ -165,7 +165,7 @@ void syncRtc() {
 
 // Print the RTC's date and time
 void printDateTime() {
-  if (logMode == 3){
+  if (logMode == 3) {
     DEBUG_PRINTLN("Continuous");
   } else {
     rtc.getTime(); // Get the RTC's date and time
