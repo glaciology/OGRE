@@ -44,6 +44,10 @@ void deinitializeBuses() {
 
 // POWER DOWN AND WAIT FOR INTERRUPT
 void goToSleep() {
+  
+  closeFailCounter = 0;
+  lowBatteryCounter = 0;
+  
 # if DEBUG
   Serial.end();
 #endif
@@ -173,8 +177,8 @@ float measBat() {
   int measure1 = analogRead(BAT);
   delay(1);
   digitalWrite(BAT_CNTRL, LOW);
-  float vcc0 = (float)measure0 * converter / 16384.0; // convert to normal number
-  float vcc1 = (float)measure1 * converter / 16384.0; // convert to normal number
+  float vcc0 = (float)measure0 * gain / 16384.0 + offset; // convert to normal number
+  float vcc1 = (float)measure1 * gain / 16384.0 + offset; // convert to normal number
   float voltageFinal = (vcc0 + vcc1) / 2;
   return voltageFinal;
 }
@@ -187,7 +191,7 @@ void checkBattery() {
       pinMode(PER_POWER, OUTPUT);
       pinMode(ZED_POWER, OUTPUT);
       deinitializeBuses();
-      while((measBat() < shutdownThreshold + .2)) { // IMPORTANT - RECHARGE THRESHOLD SET HERE
+      while((measBat() < shutdownThreshold + .3)) { // IMPORTANT - RECHARGE THRESHOLD SET HERE
         goToSleep();
         petDog(); 
         DEBUG_PRINT("Info: Battery: "); DEBUG_PRINTLN(measBat());

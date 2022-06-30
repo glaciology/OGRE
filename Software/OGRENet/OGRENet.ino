@@ -1,6 +1,6 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 6/23/22
+   Derek Pickell 6/30/22
    V1.0.5
 
    Hardware:
@@ -93,8 +93,9 @@ bool measureBattery         = true;           // If TRUE, uses battery circuit t
 int  stationName            = 0000;           // Station name, 4 digits
 
 // BATTERY PARAMETERS
-float converter              = 17.5;          // If using battery > 12.6V, voltage divider GAIN needs to be tuned
-float shutdownThreshold      = 11.8;          // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
+float gain                   = 17.2;          // Gain/offset for 68k/10k voltage divider battery voltage measure
+float offset                 = 0.23;          // ADC range 0-2.0V
+float shutdownThreshold      = 11.0;          // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
                                               // SYSTEM WILL SLEEP IF DIPS BELOW HERE, WAKES after shutdownThreshold + 0.2V reached
 //----------------------------------------------------
 //////////////////////////////////////////////////////
@@ -108,7 +109,7 @@ volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 unsigned long dates[15]           = {};       // Array with Unix Epochs of log dates !!! MAX 15 !!!
-int           settings[15]        = {};       // Array that holds user settings on SD
+int           settings[16]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name for modes 1, 2, 3
 

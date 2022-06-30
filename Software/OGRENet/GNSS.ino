@@ -107,7 +107,6 @@ void logGNSS() {
   bytesWritten      = 0;          // Reset debug counters
   writeFailCounter  = 0;
   syncFailCounter   = 0;
-  closeFailCounter  = 0;
 
   gnss.clearFileBuffer();         // Clear file buffer
   gnss.clearMaxFileBufferAvail(); // Reset max file buffer size

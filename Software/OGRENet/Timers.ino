@@ -82,7 +82,7 @@ void configureSleepAlarm() {
     // note that a maximum of 15 dates can be provided. 
     time_t a;
     time_t b;
-    for(int i=0; i< 15; i++) {
+    for(int i=0; i< sizeof(dates)/sizeof(dates[0]); i++) {
       if(dates[i] > rtc.getEpoch()) {
         Serial.print("Info: next date found: "); Serial.println(dates[i]);
         b = dates[i];
