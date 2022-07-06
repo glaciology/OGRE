@@ -1,7 +1,7 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 6/30/22
-   V1.0.5
+   Derek Pickell 7/06/22
+   V1.0.6
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T
@@ -25,7 +25,7 @@
 */
 
 #define HARDWARE_VERSION 1  // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22
-#define SOFTWARE_VERSION "1-0-5" 
+#define SOFTWARE_VERSION "1-0-6" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
 #include <Wire.h>                             // 
@@ -95,7 +95,7 @@ int  stationName            = 0000;           // Station name, 4 digits
 // BATTERY PARAMETERS
 float gain                   = 17.2;          // Gain/offset for 68k/10k voltage divider battery voltage measure
 float offset                 = 0.23;          // ADC range 0-2.0V
-float shutdownThreshold      = 11.0;          // Shutdown if battery voltage dips below this (11.8V for DEKA 12V GEL)
+float shutdownThreshold      = 11.0;          // Shutdown if battery voltage dips below this (10.8V for DEKA 12V GEL)
                                               // SYSTEM WILL SLEEP IF DIPS BELOW HERE, WAKES after shutdownThreshold + 0.2V reached
 //----------------------------------------------------
 //////////////////////////////////////////////////////
@@ -150,7 +150,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.0.5 (6/28/22)***");
+    Serial.println("***WELCOME TO GNSS LOGGER v1.0.6 (7/06/22)***");
   #endif
 
   //// CONFIGURE INITIAL SETTINGS  ////
