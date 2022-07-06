@@ -33,7 +33,7 @@
 #include <WDT.h>                              //
 #include <RTC.h>                              //
 #include <time.h>                             //
-#include <SdFat.h>                            // https://github.com/greiman/SdFat v2.0.6
+#include <SdFat.h>                            // https://github.com/greiman/SdFat v2.1.0
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
 SFE_UBLOX_GNSS gnss;                          //
 SdFs sd;                                      // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
