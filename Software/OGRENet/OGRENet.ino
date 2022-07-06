@@ -108,7 +108,7 @@ volatile bool rtcSyncFlag         = false;    // Flag to indicate if RTC has bee
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
-unsigned long dates[15]           = {};       // Array with Unix Epochs of log dates !!! MAX 15 !!!
+unsigned long dates[16]           = {};       // Array with Unix Epochs of log dates !!! MAX 15 !!!
 int           settings[16]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name for modes 1, 2, 3

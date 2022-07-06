@@ -36,7 +36,7 @@ void logDebug(const char* errorCode) {
   }
   
   else {
-    DEBUG_PRINT("Info: Debug Dumped to: debug.csv");
+    DEBUG_PRINTLN("Info: Debug Dumped to: debug.csv");
   }
 
   // Create datetime string
@@ -79,4 +79,6 @@ void logDebug(const char* errorCode) {
     DEBUG_PRINTLN("Warning: Failed to close debug file.");
     closeFailCounter++; // Count number of failed file closes
   }
+  DEBUG_PRINTLN("HERE1");
+  delay(2000);
 }

@@ -196,7 +196,7 @@ void checkBattery() {
         petDog(); 
         DEBUG_PRINT("Info: Battery: "); DEBUG_PRINTLN(measBat());
       }
-      DEBUG_PRINT("Info: Battery Charged."); 
+      DEBUG_PRINTLN("Info: Battery Charged."); 
       lowBatteryCounter++;
     }
   }
