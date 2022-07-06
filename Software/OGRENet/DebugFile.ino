@@ -79,6 +79,4 @@ void logDebug(const char* errorCode) {
     DEBUG_PRINTLN("Warning: Failed to close debug file.");
     closeFailCounter++; // Count number of failed file closes
   }
-  DEBUG_PRINTLN("HERE1");
-  delay(2000);
 }
