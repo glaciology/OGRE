@@ -10,7 +10,7 @@ On-ice Greenland Research Experimental Network :: A low-power, low-cost GNSS dat
 </p>
 
 ## Overview
-Designed for logging raw multi-GNSS data in remote regions of the Arctic, this PCB-software package incorporates low power, low cost components onto a single PCB and features a Ublox ZED-F9P GNSS module and Sparkfun Artemis MCU ( Ambiq Apollo3 MCU, Cortex-M4). 
+Designed for logging raw multi-GNSS data in remote regions of the Arctic, this instruments incorporates low power, low cost components onto a single circuit board and features a Ublox ZED-F9P GNSS module and Sparkfun Artemis MCU ( Ambiq Apollo3 MCU, Cortex-M4). 
 - Logs raw GPS, GLONASS, BEIDOU, GALILEO, QZSS & Satellite Nav Messages at 1 Hz to microSD.
 - Nominal current consumption with a 12V supply is 45mA (.54W) awake and 0.07mA (.84mW) asleep.
 - Features on-board battery measurement circuit and temperature sensor. 
