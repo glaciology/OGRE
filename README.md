@@ -19,7 +19,7 @@ Designed for logging raw multi-GNSS data in remote regions of the Arctic, this i
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/37055625/159164258-056cc197-e42d-48bf-8e59-d1279da0c638.png" width="500"/>
-</p>![image](https://user-images.githubusercontent.com/37055625/176936853-b51edf73-01c0-4ca6-965a-6facaed8a807.png)
+</p>
 
 
 ## Project Organization 
