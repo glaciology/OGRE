@@ -1,18 +1,18 @@
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/37055625/176936815-bca28e75-e4d5-4d05-937f-501e2b861f2d.png" width="550"/>
-</p>
+<img src="https://user-images.githubusercontent.com/37055625/181100467-84fbc824-24a9-4d06-a20b-8dd893361870.PNG" width="250"/>
+ </p>
 
 
-On-ice Greenland Research Experimental Network :: A low-power, low-cost GNSS data logger for monitoring the cryosphere.
+# On-ice Greenland Research Experimental Network :: A low-power, low-cost GNSS data logger for monitoring the cryosphere.
 <p align="center">
-<img src="https://user-images.githubusercontent.com/37055625/161155794-8e4619df-977a-4cc8-ab37-04bb2754a40c.jpg" width="250"/>
+<img src="https://user-images.githubusercontent.com/37055625/181101164-2deffa3e-e22e-488c-9098-c6bd66c3908c.jpg" width="350"/>
 </p>
 
 ## Overview
-Designed for logging raw multi-GNSS data in remote regions of the Arctic, this instruments incorporates low power, low cost components onto a single circuit board and features a Ublox ZED-F9P GNSS module and Sparkfun Artemis MCU ( Ambiq Apollo3 MCU, Cortex-M4). 
+Designed for logging raw multi-GNSS data in remote regions of the Arctic, this instruments incorporates low power, low cost components onto a single circuit board and features a Ublox ZED-F9P/T GNSS module and Sparkfun Artemis MCU (Ambiq Apollo3 MCU, Cortex-M4). 
 - Logs raw GPS, GLONASS, BEIDOU, GALILEO, QZSS & Satellite Nav Messages at 1 Hz to microSD.
-- Nominal current consumption with a 12V supply is 45mA (.54W) awake and 0.07mA (.84mW) asleep.
+- Nominal current consumption with a 12V supply is 45-65mA (.54W) awake and 0.07mA (.84mW) asleep.
 - Features on-board battery measurement circuit and temperature sensor. 
 - Additional pins & peripherals include RX/TX for serial programming, 3-Wire Temperature sensor, secondary I2C bus, secondary UART bus, several GPIO pins and I/O pins for streaming or receiving RTCM messages for RTK operation.  
 - Simple 2 layer PCB with SMD components totaling ~$260, including antenna. PCB inside enclosure measures 7x6.5x2.5cm. 
@@ -23,7 +23,7 @@ Designed for logging raw multi-GNSS data in remote regions of the Arctic, this i
 
 
 ## Project Organization 
-[/Software: Contains Arduino Code and Test Script](Software)
+[/Software: Contains Arduino Code and Test Scripts](Software)
 - [OGRENet: Software and software config files for upload to MCU](OGRENet) <br>
 
 
@@ -40,9 +40,9 @@ The Software has 6 modes of operation:
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER defined hours
   - (2) Continous Mode: Log GNSS data continously
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER specified day each month
-  - (4) Sleep Interval Mode: Log GNSS data for 24 hours immediately and at a USER defined interval thereafter
+  - (4) Sleep Interval Mode: Log GNSS data for 24 hours at power-on and at a USER defined interval thereafter
   - (5) Log GNSS data for 24 hours on USER specified dates/times read from .txt file. Defaults to mode 4 after.
-  - (99) Test Mode: Log GNSS data for 50 second intervals, sleep for 50 second intervals
+  - (99) Test Mode: Log GNSS data for 50 second interval, sleep for 50 second and repeat.
   
 OUTPUTs: With all modes, GNSS data is logged to a uSD card in raw .ubx (UBLOX) proprietary format. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery health, logging errors, etc.).
   
@@ -84,19 +84,21 @@ Insert the uSD card (with or without CONFIG & EPOCH files), then connect battery
  The following indicate failure of initialization: 
   - 2 Blink Pattern: uSD initialization failed - system awaiting automatic reset to try again (60 seconds).
   - 3 Blink Pattern: Ublox initialization failed - system awaiting automatic reset to try again (60 seconds).
-  - 5 Blink Pattern: RTC failed to sync - system awaiting automatic reset to try again (60 seconds). 
+  - 5 Blink Pattern: RTC failed to sync with GNSS time - system awaiting automatic reset to try again (60 seconds). 
   - 5 Rapid Blinks: uSD failed to read CONFIG settings. 
 
 Once the system is initialized, it will either sleep or begin logging data, depending on the specified log mode. 
 If the USER has enabled LED_INDICATORS, the following additional lights will flash: 
-  - Random flashes: System logging GNSS data
+  - Random rapid flashes: System logging GNSS data
   - 1 Blink every 12 seconds: System sleeping
 
 INSTALLATION:
 details coming soon...
 
 ## Hardware Notes
-<p align="center">
+<p float="middle">
+<img src="https://user-images.githubusercontent.com/37055625/161155794-8e4619df-977a-4cc8-ab37-04bb2754a40c.jpg" width="250"/>
+<img src="https://user-images.githubusercontent.com/37055625/181101078-56771903-b7e9-467f-81ce-15af4ea97b13.jpg" width="250"/>
 <img src="https://user-images.githubusercontent.com/37055625/159168297-7e0709cb-d71b-4a1e-9d3b-56ec911e481a.png" width="500"/>
 </p>
 
