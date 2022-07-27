@@ -99,7 +99,6 @@ details coming soon...
 <p float="middle">
 <img src="https://user-images.githubusercontent.com/37055625/161155794-8e4619df-977a-4cc8-ab37-04bb2754a40c.jpg" width="250"/>
 <img src="https://user-images.githubusercontent.com/37055625/181101078-56771903-b7e9-467f-81ce-15af4ea97b13.jpg" width="250"/>
-<img src="https://user-images.githubusercontent.com/37055625/159168297-7e0709cb-d71b-4a1e-9d3b-56ec911e481a.png" width="500"/>
 </p>
 
 MATERIALS
@@ -114,7 +113,6 @@ While this system is optimized for 12V batteries, input voltage can range from 5
   - The reverse polarity protection MOSFET has a limit of 20V. **Do not exeed 20V.**
 
 ## License & Credits
-This project is open source!
+This project is open source! OGRENet software is released under the [MIT License](http://opensource.org/licenses/MIT).
 
-Some code for this project adapted from [Sparkfun GNSS Library](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library) and 
-[Cryologger Glacier Velocity Tracker](https://github.com/adamgarbo/Cryologger_Glacier_Velocity_Tracker)
+Some [code](Software/TestCode) for this project is adapted from Sparkfun, released under the same license. 
