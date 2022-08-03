@@ -92,11 +92,13 @@ If the USER has enabled LED_INDICATORS, the following additional lights will fla
   - Random rapid flashes: System logging GNSS data
   - 1 Blink every 12 seconds: System sleeping
 
-INSTALLATION:
-details coming soon...
+## Installation
+A pre-compiled binary is avialable with each release. V1.0.6 [here](https://github.com/glaciology/OGRENet/releases/tag/v1.0.6). This can be uploaded to the Apollo MCU with a usb-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
+
+You can also compile this code with the Arduino IDE, ensuring that the code and board libraries match the proper versions defined in the header of OGRENet.ino. 
 
 ## Hardware Notes
-<p float="middle">
+<p align="center">
 <img src="https://user-images.githubusercontent.com/37055625/161155794-8e4619df-977a-4cc8-ab37-04bb2754a40c.jpg" width="250"/>
 <img src="https://user-images.githubusercontent.com/37055625/181101078-56771903-b7e9-467f-81ce-15af4ea97b13.jpg" width="250"/>
 </p>
