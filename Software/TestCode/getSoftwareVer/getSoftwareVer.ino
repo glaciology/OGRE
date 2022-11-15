@@ -2,7 +2,6 @@
   Module Info - extracts and prints the full module information from UBX_MON_VER
   using a custom command.
   By: @mayopan
-  **THIS PROGRAM also t
   * Modified for Dartmouth Glaciology Boards with proper pin assignments
 
   License: MIT. See license file for more information but you can
