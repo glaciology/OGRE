@@ -4,27 +4,26 @@
  </p>
 
 
-# On-ice Greenland Research Experimental Network :: A low-power, low-cost GNSS data logger for monitoring the cryosphere.
+# On-ice Greenland Research Experimental Network :: A low-power, low-cost GNSS data logger "OGRE" for monitoring the cryosphere.
 <p align="center">
 <img src="https://user-images.githubusercontent.com/37055625/181101164-2deffa3e-e22e-488c-9098-c6bd66c3908c.jpg" width="350"/>
 </p>
 
 ## Overview
 Designed for logging raw multi-GNSS data in remote regions of the Arctic, this instruments incorporates low power, low cost components onto a single circuit board and features a Ublox ZED-F9P/T GNSS module and Sparkfun Artemis MCU (Ambiq Apollo3 MCU, Cortex-M4). 
-- Logs raw GPS, GLONASS, BEIDOU, GALILEO, QZSS & Satellite Nav Messages at 1 Hz to microSD.
-- Nominal current consumption with a 12V supply is 45-65mA (.54W) awake and 0.07mA (.84mW) asleep.
+- Logs raw/binary GPS, GLONASS, BEIDOU, GALILEO, QZSS & Satellite Nav Messages at 1 Hz to microSD.
+- Nominal current consumption with a 12V supply is 45-65mA (.54W) awake, and 0.07mA (.84mW) asleep.
 - Features on-board battery measurement circuit and temperature sensor. 
-- Additional pins & peripherals include RX/TX for serial programming, 3-Wire Temperature sensor, secondary I2C bus, secondary UART bus, several GPIO pins and I/O pins for streaming or receiving RTCM messages for RTK operation.  
-- Simple 2 layer PCB with SMD components totaling ~$260, including antenna. PCB inside enclosure measures 7x6.5x2.5cm. 
+- Additional pins & peripherals include RX/TX for serial programming, 3-Wire Temperature sensor, secondary I2C bus, secondary UART bus, secondary SPI bus, several GPIO pins and I/O pins for streaming or receiving RTCM messages for RTK operation.  
+- Simple 2 layer PCB with SMD components totaling ~$260, including patch antenna. PCB inside enclosure measures 7x6.5x2.5cm. 
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/37055625/159164258-056cc197-e42d-48bf-8e59-d1279da0c638.png" width="500"/>
+<img src="https://user-images.githubusercontent.com/37055625/207705142-4ba32b05-6b62-4d18-bcf7-4f9eb635589c.jpeg" width="500"/>
 </p>
-
 
 ## Project Organization 
 [/Software: Contains Arduino Code and Test Scripts](Software)
-- [OGRENet: Software and software config files for upload to MCU](OGRENet) <br>
+- [OGRENet: Software and software config files for upload to OGRE instrument](OGRENet) <br>
 
 
 [/Hardware: Hardware & manufacturing files](Hardware)
@@ -41,13 +40,13 @@ The Software has 6 modes of operation:
   - (2) Continous Mode: Log GNSS data continously
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER specified day each month
   - (4) Sleep Interval Mode: Log GNSS data for 24 hours at power-on and at a USER defined interval thereafter
-  - (5) Log GNSS data for 24 hours on USER specified dates/times read from .txt file. Defaults to mode 4 after.
+  - (5) Log GNSS data for 24 hours on USER specified dates/times read from .txt file. Defaults to mode 4 after last user provided date.
   - (99) Test Mode: Log GNSS data for 50 second interval, sleep for 50 second and repeat.
   
-OUTPUTs: With all modes, GNSS data is logged to a uSD card in raw .ubx (UBLOX) proprietary format. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery health, logging errors, etc.).
+OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, etc.) is logged to a uSD card in raw .ubx (UBLOX) proprietary format. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery health, logging errors, etc.).
   
 INPUTs: USERS specify settings in the [CONFIG.txt](OGRENet/CONFIG) file, which, if uploaded to the SD card, will be read into the software. 
-Otherwise, software will default to hardcoded values. USER may also upload a [EPOCH.txt](OGRENet/EPOCH) file, which allows the user to specify up to 16 log dates (unix epoch format) for logging in Mode 5. 
+Otherwise, software will default to hardcoded configuration. USER may also upload a [EPOCH.txt](OGRENet/EPOCH) file, which allows the user to specify up to 16 log dates (unix epoch format) for logging in Mode 5. 
 
 The CONFIG.TXT file is formatted as follows: 
 
@@ -99,7 +98,7 @@ You can also compile this code with the Arduino IDE, ensuring that the code and 
 
 ## Hardware Notes
 <p align="center">
-<img src="https://user-images.githubusercontent.com/37055625/161155794-8e4619df-977a-4cc8-ab37-04bb2754a40c.jpg" width="250"/>
+<img src="https://user-images.githubusercontent.com/37055625/207705966-89887dd3-3384-4fdd-b19f-6bf830b9bbab.jpg" width="296"/>
 <img src="https://user-images.githubusercontent.com/37055625/181101078-56771903-b7e9-467f-81ce-15af4ea97b13.jpg" width="250"/>
 </p>
 
@@ -111,8 +110,8 @@ In standard configuration, this system is powered by a 12V lead-acid battery.
   
 While this system is optimized for 12V batteries, input voltage can range from 5.2V to 20V with the following considerations:  
   - The Pololu DC-DC converter minimum input is 5.2V and maximum input is 50V, although aditional power filtering at high voltages required. 
-  - The Battery Measurement circuit features a voltage divider circuit that must scale max voltage to 3.3V for the ADC pin. Standard dividers for a 12V battery use 68kOhm and 10kOhm resistors. USER must adjust gain/offset of ADC battery measurement conversion in software if using different power configuration. 
-  - The reverse polarity protection MOSFET has a limit of 20V. **Do not exeed 20V.**
+  - The Battery Measurement circuit features a voltage divider circuit that must scale max voltage to 3.3V for the ADC pin. Standard dividers for a 12V battery use 68kOhm and 10kOhm resistors. USER must adjust gain/offset of ADC battery measurement conversion in software if using different power configuration (i.e., different resistor dividers and/or different battery voltage). 
+  - The reverse polarity protection MOSFET has a limit of 20V. **Do not exeed 20V** without either removing this part or finding an appropriate substitute component. 
 
 ## License & Credits
 This project is open source! OGRENet software is released under the [MIT License](http://opensource.org/licenses/MIT).
