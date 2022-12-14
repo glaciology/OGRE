@@ -27,10 +27,10 @@ Designed for logging raw multi-GNSS data in remote regions of the Arctic, this i
 
 
 [/Hardware: Hardware & manufacturing files](Hardware)
-- [Components.md: List of PCB parts](Hardware/Components.md)
-- [OGRENET_3/22_Manufacturing_Files: PCB Computer Aided Manufacturing Files](Hardware/OGRENET_3/22_Manufacturing_Files.zip)
+- [Components.md: List of PCB parts](Hardware/)
+- [OGRENET_3/22_Manufacturing_Files: PCB Computer Aided Manufacturing Files](Hardware/OGRE_PCB_Gerbers.zip)
 - [Hardware Docs: Documentation for critical components](Hardware/HardwareDocs)
-- [Schematic: Electrical connection schematic](Hardware/GNSS_Schematic2.pdf)
+- [Schematic: Electrical connection schematic](Hardware/OGRE_Schematic3.pdf)
 
 
 ## Getting Started 
