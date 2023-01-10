@@ -21,11 +21,13 @@ void configureSD() {
 
 
 void getFileToCompress(){
-  if (!myFile.open("compressme.ubx", O_READ)){
-    Serial.print("warning: failed to open compressme.ubx");
+  if (!myFile.open("0001_20221118_185655.ubx", O_READ)){
+    Serial.println("warning: failed to open _filename_.ubx");
   }
 }
 
 void getFiletoWrite(){
-  if(!myWriteFile.open("compressed.comp", O_CREAT | O_APPEND | O_WRITE))
+  if(!myWriteFile.open("compressed_new.comp", O_CREAT | O_APPEND | O_WRITE)){
+    Serial.println("warning: failed to create/open compressed.comp");
+  }
 }
