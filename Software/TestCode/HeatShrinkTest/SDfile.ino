@@ -21,7 +21,7 @@ void configureSD() {
 
 
 void getFileToCompress(){
-  if (!myFile.open("0001_20221118_185655.ubx", O_READ)){
+  if (!myFile.open("170.ubx", O_READ)){
     Serial.println("warning: failed to open _filename_.ubx");
   }
 }

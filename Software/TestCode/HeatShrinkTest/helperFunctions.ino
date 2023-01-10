@@ -31,7 +31,6 @@ static void compress(uint8_t *input,
     uint32_t sunk   = 0;
     uint32_t polled = 0;
     while (sunk < input_size) {
-        //ASSERT(heatshrink_encoder_sink(&hse, &input[sunk], input_size - sunk, &count) >= 0);
         heatshrink_encoder_sink(&hse, &input[sunk], input_size - sunk, &count);
         sunk += count;
         #ifdef HEATSHRINK_DEBUG
@@ -40,17 +39,12 @@ static void compress(uint8_t *input,
         Serial.print(F("\n"));
         #endif
         if (sunk == input_size) {
-            //ASSERT_EQ(HSER_FINISH_MORE, heatshrink_encoder_finish(&hse));
             heatshrink_encoder_finish(&hse);
         }
 
         HSE_poll_res pres;
         do {                    /* "turn the crank" */
-            pres = heatshrink_encoder_poll(&hse,
-                                           &output[polled],
-                                           output_size - polled,
-                                           &count);
-            //ASSERT(pres >= 0);
+            pres = heatshrink_encoder_poll(&hse,&output[polled], output_size - polled, &count);
             polled += count;
             #ifdef HEATSHRINK_DEBUG
             Serial.print(F("^^ polled "));
@@ -58,14 +52,12 @@ static void compress(uint8_t *input,
             Serial.print(F("\n"));
             #endif
         } while (pres == HSER_POLL_MORE);
-        //ASSERT_EQ(HSER_POLL_EMPTY, pres);
         #ifdef HEATSHRINK_DEBUG
         if (polled >= output_size){
             Serial.print(F("FAIL: Exceeded the size of the output buffer!\n"));
         }
         #endif
         if (sunk == input_size) {
-            //ASSERT_EQ(HSER_FINISH_DONE, heatshrink_encoder_finish(&hse));
             heatshrink_encoder_finish(&hse);
         }
     }
@@ -82,20 +74,4 @@ static void compress(uint8_t *input,
     #ifdef HEATSHRINK_DEBUG
     dump_buf("output", output, output_size);
     #endif
-}
-
-
-// Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)
-void blinkLed(byte ledFlashes, unsigned int ledDelay) {
-  byte i = 0;
-  while (i < ledFlashes * 2) {
-    unsigned long currMillis = millis();
-    if (currMillis - prevMillis >= ledDelay) {
-      digitalWrite(arduinoLED, !digitalRead(arduinoLED));
-      prevMillis = currMillis;
-      i++;
-    }
-  }
-  // Turn off LED
-  digitalWrite(arduinoLED, LOW);
 }

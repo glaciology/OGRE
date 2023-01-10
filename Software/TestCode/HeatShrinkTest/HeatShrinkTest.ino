@@ -1,26 +1,33 @@
-// Demo Code for Heatshrink (Copyright (c) 2013-2015, Scott Vokes <vokes.s@gmail.com>)
-// embedded compression library
-// Craig Versek, Apr. 2016
+// Demo Code adapted from Heatshrink (Copyright (c) 2013-2015, Scott Vokes <vokes.s@gmail.com>)
+// Derek Pickell
+// NOTE: in heatshrink_config.h, must define the following: 
+/*
+ * HEATSHRINK_DYNAMIC_ALLOC 0 => ENSURES STATIC ALLOCATION
+ * HEATSHRINK_STATIC_INPUT_BUFFER_SIZE => 512+ BYTES (larger buffer = more efficient)
+ * HEATSHRINK_STATIC_WINDOW_BITS 10 (2^W =1024 bytes)
+ * HEATSHRINK_STATIC_LOOKAHEAD_BITS 4 (2^L bits)
+ * 
+ * Total memory: 16 + 2 * 2^W bytes + 2*2^W
+ * ARTEMIS/APOLLO3 has 384KB RAM
+ */
 
 #include <stdint.h>
 #include <ctype.h>
 #include <heatshrink_encoder.h>
-#include <heatshrink_decoder.h>
-// MY Libraries
+
+// Arduino Libraries
 #include <SPI.h>
 #include <SdFat.h>
 
 SdFs sd;
 FsFile myFile;
 FsFile myWriteFile;
-SPIClass mySpi(3);
+SPIClass mySpi(3);  // SPI BUS ON OGRE
 
 #define SD_CONFIG SdSpiConfig(41, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
 #define arduinoLED            33   // OGRE
-const int sdWriteSize       = 512;
-const int fileBufferSize    = 16384;
-unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
-
+//const int sdWriteSize       = 512;
+//const int fileBufferSize    = 16384;
 
 #if HEATSHRINK_DYNAMIC_ALLOC
 #error HEATSHRINK_DYNAMIC_ALLOC must be false for static allocation test suite.
@@ -29,18 +36,19 @@ unsigned long prevMillis          = 0;        // Global time keeper, not affecte
 #define HEATSHRINK_DEBUG
 static heatshrink_encoder hse;
 
-#define BUFFER_SIZE 4096    // for compression
-uint8_t orig_buffer[BUFFER_SIZE];
-uint8_t comp_buffer[BUFFER_SIZE];
-uint8_t decomp_buffer[BUFFER_SIZE];
-
-
+//#define BUFFER_SIZE 2048    // for compression
+//uint8_t orig_buffer[BUFFER_SIZE];
+//uint8_t comp_buffer[BUFFER_SIZE];
+//uint8_t decomp_buffer[BUFFER_SIZE];
+//  #define sdBUFSIZE 1024
+//  uint8_t readBuffer[sdBUFSIZE];
+//  uint32_t comp_size = BUFFER_SIZE;
 
 void setup() {
-  pinMode(arduinoLED, OUTPUT);      // Configure the onboard LED for output
+  pinMode(arduinoLED, OUTPUT);       // Configure the onboard LED for output
   digitalWrite(arduinoLED, HIGH);    // default to LED ON
-  pinMode(18, OUTPUT);
-  digitalWrite(18, HIGH);
+  pinMode(18, OUTPUT);              
+  digitalWrite(18, HIGH);            // Turn on SD Power Bus
   delay(1);
   mySpi.begin();
   delay(1);
@@ -50,11 +58,6 @@ void setup() {
   configureSD();
   getFileToCompress();
   getFiletoWrite();
-
-  //write some data into the compression buffer
-//  #define sdBUFSIZE 1024
-//  uint8_t readBuffer[sdBUFSIZE];
-//  uint32_t comp_size = 2048;
 
   #define BUFSIZE 1024  
   uint32_t input_size  = BUFSIZE;
@@ -69,17 +72,17 @@ void setup() {
 
   heatshrink_encoder_reset(&hse);
 
-  uint32_t polled = 0;
-  size_t count = 0;
+  uint32_t polled = 0;                  // counter for bytes data OUTPUT
+  size_t count = 0;                     // counter updated via reference for data processed
   
   while(myFile.available()) {
-    myFile.read(&readBuffer,BUFSIZE);
+    myFile.read(&readBuffer,BUFSIZE);  // get BUFSIZE amt data, write to readBuffer
 
-    uint32_t sunk = 0;
+    uint32_t sunk = 0;                 // counter for synced data 
     
     memcpy(IBUFFER, readBuffer, BUFSIZE);
-    Serial.print("input: ");
-    Serial.println(BUFSIZE);
+//    Serial.print("input: ");
+//    Serial.println(BUFSIZE);
     input_counter += BUFSIZE;
     
     while (sunk < input_size ) { 
@@ -95,8 +98,9 @@ void setup() {
           //move BUFSIZE from OBUFFER TO SD CARD
           memcpy(WRITE_BUFFER, OBUFFER, polled);
           myWriteFile.write(WRITE_BUFFER, polled);
-          Serial.print("copied x number to WRITE_BUFFER ");
-          Serial.println(polled);
+          myWriteFile.sync();
+//          Serial.print("copied x number to WRITE_BUFFER ");
+//          Serial.println(polled);
           output_counter += polled;
           polled = 0;
         }
@@ -104,8 +108,8 @@ void setup() {
       } while( pres == HSER_POLL_MORE);
     } 
     counter +=1;
-    Serial.print("Sunk buff count: ");
-    Serial.println(counter);
+//    Serial.print("Sunk buff count: ");
+//    Serial.println(counter);
 
   } 
   heatshrink_encoder_finish(&hse);
@@ -154,6 +158,7 @@ void setup() {
 //    blinkLed(1, 10);
 //  }
 //  myWriteFile.sync();
+
   Serial.println("done");
   delay(2000);
   myWriteFile.close();
