@@ -26,24 +26,24 @@ Designed for logging raw multi-GNSS data in remote regions of the Arctic, this i
 - [OGRENet: Software and software config files for upload to OGRE instrument](Software/OGRENet) <br>
 
 
-[Hardware: Hardware & manufacturing files](Hardware/)
-- [Components.md: List of PCB parts](Hardware/Components.md)
-- [OGRENET_3/22_Manufacturing_Files: PCB Computer Aided Manufacturing Files](Hardware/OGRE_PCB_Gerbers.zip)
-- [Hardware Docs: Documentation for critical components](Hardware/HardwareDocs)
-- [Schematic: Electrical connection schematic](Hardware/OGRE_Schematic3.pdf)
+[Hardware: Hardware & Manufacturing Files](Hardware/)
+- [Components: List of PCB parts](Hardware/Components1-3.md)
+- [OGRENET Manufacturing Files: PCB Computer Aided Manufacturing Files](Hardware/OGRE_PCB_Gerbers.zip)
+- [Hardware Docs: Linked documentation for critical components](Hardware/HardwareDocuments.md)
+- [Schematic: Electrical connection schematic](Hardware/OGRE_Schematic1-3.pdf)
 
 
 ## Getting Started 
 
-The Software has 6 modes of operation: 
+The OGRE has 6 modes of operation: 
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER defined hours
   - (2) Continous Mode: Log GNSS data continously
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER specified day each month
   - (4) Sleep Interval Mode: Log GNSS data for 24 hours at power-on and at a USER defined interval thereafter
   - (5) Log GNSS data for 24 hours on USER specified dates/times read from .txt file. Defaults to mode 4 after last user provided date.
-  - (99) Test Mode: Log GNSS data for 50 second interval, sleep for 50 second and repeat.
+  - (99) Test Mode: Used for development. Log GNSS data for 50 second interval, sleep for 50 second and repeat.
   
-OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, etc.) is logged to a uSD card in raw .ubx (UBLOX) proprietary format. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery health, logging errors, etc.).
+OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, etc.) is logged to a uSD card in raw .ubx (UBLOX) proprietary format. Satellite .nav messages can also be logged. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery health, logging errors, etc.).
   
 INPUTs: USERS specify settings in the [CONFIG.txt](OGRENet/CONFIG) file, which, if uploaded to the SD card, will be read into the software. 
 Otherwise, software will default to hardcoded configuration. USER may also upload a [EPOCH.txt](OGRENet/EPOCH) file, which allows the user to specify up to 16 log dates (unix epoch format) for logging in Mode 5. 
@@ -92,7 +92,7 @@ If the USER has enabled LED_INDICATORS, the following additional lights will fla
   - 1 Blink every 12 seconds: System sleeping
 
 ## Installation
-A pre-compiled binary is avialable with each release. V1.0.6 [here](https://github.com/glaciology/OGRENet/releases/tag/v1.0.6). This can be uploaded to the Apollo MCU with a usb-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
+A pre-compiled binary is avialable with each release. V1.0.6 [here](https://github.com/glaciology/OGRENet/releases/tag/v1.0.6). This binary file can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
 
 You can also compile this code with the Arduino IDE, ensuring that the code and board libraries match the proper versions defined in the header of OGRENet.ino. 
 
@@ -103,14 +103,14 @@ You can also compile this code with the Arduino IDE, ensuring that the code and 
 </p>
 
 MATERIALS
-Cost of PCB and all components totals ~$260. Detailed list of components found [here](Hardware/Components.md). <br>
+Cost of PCB and all components totals ~$260. Detailed list of components found [here](Hardware/Components1-3.md). <br>
 
 POWER REQUIREMENTS: 
 In standard configuration, this system is powered by a 12V lead-acid battery. 
   
 While this system is optimized for 12V batteries, input voltage can range from 5.2V to 20V with the following considerations:  
-  - The Pololu DC-DC converter minimum input is 5.2V and maximum input is 50V, although aditional power filtering at high voltages required. 
-  - The Battery Measurement circuit features a voltage divider circuit that must scale max voltage to 3.3V for the ADC pin. Standard dividers for a 12V battery use 68kOhm and 10kOhm resistors. USER must adjust gain/offset of ADC battery measurement conversion in software if using different power configuration (i.e., different resistor dividers and/or different battery voltage). 
+  - The Pololu DC-DC converter minimum input is 5.2V and maximum input is 50V, although aditional power filtering at high voltages is required. 
+  - The Battery Measurement circuit features a voltage divider circuit that must scale max voltage to 3.3V for the ADC pin. Standard dividers for a 12V battery use 68kOhm and 10kOhm resistors. USER must adjust gain/offset of ADC battery measurement conversion in software if using different power configuration (i.e., different resistor dividers and/or a non-12V battery). 
   - The reverse polarity protection MOSFET has a limit of 20V. **Do not exeed 20V** without either removing this part or finding an appropriate substitute component. 
 
 ## License & Credits
