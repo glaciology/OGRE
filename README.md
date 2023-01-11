@@ -23,7 +23,7 @@ Designed for logging raw multi-GNSS data in remote regions of the Arctic, this i
 
 ## Project Organization 
 [Software: Contains Arduino Code and Test Scripts](Software/)
-- [OGRENet: Software and software config files for upload to OGRE instrument](OGRENet) <br>
+- [OGRENet: Software and software config files for upload to OGRE instrument](Software/OGRENet) <br>
 
 
 [Hardware: Hardware & manufacturing files](Hardware/)
