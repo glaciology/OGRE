@@ -22,11 +22,11 @@ Designed for logging raw multi-GNSS data in remote regions of the Arctic, this i
 </p>
 
 ## Project Organization 
-[/Software: Contains Arduino Code and Test Scripts](Software)
+[Software: Contains Arduino Code and Test Scripts](Software/)
 - [OGRENet: Software and software config files for upload to OGRE instrument](OGRENet) <br>
 
 
-[/Hardware: Hardware & manufacturing files](Hardware)
+[Hardware: Hardware & manufacturing files](Hardware/)
 - [Components.md: List of PCB parts](Hardware/Components.md)
 - [OGRENET_3/22_Manufacturing_Files: PCB Computer Aided Manufacturing Files](Hardware/OGRE_PCB_Gerbers.zip)
 - [Hardware Docs: Documentation for critical components](Hardware/HardwareDocs)
