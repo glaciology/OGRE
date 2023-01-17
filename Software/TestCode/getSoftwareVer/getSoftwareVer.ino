@@ -17,6 +17,10 @@
     it had been called from within the library
   - the custom packet will be updated with data returned by the module
     (previously this was not possible from outside the library)
+
+     Dependencies:
+   - SparkFun_u-blox_GNSS_Arduino_Library v2.2.8
+   - Apollo3 Arduino Core v1.2.3
 */
 
 #include <Wire.h> //Needed for I2C to GNSS
@@ -106,7 +110,11 @@ void setup()
 
 void loop()
 {
-
+ pinMode(19, OUTPUT);
+ digitalWrite(19, HIGH);
+ delay(5000);
+ digitalWrite(19, LOW);
+ delay(15000);
 }
 
 bool SFE_UBLOX_GPS_ADD::getModuleInfo(uint16_t maxWait)

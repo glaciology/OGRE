@@ -49,6 +49,7 @@ FsFile dateFile;                              // USER INPUT EPOCHS FILE
 const byte BAT                    = 32;       // ADC port for battery measure
 #elif HARDWARE_VERSION == 1                   //
 const byte BAT                    = 35;       //
+const byte SHIELD                 = 19;       //
 #endif                                        //
 const byte PER_POWER              = 18;       // Drive to turn off uSD
 const byte ZED_POWER              = 34;       // Drive to turn off ZED

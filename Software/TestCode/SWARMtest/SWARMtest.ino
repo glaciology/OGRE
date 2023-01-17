@@ -6,6 +6,10 @@
 #include <SparkFun_Swarm_Satellite_Arduino_Library.h> // NOTE: in .h file modification needed: 
                                                       // define SWARM_M138_SOFTWARE_SERIAL_ENABLED
 #include <SoftwareSerial.h>
+//#ifdef ARDUINO_ARCH_APOLLO3   
+//#undef SWARM_M138_SOFTWARE_SERIAL_ENABLEDx 
+//#define SWARM_M138_SOFTWARE_SERIAL_ENABLED  
+//#endif 
 SWARM_M138 mySwarm;
 ////////////////////////////////
 
@@ -13,13 +17,14 @@ SWARM_M138 mySwarm;
 const byte SWARM_RX  = 9;
 const byte SWARM_TX  = 10;
 const byte SWARM_CNTRL  = 19;     // ONLY WORKS WITH HARDWARE_VERSION == 1 BOARDS
-SoftwareSerial mySerial(SWARM_RX, SWARM_TX);
+Uart myUart(1, SWARM_RX, SWARM_TX);
+
 
 ///////// GLOBAL VARIABLES ///////////////////////////
 char          message[100]     = "";
 //EXISITING VARIABLES
-int  stationName               = 0000;  
-unsigned long bytesWritten     = 0;
+int  stationName               = 0001;  
+unsigned long bytesWritten     = 1234;
 unsigned long writeFailCounter = 0;
 unsigned long closeFailCounter = 0;
 //PROGRAM (NEED TO FIX)
@@ -52,17 +57,19 @@ void sendTelemetry(){
   pinMode(SWARM_CNTRL, OUTPUT); // Enable modem power 
   digitalWrite(SWARM_CNTRL, HIGH);
 
-  delay(1000);
+  delay(10000);
 
   int bootCount = 0;
-  while (!mySwarm.begin(mySerial) && bootCount < 4) { // If .begin failed, keep trying
+  myUart.begin(115200);
+  
+  while (!mySwarm.begin(myUart)) { // If .begin failed, keep trying
     //petDog(); UNCOMMENT
     Serial.println(F("Could not communicate with the modem. It may still be booting..."));
     delay(2000);
     bootCount++;
   }
 
-  if (bootCount == 4){
+  if (bootCount == 10){
     Serial.println("Could not communicate with modem. Shutting Down");
     digitalWrite(SWARM_CNTRL, LOW);
   }
@@ -138,7 +145,9 @@ void sendTelemetry(){
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
+  pinMode(18, OUTPUT);
+  digitalWrite(18, LOW);
   sendTelemetry();
 
 }
