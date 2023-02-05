@@ -26,8 +26,6 @@ SPIClass mySpi(3);  // SPI BUS ON OGRE
 
 #define SD_CONFIG SdSpiConfig(41, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
 #define arduinoLED            33   // OGRE
-//const int sdWriteSize       = 512;
-//const int fileBufferSize    = 16384;
 
 #if HEATSHRINK_DYNAMIC_ALLOC
 #error HEATSHRINK_DYNAMIC_ALLOC must be false for static allocation test suite.
@@ -35,14 +33,6 @@ SPIClass mySpi(3);  // SPI BUS ON OGRE
 
 #define HEATSHRINK_DEBUG
 static heatshrink_encoder hse;
-
-//#define BUFFER_SIZE 2048    // for compression
-//uint8_t orig_buffer[BUFFER_SIZE];
-//uint8_t comp_buffer[BUFFER_SIZE];
-//uint8_t decomp_buffer[BUFFER_SIZE];
-//  #define sdBUFSIZE 1024
-//  uint8_t readBuffer[sdBUFSIZE];
-//  uint32_t comp_size = BUFFER_SIZE;
 
 void setup() {
   pinMode(arduinoLED, OUTPUT);       // Configure the onboard LED for output
@@ -66,45 +56,53 @@ void setup() {
   uint8_t IBUFFER[BUFSIZE];
   uint8_t OBUFFER[2048];
   uint8_t WRITE_BUFFER[BUFSIZE];
-  uint32_t counter = 0;
-  uint32_t input_counter = 0;
-  uint32_t output_counter = 0;
-
+  uint32_t counter = 0;                 // counts # times buffer is sunk
+  uint32_t input_counter = 0;           // tracks total size in bytes of input
+  uint32_t output_counter = 0;          // tracks total size in bytes of output
+  
   heatshrink_encoder_reset(&hse);
-
   uint32_t polled = 0;                  // counter for bytes data OUTPUT
   size_t count = 0;                     // counter updated via reference for data processed
+
+  uint32_t t1 = micros();
   
   while(myFile.available()) {
     myFile.read(&readBuffer,BUFSIZE);  // get BUFSIZE amt data, write to readBuffer
 
+//    polled = 0;
+//    count = 0;
+    Serial.println("got next 1024 sized buffer");
     uint32_t sunk = 0;                 // counter for synced data 
     
     memcpy(IBUFFER, readBuffer, BUFSIZE);
-//    Serial.print("input: ");
-//    Serial.println(BUFSIZE);
     input_counter += BUFSIZE;
     
     while (sunk < input_size ) { 
       heatshrink_encoder_sink(&hse, &IBUFFER[sunk], input_size - sunk, &count);
       sunk+=count;
+      Serial.print("Sunk: ");
+      Serial.println(count);
 
       HSE_poll_res pres;
       do {
         pres = heatshrink_encoder_poll(&hse, &OBUFFER[polled], output_size - polled, &count);
         polled+=count;
 
+        Serial.print("Polled: ");
+        Serial.println(polled);
+
         if (polled >= BUFSIZE){
           //move BUFSIZE from OBUFFER TO SD CARD
           memcpy(WRITE_BUFFER, OBUFFER, polled);
           myWriteFile.write(WRITE_BUFFER, polled);
           myWriteFile.sync();
-//          Serial.print("copied x number to WRITE_BUFFER ");
-//          Serial.println(polled);
+          Serial.print("copied x number to WRITE_BUFFER ");
+          Serial.println(polled);
           output_counter += polled;
           polled = 0;
         }
-        
+//      output_counter += polled;
+//      polled = 0;
       } while( pres == HSER_POLL_MORE);
     } 
     counter +=1;
@@ -114,6 +112,9 @@ void setup() {
   } 
   heatshrink_encoder_finish(&hse);
 
+//  polled = 0;                  // counter for bytes data OUTPUT
+//  count = 0;                     // counter updated via reference for data processed
+  
   HSE_poll_res pres;
   do {
     pres = heatshrink_encoder_poll(&hse, &OBUFFER[polled], output_size - polled, &count);
@@ -121,43 +122,20 @@ void setup() {
   } while (pres == HSER_POLL_MORE);
   memcpy(WRITE_BUFFER, OBUFFER, polled);
   myWriteFile.write(WRITE_BUFFER, polled);
-  Serial.print("copied additional to WRITE_BUFFER: ");
+  Serial.print("copied additional blocks to WRITE_BUFFER: ");
   Serial.println(polled);
   output_counter +=polled;
+
+  uint32_t t2 = micros();
   
   Serial.println("finished");
   Serial.print("input bytes: ");
   Serial.println(input_counter);
   Serial.print("compressed: ");
   Serial.println(output_counter);
+  Serial.print("Time to compress: ");Serial.println((t2-t1)/1e6,6);
+  
 
-//  while (myFile.available()) {
-//    //petDog();
-//    Serial.println("Begin");
-//    uint32_t n = myFile.read(&readBuffer, sdBUFSIZE);
-////    Serial.println((char *) readBuffer);
-////    Serial.println(n);
-////    count++;
-////    memcpy(orig_buffer, &readBuffer, n);
-////    memcpy(orig_buffer, test_data, 168);
-//    if (n = sdBUFSIZE) { 
-//      compress(readBuffer,n,comp_buffer,comp_size);
-//      Serial.println(n);
-//    } else { 
-//      compress(readBuffer,n,comp_buffer,comp_size);
-//    }
-//    Serial.print("compressed: ");
-//    Serial.println(comp_size);
-// //   Serial.print((char *) comp_buffer);
-//    if(!myWriteFile.write(comp_buffer, comp_size)){
-//      Serial.println("error writing");
-//    }
-//    comp_size = 2048;
-//    myWriteFile.sync();
-
-//    blinkLed(1, 10);
-//  }
-//  myWriteFile.sync();
 
   Serial.println("done");
   delay(2000);
