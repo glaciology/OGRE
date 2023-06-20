@@ -7,23 +7,19 @@
 char          message[100]     = "";
 //PROGRAM (NEED TO FIX)
 volatile bool satFlag          = false;
-uint32_t hold                  = 180; //1800;       // hold message for 30 minutes (CUSTOM!!!)
-//int32_t       latitude         = 0;
-//int32_t       longitude        = 0;
-//int32_t       alt              = 0;
 
 // Callback: printMessageSent will be called when a new unsolicited $TD SENT message arrives.
 void printMessageSent(const int16_t *rssi_sat, const int16_t *snr, const int16_t *fdev, const uint64_t *msg_id) {
-  Serial.print(F("New $TD SENT message received:"));
-  Serial.print(F("  RSSI = "));
-  Serial.print(*rssi_sat);
-  Serial.print(F("  SNR = "));
-  Serial.print(*snr);
-  Serial.print(F("  FDEV = "));
-  Serial.print(*fdev);
-  Serial.print(F("  Message ID: "));
+  DEBUG_PRINT(F("New $TD SENT message received:"));
+  DEBUG_PRINT(F("  RSSI = "));
+  DEBUG_PRINT(*rssi_sat);
+  DEBUG_PRINT(F("  SNR = "));
+  DEBUG_PRINT(*snr);
+  DEBUG_PRINT(F("  FDEV = "));
+  DEBUG_PRINT(*fdev);
+  DEBUG_PRINT(F("  Message ID: "));
   serialPrintUint64_t(*msg_id);
-  Serial.println();
+  DEBUG_PRINTLN();
   messageSent = true;
 }
 
@@ -32,10 +28,10 @@ void sendTelemetry() {
   ////////// TURN ON MODEM POWER /////////////
   pinMode(SWARM_CNTRL, OUTPUT); // Enable modem power
   digitalWrite(SWARM_CNTRL, HIGH);
-
   delay(10000);
   myUart.begin(115200);
   ///////////////////////////////////////////
+  
   messageSent = false;
 
   int bootCount = 0;
@@ -48,7 +44,6 @@ void sendTelemetry() {
     if (bootCount > 15 ) { // timeout after 30 seconds
       DEBUG_PRINTLN("Could not communicate with modem. Shutting Down");
       digitalWrite(SWARM_CNTRL, LOW);
-      //logDebug("Couldn't turn on modem");
       return; // make sure this cancels entire function
     }
   }
@@ -70,7 +65,7 @@ void sendTelemetry() {
     //logDebug("Modem couldn't acquire GPS");
     errCount++;
 
-    if (errCount > 60 ) {  // timeout after 120 seconds
+    if (errCount > 80 ) {  // timeout after 160 seconds
       DEBUG_PRINTLN("The modem couldn't fix a valid GPS reference. Shutting down.");
       digitalWrite(SWARM_CNTRL, LOW);
       return;
@@ -88,7 +83,7 @@ void sendTelemetry() {
           closeFailCounter, battery2, lat, lon, alt, siv, end_time);
 
   Swarm_M138_Error_e err2 = mySwarm.transmitTextHold(message, &id, hold); // Include a hold duration
-  delay(10);
+  delay(100);
   // CHECK IF QUEUED PROPERLY:
   if (err2 == SWARM_M138_SUCCESS) {
     Serial.print(F("The message has been added to the transmit queue. The message ID is "));
@@ -99,19 +94,23 @@ void sendTelemetry() {
     DEBUG_PRINTLN(F("Swarm communication error: "));
     DEBUG_PRINT((int)err2);
     DEBUG_PRINT(F(" : "));
-    Serial.print(mySwarm.modemErrorString(err2)); // Convert the error into printable text
-    if (err == SWARM_M138_ERROR_ERR) { // If we received a command error (ERR), print it
-      DEBUG_PRINT(F(" : "));
-      DEBUG_PRINT(mySwarm.commandError);
-      DEBUG_PRINT(F(" : "));
-      DEBUG_PRINTLN(mySwarm.commandErrorString((const char *)mySwarm.commandError));
-    }
-    else
-      DEBUG_PRINTLN();
-    // logDebug("SatQueueFail");
+    DEBUG_PRINTLN(mySwarm.modemErrorString(err2)); // Convert the error into printable text
     digitalWrite(SWARM_CNTRL, LOW);
     satFlag = false;
     return;
+//    
+//    if (err2 == SWARM_M138_ERROR_ERR) { // If we received a command error (ERR), print it
+//      DEBUG_PRINT(F(" : "));
+//      DEBUG_PRINT(mySwarm.commandError);
+//      DEBUG_PRINT(F(" : "));
+//      DEBUG_PRINTLN(mySwarm.commandErrorString((const char *)mySwarm.commandError));
+//    }
+//    else
+//      DEBUG_PRINTLN();
+//    // logDebug("SatQueueFail");
+//    digitalWrite(SWARM_CNTRL, LOW);
+//    satFlag = false;
+//    return;
   }
 
   unsigned long loopStartTime = millis();
