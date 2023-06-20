@@ -11,14 +11,13 @@
 //#define SWARM_M138_SOFTWARE_SERIAL_ENABLED  
 //#endif 
 SWARM_M138 mySwarm;
-////////////////////////////////
+//////////////////////////////////////////////////////
 
 ///////// HARDWARE-SPECIFIC PINOUTS & OBJECTS ////////
 const byte SWARM_RX  = 9;
 const byte SWARM_TX  = 10;
 const byte SWARM_CNTRL  = 19;     // ONLY WORKS WITH HARDWARE_VERSION == 1 BOARDS
 Uart myUart(1, SWARM_RX, SWARM_TX);
-
 
 ///////// GLOBAL VARIABLES ///////////////////////////
 char          message[100]     = "";
@@ -34,7 +33,8 @@ float         voltageFinal     = 0;
 int32_t       latitude         = 0;
 int32_t       longitude        = 0;
 int32_t       alt              = 0;
-
+// BOOL STATES
+bool messageSent = false;
 
 // Callback: printMessageSent will be called when a new unsolicited $TD SENT message arrives.
 void printMessageSent(const int16_t *rssi_sat, const int16_t *snr, const int16_t *fdev, const uint64_t *msg_id) {
@@ -48,7 +48,7 @@ void printMessageSent(const int16_t *rssi_sat, const int16_t *snr, const int16_t
   Serial.print(F("  Message ID: "));
   serialPrintUint64_t(*msg_id);
   Serial.println();
-  satFlag = true;
+  messageSent = true;
 }
 
 
@@ -58,26 +58,30 @@ void sendTelemetry(){
   digitalWrite(SWARM_CNTRL, HIGH);
 
   delay(10000);
-
-  int bootCount = 0;
   myUart.begin(115200);
+  ///////////////////////////////////////////
+  messageSent = false;
   
+  int bootCount = 0;
   while (!mySwarm.begin(myUart)) { // If .begin failed, keep trying
     //petDog(); UNCOMMENT
     Serial.println(F("Could not communicate with the modem. It may still be booting..."));
     delay(2000);
     bootCount++;
-  }
 
-  if (bootCount == 10){
-    Serial.println("Could not communicate with modem. Shutting Down");
-    digitalWrite(SWARM_CNTRL, LOW);
+    if (bootCount > 15 ){ // timeout after 30 seconds
+      Serial.println("Could not communicate with modem. Shutting Down");
+      digitalWrite(SWARM_CNTRL, LOW);
+      //logDebug("Couldn't turn on modem");
+      return; // make sure this cancels entire function
+    }
   }
 
   // Wait until the modem has valid Date/Time
   Swarm_M138_DateTimeData_t dateTime;
   Swarm_M138_Error_e err = mySwarm.getDateTime(&dateTime);
 
+  int errCount = 0;
   while (err != SWARM_M138_SUCCESS) {
     Serial.print(F("Swarm communication error: "));
     Serial.print((int)err);
@@ -86,16 +90,23 @@ void sendTelemetry(){
     Serial.println(F("The modem may not have acquired a valid GPS date/time reference..."));
     delay(2000);
     err = mySwarm.getDateTime(&dateTime);
+    //logDebug("Modem couldn't acquire GPS");
+    errCount++;
+
+    if (errCount > 60 ) {  // timeout after 120 seconds
+      Serial.println("The modem couldn't fix a valid GPS reference...");
+      digitalWrite(SWARM_CNTRL, LOW);
+      return;
+    }
   }
 
-  // Set up the callback for the unsolicited $TD SENT messages. Call printMessageSent when a new message arrives
-  mySwarm.setTransmitDataCallback(&printMessageSent);
-
-  // SEND MESSAGE 
+  ///////// SEND MESSAGE //////////
+  mySwarm.setTransmitDataCallback(&printMessageSent); // Callback for when sent
   uint64_t id;
   
 //  sprintf(message, "%04d_%lu_%lu_%lu_%04f_%d_%d_%d", stationName, bytesWritten, writeFailCounter, 
 //          closeFailCounter, voltageFinal, latitude, longitude, alt);
+// getPVT(); -- WRITE THIS METHOD
     
   sprintf(message, "%04d_%lu_%lu_%lu_%04f_%d_%d_%d", stationName, bytesWritten, writeFailCounter, 
       closeFailCounter, voltageFinal, 90, 74, 3222);
@@ -128,10 +139,16 @@ void sendTelemetry(){
   }
 
   unsigned long loopStartTime = millis();
-  while (!satFlag && millis() - loopStartTime < 1000UL * hold) {
+  uint16_t unsent;
+  while (!satFlag && millis() - loopStartTime < 1000UL * hold) { // roll over!?
     // petDog();
+    mySwarm.checkUnsolicitedMsg();
     Serial.println("waiting to send messages");
     delay(5000); 
+    if (mySwarm.getUnsentMessageCount(&unsent) == SWARM_M138_SUCCESS) {
+      Serial.println("message sent.");
+      break;
+    }
   }
 
   if (!satFlag){
