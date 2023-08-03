@@ -76,12 +76,15 @@ void sendTelemetry() {
   mySwarm.setTransmitDataCallback(&printMessageSent); // Callback for when sent
   uint64_t id;
 
-  float battery2 = measBat();
+  int battery2 = int(100*measBat());
+  int temp2 = int(getInternalTemp()*100);
+  DEBUG_PRINTLN(battery2);
   uint32_t end_time = rtc.getEpoch();
   
-  sprintf(message, "%04d_%lu_%lu_%lu_%04f_%d_%d_%d_%d_%10u", stationName, bytesWritten, writeFailCounter,
-          closeFailCounter, battery2, lat, lon, alt, siv, end_time);
+  sprintf(message, "%04d_%lu_%lu_%lu_%04d_%d_%d_%d_%d_%10u_%04d", stationName, bytesWritten, writeFailCounter,
+          closeFailCounter, battery2, lat, lon, alt, siv, end_time, temp2);
 
+  DEBUG_PRINTLN(message);
   Swarm_M138_Error_e err2 = mySwarm.transmitTextHold(message, &id, hold); // Include a hold duration
   delay(100);
   // CHECK IF QUEUED PROPERLY:

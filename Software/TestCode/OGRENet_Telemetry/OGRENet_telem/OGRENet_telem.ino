@@ -72,7 +72,7 @@ Uart myUart(1, SWARM_RX, SWARM_TX);
 //////////////////////////////////////////////////////
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE
-byte logMode                = 5;              // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
+byte logMode                = 99;              // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
                                               // 5 = specified Unix Epochs for 24 hrs (defaults to mode 4 after), 99 = test mode
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour 
@@ -85,8 +85,8 @@ byte logStartDay            = 8;              // Day of month between 1 and 28
 uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (ie, 2628000 ~ 1 month)
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 1800;             // Sleep interval (Seconds)
-uint32_t secondsLog         = 1800;             // Logging interval (Seconds)
+uint32_t secondsSleep       = 600; //99;             // Sleep interval (Seconds)
+uint32_t secondsLog         = 600; //99;             // Logging interval (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;              // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
@@ -98,7 +98,7 @@ int logNav                  = 1;              //
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = true;           // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = false;           // If TRUE, uses battery circuit to measure V during debug logs
 int  stationName            = 0000;           // Station name, 4 digits
 
 // BATTERY PARAMETERS
@@ -128,7 +128,7 @@ int lon                           = 99;       //
 int lat                           = 99;       // 
 int alt                           = 99;       //
 int siv                           = 99;       //
-uint32_t hold                     = 1800;     // hold message for 30 minutes (CUSTOM!!!)
+uint32_t hold                     = 3600;     // hold message for 60 minutes (CUSTOM!!!)
  
 // DEBUGGING
 uint16_t      maxBufferBytes      = 0;        // How full the file buffer has been

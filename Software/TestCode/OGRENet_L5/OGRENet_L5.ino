@@ -1,6 +1,6 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 7/06/22
+   Derek Pickell 7/06/22, modified for L5
    V1.0.6
 
    Hardware:
@@ -90,7 +90,7 @@ int logNav                  = 1;              //
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = false;          // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = true;           // If TRUE, uses battery circuit to measure V during debug logs
 int  stationName            = 0000;           // Station name, 4 digits
 
 // BATTERY PARAMETERS
@@ -156,7 +156,6 @@ void setup() {
 
   //// CONFIGURE INITIAL SETTINGS  ////
   pinMode(LED, OUTPUT);              //
-  pinMode(LED, HIGH);
   configureWdt();                    // 12s interrupt, 24s reset period
   checkBattery();                    // IF battery LOW, send back to sleep until recharged
   initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
