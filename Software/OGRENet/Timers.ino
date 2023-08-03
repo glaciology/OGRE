@@ -44,7 +44,7 @@ void configureLogAlarm() {
   if (logMode == 2){ // empty - continuous
   }
 
-  if (logMode == 3 || logMode == 4 || logMode == 5) {
+  if (logMode == 3 || logMode == 4 || logMode == 5 || logMode ==6) {
     // WILL LOG FOR 24 HOURS
     rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
     rtc.setAlarmMode(4);
@@ -84,7 +84,7 @@ void configureSleepAlarm() {
     time_t b;
     for(int i=0; i< sizeof(dates)/sizeof(dates[0]); i++) {
       if(dates[i] > rtc.getEpoch()) {
-        Serial.print("Info: next date found: "); Serial.println(dates[i]);
+        DEBUG_PRINT("Info: next date found: "); DEBUG_PRINTLN(dates[i]);
         b = dates[i];
         rtc.setAlarm(gmtime(&b)->tm_hour, gmtime(&b)->tm_min, gmtime(&b)->tm_sec, 0, gmtime(&b)->tm_mday, gmtime(&b)->tm_mon+1);
         rtc.setAlarmMode(1); // Set the RTC alarm to match on minutes rollover
@@ -96,7 +96,24 @@ void configureSleepAlarm() {
     }
     a = rtc.getEpoch() + epochSleep;
     rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
-    rtc.setAlarmMode(1); // Set the RTC alarm to match on minutes rollover
+    rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+    
+  }
+
+  if (logMode == 6){
+    time_t a;
+    int whichMonth = rtc.month;
+    DEBUG_PRINT("The month is: "); DEBUG_PRINTLN(whichMonth);
+
+    if (whichMonth != 6 || 7 || 8){
+      a = rtc.getEpoch() + summerInterval;
+      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+    } else { 
+      a = rtc.getEpoch() + winterInterval;
+      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+    }
     
   }
     

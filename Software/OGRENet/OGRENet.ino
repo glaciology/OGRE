@@ -1,7 +1,7 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 7/06/22
-   V1.0.6
+   Derek Pickell 8/03/23
+   V1.1.0
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T
@@ -32,7 +32,6 @@
 #include <SPI.h>                              // 
 #include <WDT.h>                              //
 #include <RTC.h>                              //
-#include <time.h>                             //
 #include <SdFat.h>                            // https://github.com/greiman/SdFat v2.1.0
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
 SFE_UBLOX_GNSS gnss;                          //
@@ -65,7 +64,8 @@ SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 41, 42, 43
 //----------- DEFAULT CONFIGURATION HERE ------------
 // LOG MODE
 byte logMode                = 5;              // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
-                                              // 5 = specified Unix Epochs for 24 hrs (defaults to mode 4 after), 99 = test mode
+                                              // 5 = specified Unix Epochs for 24 hrs (defaults to mode 4 after), 
+                                              // 6 = weekly during summer, monthly during winter for 24 hours, 99 = test mode
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour 
 byte logEndHr               = 14;             // UTC Hour
@@ -75,6 +75,11 @@ byte logStartDay            = 8;              // Day of month between 1 and 28
 
 // LOG MODE 4/5: SLEEP FOR SPECIFIED DURATION
 uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (ie, 2628000 ~ 1 month)
+
+// LOG MODE 6: SUMMER/WINTER
+//int summer[]                = {6, 7, 8};      // Designated months for extended logging
+uint32_t summerInterval     = 432000;         // Log every 5 days (sleep duration)
+uint32_t winterInterval     = 2628000;        // Log every month (sleep duration)
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 50;             // Sleep interval (Seconds)
@@ -87,6 +92,7 @@ int logGAL                  = 0;              //
 int logBDS                  = 0;              //
 int logQZSS                 = 0;              //
 int logNav                  = 1;              //
+int logL5                   = 0;              // WARNING: only set if using L5-capable ZED.
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
