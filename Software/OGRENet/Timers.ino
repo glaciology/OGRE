@@ -51,9 +51,11 @@ void configureLogAlarm() {
     rtc.attachInterrupt();
   }
   
-  if (logMode == 99) {
-    rtc.setAlarm(0, 0, (secondsLog + rtc.seconds) % 60, 0, 0, 0); 
-    rtc.setAlarmMode(6);
+  if (logMode == 99 || 7) {
+    time_t a;
+    a = rtc.getEpoch() + secondsLog;
+    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+    rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     rtc.attachInterrupt();
   }
   
@@ -105,7 +107,7 @@ void configureSleepAlarm() {
     int whichMonth = rtc.month;
     DEBUG_PRINT("The month is: "); DEBUG_PRINTLN(whichMonth);
 
-    if (whichMonth != 6 || 7 || 8){
+    if (whichMonth == (6 || 7 || 8)){
       a = rtc.getEpoch() + summerInterval;
       rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
@@ -114,12 +116,31 @@ void configureSleepAlarm() {
       rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
-    
+  }
+
+  if (logMode == 7){ // TO TEST LOG MODE 6 ON FASTER SCALE
+    time_t a;
+    int whichHour = rtc.hour;
+    DEBUG_PRINT("The hour is: "); DEBUG_PRINTLN(whichHour);
+
+    if (whichHour == (6 || 7 || 8)){
+      DEBUG_PRINTLN("SUMMER MODE");
+      a = rtc.getEpoch() + 600; // sleep for ten minutes, log for an hour
+      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+    } else { 
+      DEBUG_PRINTLN("WINTER MODE");
+      a = rtc.getEpoch() + 3600; //sleep for an hour
+      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+    }
   }
     
   if (logMode == 99) {
-    rtc.setAlarm(0, 0, (secondsSleep + rtc.seconds) % 60, 0, 0, 0); 
-    rtc.setAlarmMode(6);
+    time_t a;
+    a = rtc.getEpoch() + secondsSleep;
+    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+    rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
   }
 
   rtc.attachInterrupt();

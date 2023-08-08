@@ -83,7 +83,7 @@ uint32_t winterInterval     = 2628000;        // Log every month (sleep duration
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 50;             // Sleep interval (Seconds)
-uint32_t secondsLog         = 50;             // Logging interval (Seconds)
+uint32_t secondsLog         = 1000;           // Logging interval (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;              // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
