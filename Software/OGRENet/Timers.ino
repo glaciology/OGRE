@@ -107,11 +107,13 @@ void configureSleepAlarm() {
     int whichMonth = rtc.month;
     DEBUG_PRINT("The month is: "); DEBUG_PRINTLN(whichMonth);
 
-    if (whichMonth == 6 || whichMonth == 7 || whichMonth == 8){
+    if (whichMonth == 5 ||whichMonth == 6 || whichMonth == 7 || whichMonth == 8){
+      DEBUG_PRINTLN("SUMMER MODE");
       a = rtc.getEpoch() + summerInterval;
       rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     } else { 
+      DEBUG_PRINTLN("WINTER MODE");
       a = rtc.getEpoch() + winterInterval;
       rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date

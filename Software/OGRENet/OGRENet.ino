@@ -25,7 +25,7 @@
 */
 
 #define HARDWARE_VERSION 1  // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22
-#define SOFTWARE_VERSION "1-0-6" 
+#define SOFTWARE_VERSION "1-1-0" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
 #include <Wire.h>                             // 
@@ -77,13 +77,13 @@ byte logStartDay            = 8;              // Day of month between 1 and 28
 uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (ie, 2628000 ~ 1 month)
 
 // LOG MODE 6: SUMMER/WINTER
-//int summer[]                = {6, 7, 8};      // Designated months for extended logging
-uint32_t summerInterval     = 432000;         // Log every 5 days (sleep duration)
-uint32_t winterInterval     = 2628000;        // Log every month (sleep duration)
+//int summer[]                = {5, 6, 7, 8}; // Designated months for extended logging
+uint32_t summerInterval     = 30;             // Log continuously (sleep duration)
+uint32_t winterInterval     = 777600;         // Log every 10 days (sleep duration)
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 50;             // Sleep interval (Seconds)
-uint32_t secondsLog         = 600;           // Logging interval (Seconds)
+uint32_t secondsLog         = 600;            // Logging interval (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;              // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
@@ -157,7 +157,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.0.6 (7/06/22)***");
+    Serial.println("***WELCOME TO GNSS LOGGER v1.1.0 (8/01/23)***");
   #endif
 
   //// CONFIGURE INITIAL SETTINGS  ////

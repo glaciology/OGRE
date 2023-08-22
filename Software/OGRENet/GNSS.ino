@@ -35,20 +35,17 @@ void configureGNSS() {
   
   //////////////////////////////////////////
   if (initSetup) {                                                       // ONLY run this once, during initialization
-    bool success = true;
-//    setValueSuccess &= gnss.newCfgValset8(UBLOX_CFG_I2C_ENABLED, 1);   // Enable I2C
-//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_SPI_ENABLED, 0);   // Disable SPI
-//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_UART1_ENABLED, 0); // Disable UART1
-//    setValueSuccess &= gnss.addCfgValset8(UBLOX_CFG_UART2_ENABLED, 0); // Disable UART2
-//    setValueSuccess &= gnss.sendCfgValset8(UBLOX_CFG_USB_ENABLED, 0);  // Disable USB
-    
+    bool success = true;    
     success &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, logGPS);     // Enable GPS (define in USER SETTINGS)
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);     // Enable BeiDou
-    success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
-    success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GPS_L5_ENA, logL5);  // Enable GPS L5
-    success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_GAL_E5A_ENA, logL5); // Enable Galileo L5
+    success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
+
+    if (logL5 == 1) { 
+      success &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_L5_ENA, logL5);  // Enable GPS L5
+      success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_GAL_E5A_ENA, logL5); // Enable Galileo L5
+    }
 
     delay(2000);
     if (!success) {
@@ -59,9 +56,12 @@ void configureGNSS() {
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);     // Enable BeiDou
-      success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
-      success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GPS_L5_ENA, logL5);  // Enable GPS L5
-      success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_GAL_E5A_ENA, logL5); // Enable Galileo L5
+      success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
+    
+      if (logL5 == 1) { 
+        success &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_L5_ENA, logL5);  // Enable GPS L5
+        success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_GAL_E5A_ENA, logL5); // Enable Galileo L5
+      }
 
       delay(2000);
       if (!success) {
