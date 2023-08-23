@@ -27,9 +27,9 @@ void configureSD() {
 // Create timestamped log file name
 void getLogFileName() { 
   rtc.getTime();
-  sprintf(logFileNameDate, "%04d_20%02d%02d%02d_%02d%02d%02d.ubx", stationName,
+  sprintf(logFileNameDate, "%04d_20%02d%02d%02d_%02d%02d.ubx", stationName,
           rtc.year, rtc.month, rtc.dayOfMonth,
-          rtc.hour, rtc.minute, rtc.seconds);
+          rtc.hour, rtc.minute);
 }
 
 

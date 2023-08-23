@@ -40,6 +40,7 @@ void configureGNSS() {
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);     // Enable BeiDou
+    success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_SBAS_ENA, logSBAS);   // Enable SBAS
     success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
 
     if (logL5 == 1) { 
@@ -56,6 +57,7 @@ void configureGNSS() {
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);     // Enable BeiDou
+      success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_SBAS_ENA, logSBAS);   // Enable SBAS
       success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
     
       if (logL5 == 1) { 

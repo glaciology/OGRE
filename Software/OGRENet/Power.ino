@@ -188,10 +188,10 @@ void checkBattery() {
   if (measureBattery == true) {
     if (measBat() < shutdownThreshold) {
       DEBUG_PRINTLN("Info: BATTERY LOW. SLEEPING");
-      pinMode(PER_POWER, OUTPUT);
+      pinMode(PER_POWER, OUTPUT);  // define as OUTPUT in case pins haven't been initialized
       pinMode(ZED_POWER, OUTPUT);
       deinitializeBuses();
-      while((measBat() < shutdownThreshold + .3)) { // IMPORTANT - RECHARGE THRESHOLD SET HERE
+      while((measBat() < shutdownThreshold + .5)) { // IMPORTANT - RECHARGE THRESHOLD SET HERE
         goToSleep();
         petDog(); 
         DEBUG_PRINT("Info: Battery: "); DEBUG_PRINTLN(measBat());
