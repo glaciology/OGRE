@@ -127,7 +127,7 @@ void configureSleepAlarm() {
 
     if (whichHour == 6 || whichHour == 7 ||  whichHour == 8) {
       DEBUG_PRINTLN("SUMMER MODE");
-      a = rtc.getEpoch() + 600; // sleep for ten minutes, log for an hour
+      a = rtc.getEpoch() + 600; // sleep for ten minutes
       rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     } else { 

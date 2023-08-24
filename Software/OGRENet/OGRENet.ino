@@ -81,7 +81,7 @@ uint32_t summerInterval     = 30;             // Sleep duration during May, June
 uint32_t winterInterval     = 777600;         // Sleep duration during winter, i.e., 9 days
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 50;             // Sleep interval (Seconds)
+uint32_t secondsSleep       = 100;            // Sleep interval (Seconds)
 uint32_t secondsLog         = 600;            // Logging interval (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
@@ -158,7 +158,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.1.0 (8/01/23)***");
+    Serial.println("***WELCOME TO GNSS LOGGER v1.1.1 (9/23)***");
   #endif
 
   //// CONFIGURE INITIAL SETTINGS  ////
