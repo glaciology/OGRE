@@ -35,12 +35,13 @@ Designed for logging raw multi-GNSS data in remote regions of the Arctic, this i
 
 ## Getting Started 
 
-The OGRE has 6 modes of operation: 
+The OGRE has 7 modes of operation: 
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER defined hours
   - (2) Continous Mode: Log GNSS data continously
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER specified day each month
   - (4) Sleep Interval Mode: Log GNSS data for 24 hours at power-on and at a USER defined interval thereafter
   - (5) Log GNSS data for 24 hours on USER specified dates/times read from .txt file. Defaults to mode 4 after last user provided date.
+  - (6) Log GNSS data for 24 hours; During winter once every 9 days; During summer daily.
   - (99) Test Mode: Used for development. Log GNSS data for 50 second interval, sleep for 50 second and repeat.
   
 OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, etc.) is logged to a uSD card in raw .ubx (UBLOX) proprietary format. Satellite .nav messages can also be logged. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery health, logging errors, etc.).
@@ -65,15 +66,18 @@ ENABLE_BDS(0-false, 1-true)=1
 ENABLE_QZSS(0-false, 1-true)=0
 ENABLE_NAV_SFRBX((0-false, 1-true)=1
 STATION_NAME(0000)=0001
+MEASURE_RATE=1
 break;
 ```
 
 - If the USER selects LOG_MODE=1, then LOG_START_HOUR_UTC and LOG_END_HOUR_UTC must be specified. 
 - If the USER selects LOG_MODE=3, then LOG_START_DAY must also be specified (day of each month GNSS data is logged). 
-- If the USER selects LOG_MODE=5, then unix epoch dates for logging are specified in EPOCH.txt. If no dates are specified or if all dates have elapsed, then log interval defaults to LOG_MODE 4, where LOG_EPOCH_SLEEP must be defined. 
+- If the USER selects LOG_MODE=5, then unix epoch dates for logging are specified in EPOCH.txt. If no dates are specified or if all dates have elapsed, then log interval defaults to LOG_MODE 4, where LOG_EPOCH_SLEEP must be defined.
+- If the USER selects LOG_MODE=6, note that the months that are considered summer and winter are hardcoded. Furthermore, the duration between logging during summer or winter is hardcoded. 
 - LED_INDICATORS, if false, will disable all LEDs for power savings, excluding those present during initialization. 
 - MEASURE_BATTERY can be enabled if the user has installed the 12V Lead Acid Battery Circuit and desires battery voltage measurements included in the DEBUG file. This feature will also activate a function that checks the health of the battery and put the instrument to sleep when voltage dips below 10.8V. System will restart when voltage measured above ~11.2V. 
-- STATION_NAME is a number between 0001 and 9999, and will be appended to the timestamped file names for each GNSS file. 
+- STATION_NAME is a number between 0001 and 9999, and will be appended to the timestamped file names for each GNSS file.
+- MEASURE_RATE is frequency of solutions logged to SD card: 1 = 1 per second, 15 = 1 per 15 seconds. 
 
 OPERATION:  
 Insert the uSD card (with or without CONFIG & EPOCH files), then connect battery. The system will attempt to initialize and following LED indicators will flash: 
