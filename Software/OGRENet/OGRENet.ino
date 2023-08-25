@@ -103,7 +103,7 @@ int measurementRate         = 1;              // Produce a measurement every X s
 // BATTERY PARAMETERS
 float gain                   = 17.2;          // Gain/offset for 68k/10k voltage divider battery voltage measure
 float offset                 = 0.23;          // ADC range 0-2.0V
-float shutdownThreshold      = 11.0;          // Shutdown if battery voltage dips below this (10.8V for DEKA 12V GEL)
+float shutdownThreshold      = 10.9;          // Shutdown if battery voltage dips below this (10.8V for DEKA 12V GEL)
                                               // SYSTEM WILL SLEEP IF DIPS BELOW HERE, WAKES after shutdownThreshold + 0.5V reached
 //----------------------------------------------------
 //////////////////////////////////////////////////////
