@@ -27,9 +27,9 @@ void configureSD() {
 // Create timestamped log file name
 void getLogFileName() { 
   rtc.getTime();
-  sprintf(logFileNameDate, "%04d_20%02d%02d%02d_%02d%02d%02d.ubx", stationName,
+  sprintf(logFileNameDate, "%04d_20%02d%02d%02d_%02d%02d.ubx", stationName,
           rtc.year, rtc.month, rtc.dayOfMonth,
-          rtc.hour, rtc.minute, rtc.seconds);
+          rtc.hour, rtc.minute);
 }
 
 
@@ -87,9 +87,11 @@ void getConfig() {
   logQZSS = settings[11];
   logNav = settings[12];
   stationName = settings[13];
+  measurementRate = settings[14];
   
   DEBUG_PRINTLN("Info: Settings read from SD:");
   DEBUG_PRINT(" - Log Mode: "); DEBUG_PRINTLN(logMode);
+  DEBUG_PRINT(" - Log Rate: "); DEBUG_PRINTLN(measurementRate);
   DEBUG_PRINT(" - Log Battery?: "); DEBUG_PRINTLN(measureBattery);
   DEBUG_PRINT(" - Flash LED?: "); DEBUG_PRINTLN(ledBlink);
 

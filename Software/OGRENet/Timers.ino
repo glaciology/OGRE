@@ -51,7 +51,7 @@ void configureLogAlarm() {
     rtc.attachInterrupt();
   }
   
-  if (logMode == 99 || 7) {
+  if (logMode == 99 || logMode == 7) {
     time_t a;
     a = rtc.getEpoch() + secondsLog;
     rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
@@ -127,7 +127,7 @@ void configureSleepAlarm() {
 
     if (whichHour == 6 || whichHour == 7 ||  whichHour == 8) {
       DEBUG_PRINTLN("SUMMER MODE");
-      a = rtc.getEpoch() + 600; // sleep for ten minutes, log for an hour
+      a = rtc.getEpoch() + 600; // sleep for ten minutes
       rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     } else { 
@@ -187,6 +187,7 @@ void syncRtc() {
          rtc.setEpoch(gnssEpoch);                        // Set RTC date and time
          rtcDrift = gnssEpoch - rtcEpoch;                // Calculate RTC drift (debug)
          rtcSyncFlag = true;                             // Set flag, end SYNC
+         gnss.setAutoPVTrate(0);                         // Turn off PVT rate
 
          DEBUG_PRINT("Info: RTC drift: "); DEBUG_PRINTLN(rtcDrift);
          DEBUG_PRINT("Info: RTC time synced to "); printDateTime();

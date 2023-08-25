@@ -40,6 +40,7 @@ void configureGNSS() {
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
     success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);     // Enable BeiDou
+    success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_SBAS_ENA, logSBAS);   // Enable SBAS
     success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
 
     if (logL5 == 1) { 
@@ -56,6 +57,7 @@ void configureGNSS() {
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);     // Enable BeiDou
+      success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_SBAS_ENA, logSBAS);   // Enable SBAS
       success &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);  // Enable QZSS
     
       if (logL5 == 1) { 
@@ -81,16 +83,15 @@ void configureGNSS() {
   gnss.setI2COutput(COM_TYPE_UBX);                 // Set the I2C port to output UBX only (no NMEA)
   gnss.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); // Save communications port settings to flash and BBR
   gnss.setNavigationFrequency(1);                  // Produce one navigation solution per second
-  gnss.setAutoRXMRAWX(true, false);                // Enable automatic RXM RAWX (RAW) messages 
+  gnss.setAutoRXMRAWXrate(measurementRate, false); // Enable automatic RXM RAWX (RAW) messages 
   gnss.logRXMRAWX();                               // Enable RXM RAWX (RAW) data logging
   
   if (logNav == 1) {
-    gnss.setAutoRXMSFRBX(true, false);            // Enable automatic RXM SFRBX (NAV) messages 
-    gnss.logRXMSFRBX();                           // Enable RXM SFRBX (NAV) data logging
+    gnss.setAutoRXMSFRBXrate(measurementRate, false);  // Enable automatic RXM SFRBX (NAV) messages 
+    gnss.logRXMSFRBX();                                // Enable RXM SFRBX (NAV) data logging
   }
-
-  gnss.setAutoPVT(true);                          // Enable PVT messages for syncing RTC
- 
+  
+  gnss.setAutoPVTrate(1);                          // Enable PVT messages for syncing RTC
 }
 
 

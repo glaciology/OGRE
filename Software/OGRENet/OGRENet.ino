@@ -1,10 +1,10 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
    Derek Pickell 8/03/23
-   V1.1.0
+   V1.1.1
 
    Hardware:
-   - OGRENet PCB w/ ZED-F9P/T
+   - OGRENet PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
 
    Dependencies:
    - SparkFun_u-blox_GNSS_Arduino_Library v2.2.8
@@ -13,6 +13,7 @@
 
    INSTRUCTIONS:
    - See github.com/glaciology/OGRENet/ for detailed instructions.
+   - Optional settings files on SD card: CONFIG.txt, EPOCHS.txt
    - LED indicators:
         *2 Blink Pattern: uSD failed - waiting for RESET
         *3 Blink Pattern: Ublox I2C or config failed - waiting for RESET
@@ -24,8 +25,8 @@
         *No Blinks: System deep sleep due to low battery or battery dead.
 */
 
-#define HARDWARE_VERSION 1  // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22
-#define SOFTWARE_VERSION "1-1-0" 
+#define HARDWARE_VERSION 1  // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22 - present
+#define SOFTWARE_VERSION "1-1-1" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
 #include <Wire.h>                             // 
@@ -48,7 +49,7 @@ FsFile dateFile;                              // USER INPUT EPOCHS FILE
 const byte BAT                    = 32;       // ADC port for battery measure
 #elif HARDWARE_VERSION == 1                   //
 const byte BAT                    = 35;       //
-const byte SHIELD                 = 19;       //
+const byte SHIELD                 = 19;       // Use with Telemetry Shield
 #endif                                        //
 const byte PER_POWER              = 18;       // Drive to turn off uSD
 const byte ZED_POWER              = 34;       // Drive to turn off ZED
@@ -61,11 +62,10 @@ SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 41, 42, 43
 #define SD_CONFIG SdSpiConfig(PIN_SD_CS, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
 
 //////////////////////////////////////////////////////
-//----------- DEFAULT CONFIGURATION HERE ------------
-// LOG MODE
-byte logMode                = 5;              // 1 = daily fixed, 2 = continous, 3 = monthly 24-hr fixed, 4 = 24-hr rolling log, interval sleep
-                                              // 5 = specified Unix Epochs for 24 hrs (defaults to mode 4 after), 
-                                              // 6 = weekly during summer, monthly during winter for 24 hours, 99 = test mode
+//--------- USER DEFAULT CONFIGURATION HERE ------------
+// LOG MODE: 
+byte logMode                = 6;              // {1, 2, 3, 4, 5, 6, 99}
+
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour 
 byte logEndHr               = 14;             // UTC Hour
@@ -74,36 +74,37 @@ byte logEndHr               = 14;             // UTC Hour
 byte logStartDay            = 8;              // Day of month between 1 and 28
 
 // LOG MODE 4/5: SLEEP FOR SPECIFIED DURATION
-uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (ie, 2628000 ~ 1 month)
+uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (i.e., 2628000 ~ 1 month)
 
-// LOG MODE 6: SUMMER/WINTER
-//int summer[]                = {5, 6, 7, 8}; // Designated months for extended logging
-uint32_t summerInterval     = 30;             // Log continuously (sleep duration)
-uint32_t winterInterval     = 777600;         // Log every 10 days (sleep duration)
+// LOG MODE 6: SUMMER/WINTER: LOG 24 HOURS, SLEEP FOR:
+uint32_t summerInterval     = 30;             // Sleep duration during May, June, July, August
+uint32_t winterInterval     = 777600;         // Sleep duration during winter, i.e., 9 days
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 50;             // Sleep interval (Seconds)
+uint32_t secondsSleep       = 100;            // Sleep interval (Seconds)
 uint32_t secondsLog         = 600;            // Logging interval (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;              // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
 int logGLO                  = 1;              //
-int logGAL                  = 0;              //
+int logGAL                  = 1;              //
 int logBDS                  = 0;              //
 int logQZSS                 = 0;              //
+int logSBAS                 = 0;              // Not on SD CONFIG File 
 int logNav                  = 1;              //
 int logL5                   = 0;              // WARNING: only set if using L5-capable ZED.
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = false;          // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = true;           // If TRUE, uses battery circuit to measure V during debug logs
 int  stationName            = 0000;           // Station name, 4 digits
+int measurementRate         = 1;              // Produce a measurement every X seconds
 
 // BATTERY PARAMETERS
 float gain                   = 17.2;          // Gain/offset for 68k/10k voltage divider battery voltage measure
 float offset                 = 0.23;          // ADC range 0-2.0V
-float shutdownThreshold      = 11.0;          // Shutdown if battery voltage dips below this (10.8V for DEKA 12V GEL)
-                                              // SYSTEM WILL SLEEP IF DIPS BELOW HERE, WAKES after shutdownThreshold + 0.2V reached
+float shutdownThreshold      = 10.9;          // Shutdown if battery voltage dips below this (10.8V for DEKA 12V GEL)
+                                              // SYSTEM WILL SLEEP IF DIPS BELOW HERE, WAKES after shutdownThreshold + 0.5V reached
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
@@ -116,9 +117,9 @@ volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 unsigned long dates[16]           = {};       // Array with Unix Epochs of log dates !!! MAX 15 !!!
-int           settings[16]        = {};       // Array that holds user settings on SD
+int           settings[17]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
-char          logFileNameDate[30] = "";       // Log file name for modes 1, 2, 3
+char          logFileNameDate[30] = "";       // Log file name
 
 // DEBUGGING
 uint16_t      maxBufferBytes      = 0;        // How full the file buffer has been
@@ -157,7 +158,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.1.0 (8/01/23)***");
+    Serial.println("***WELCOME TO GNSS LOGGER v1.1.1 (9/23)***");
   #endif
 
   //// CONFIGURE INITIAL SETTINGS  ////
@@ -195,7 +196,7 @@ void loop() {
         initializeBuses();           // Reconfigure GNSS/SD if necessary
         configureSD();               //
         configureGNSS();             //
-        syncRtc();                   //
+        syncRtc();
       }                              //
       configureLogAlarm();           // 
       logGNSS();                     //
