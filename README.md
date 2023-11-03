@@ -6,8 +6,12 @@
 
 # On-ice Greenland Research Experimental Network :: A low-power, low-cost GNSS data logger "OGRE" for monitoring the cryosphere.
 <p align="center">
-<img src="https://user-images.githubusercontent.com/37055625/181101164-2deffa3e-e22e-488c-9098-c6bd66c3908c.jpg" width="350"/>
+<img src="https://github.com/glaciology/OGRENet/assets/37055625/04b9404f-7409-4638-b8b2-81a605f01529" width="350"/>
 </p>
+
+
+
+
 
 ## Overview
 Designed for logging raw multi-GNSS data in remote regions of the Arctic, this instruments incorporates low power, low cost components onto a single circuit board and features a Ublox ZED-F9P/T GNSS module and Sparkfun Artemis MCU (Ambiq Apollo3 MCU, Cortex-M4). 
