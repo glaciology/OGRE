@@ -57,11 +57,11 @@ Otherwise, software will default to hardcoded configuration. USER may also uploa
 The CONFIG.TXT file is formatted as follows: 
 
 ```
-LOG_MODE(1: daily, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: summer, 99: test)=5
-LOG_START_HOUR_UTC(only if using mode 1)=12
-LOG_END_HOUR_UTC(only if using mode 1)=14
+LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=6
+LOG_START_HOUR_UTC(only if using mode 1)=17
+LOG_END_HOUR_UTC(only if using mode 1)=23
 LOG_START_DAY(only if using mode 3, 0-28)=25
-LOG_EPOCH_SLEEP(only if using mode 4/5, seconds)=1800
+LOG_EPOCH_SLEEP(only if using mode 4/5, seconds)=3600
 LED_INDICATORS(0-false, 1-true)=1
 MEASURE_BATTERY(0-false, 1-true)=1
 ENABLE_GPS(0-false, 1-true)=1
@@ -69,18 +69,20 @@ ENABLE_GLO(0-false, 1-true)=1
 ENABLE_GAL(0-false, 1-true)=1
 ENABLE_BDS(0-false, 1-true)=1
 ENABLE_QZSS(0-false, 1-true)=0
-ENABLE_NAV_SFRBX((0-false, 1-true)=1
+ENABLE_NAV_SFRBX((0-false, 1-true)=0
 STATION_NAME(0000)=0001
 MEASURE_RATE=1
+BAT_SHUTDOWN_V=10.9
+WINTER_INTERVAL(seconds, mode 6)=777601
 break;
 ```
 
 - If the USER selects LOG_MODE=1, then LOG_START_HOUR_UTC and LOG_END_HOUR_UTC must be specified. 
 - If the USER selects LOG_MODE=3, then LOG_START_DAY must also be specified (day of each month GNSS data is logged). 
 - If the USER selects LOG_MODE=5, then unix epoch dates for logging are specified in EPOCH.txt. If no dates are specified or if all dates have elapsed, then log interval defaults to LOG_MODE 4, where LOG_EPOCH_SLEEP must be defined.
-- If the USER selects LOG_MODE=6, note that the months that are considered summer and winter are hardcoded. Furthermore, the duration between logging during summer or winter is hardcoded. Note: log sessions are 24 hours, and files start/end based on when the reciever first wakes up, rather dilineated at 00-UTC. 
+- If the USER selects LOG_MODE=6, note that the months that are considered summer (May - Aug) and winter are hardcoded. Furthermore, the duration between logging during winter is set by WINTER_INTERVAL. Note: log sessions are 24 hours, and files start/end based on when the reciever first wakes up, rather dilineated at 00-UTC. 
 - LED_INDICATORS, if false, will disable all LEDs, excluding those present during initialization. 
-- MEASURE_BATTERY, if true, battery voltage is measured/monitored, and the instrument will be put to sleep when voltage dips below 10.8V. System will restart when voltage measured above ~11.2V. 
+- MEASURE_BATTERY, if true, battery voltage is measured/monitored, and the instrument will be put to sleep when voltage dips below 10.9V (OR as defined by user in BAT_SHUTDOWN). System will restart when voltage measured above ~11.2V. 
 - STATION_NAME is a number between 0001 and 9999, and will be appended to the timestamped file names for each GNSS file.
 - MEASURE_RATE is frequency of epoch solutions logged to SD card: 1 = 1 per second, 15 = 1 per 15 seconds. 
 
