@@ -26,7 +26,7 @@
 */
 
 #define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE v3/22 - present
-#define SOFTWARE_VERSION "1-1-1" 
+#define SOFTWARE_VERSION "2-0-1" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
 #include <Wire.h>                             // 
