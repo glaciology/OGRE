@@ -25,24 +25,24 @@
         *No Blinks: System deep sleep due to low battery or battery dead.
 */
 
-#define HARDWARE_VERSION 1  // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22 - present
-#define SOFTWARE_VERSION "1-1-1" 
+#define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE v3/22 - present, 2 = SLED (NO SD)
+#define SOFTWARE_VERSION "2-0-0" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
 #include <Wire.h>                             // 
-#include <SPI.h>                              // 
+//#include <SPI.h>                              // 
 #include <WDT.h>                              //
 #include <RTC.h>                              //
 #include <SdFat.h>                            // https://github.com/greiman/SdFat v2.1.0
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
 SFE_UBLOX_GNSS gnss;                          //
-SdFs sd;                                      // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
+//SdFs sd;                                      // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
 APM3_RTC rtc;                                 //
 APM3_WDT wdt;                                 // 
-FsFile myFile;                                // RAW UBX LOG FILE
-FsFile debugFile;                             // DEBUG LOG FILE
-FsFile configFile;                            // USER INPUT CONFIG FILE
-FsFile dateFile;                              // USER INPUT EPOCHS FILE
+//FsFile myFile;                                // RAW UBX LOG FILE
+//FsFile debugFile;                             // DEBUG LOG FILE
+//FsFile configFile;                            // USER INPUT CONFIG FILE
+//FsFile dateFile;                              // USER INPUT EPOCHS FILE
 
 ///////// HARDWARE-SPECIFIC PINOUTS & OBJECTS ////////
 #if HARDWARE_VERSION == 0
@@ -58,13 +58,13 @@ const byte PIN_SD_CS              = 41;       //
 const byte BAT_CNTRL              = 22;       // Drive high to turn on Bat measure
 
 TwoWire myWire(2);                            // USE I2C bus 2, SDA/SCL 25/27
-SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 41, 42, 43
-#define SD_CONFIG SdSpiConfig(PIN_SD_CS, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
+//SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 41, 42, 43
+//#define SD_CONFIG SdSpiConfig(PIN_SD_CS, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
 
 //////////////////////////////////////////////////////
 //--------- USER DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: 
-byte logMode                = 6;              // {1, 2, 3, 4, 5, 6, 99}
+byte logMode                = 2;              // {1, 2, 3, 4, 5, 6, 99}
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour 
@@ -81,14 +81,14 @@ uint32_t summerInterval     = 30;             // Sleep duration during May, June
 uint32_t winterInterval     = 777600;         // Sleep duration during winter, i.e., 9 days
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 99;            // Sleep interval (Seconds)
-uint32_t secondsLog         = 99;            // Logging interval (Seconds)
+uint32_t secondsSleep       = 100;            // Sleep interval (Seconds)
+uint32_t secondsLog         = 600;            // Logging interval (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;              // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
 int logGLO                  = 1;              //
 int logGAL                  = 1;              //
-int logBDS                  = 0;              //
+int logBDS                  = 1;              //
 int logQZSS                 = 0;              //
 int logSBAS                 = 0;              // Not on SD CONFIG File 
 int logNav                  = 1;              //
@@ -96,9 +96,9 @@ int logL5                   = 0;              // WARNING: only set if using L5-c
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = true;           // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = false;           // If TRUE, uses battery circuit to measure V during debug logs
 int  stationName            = 0000;           // Station name, 4 digits
-int measurementRate         = 1;              // Produce a measurement every X seconds
+int measurementRate         = 15;              // Produce a measurement every X seconds
 
 // BATTERY PARAMETERS
 float gain                   = 17.2;          // Gain/offset for 68k/10k voltage divider battery voltage measure
@@ -109,7 +109,7 @@ float shutdownThreshold      = 10.9;          // Shutdown if battery voltage dip
 //////////////////////////////////////////////////////
 
 ///////// GLOBAL VARIABLES ///////////////////////////
-const int     sdWriteSize         = 512;      // Write data to SD in blocks of 512 bytes
+const int     sdWriteSize         = 128;      // Write data to SD in blocks of 512 bytes
 const int     fileBufferSize      = 16384;    // Allocate 16KB RAM for UBX message storage
 volatile bool wdtFlag             = false;    // ISR WatchDog
 volatile bool rtcSyncFlag         = false;    // Flag to indicate if RTC has been synced with GNSS
@@ -140,7 +140,7 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 ///////// DEBUGGING MACROS ///////////////////////////
-#define DEBUG                     true        // Output messages to Serial monitor
+#define DEBUG                     false       // Output messages to Serial monitor
 #define DEBUG_GNSS                false       // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
@@ -155,11 +155,10 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 void setup() {
-  #if DEBUG
-    Serial.begin(115200);
-    delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.1.1 (9/23)***");
-  #endif
+  Serial.begin(115200);
+  delay(1000);
+  DEBUG_PRINTLN("***WELCOME TO GNSS LOGGER v1.1.1 (9/23)***");
+
 
   //// CONFIGURE INITIAL SETTINGS  ////
   pinMode(LED, OUTPUT);              //
@@ -167,10 +166,10 @@ void setup() {
   configureWdt();                    // 12s interrupt, 24s reset period
   checkBattery();                    // IF battery LOW, send back to sleep until recharged
   initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
-  configureSD();                     // BLINK 2x pattern - FAILED SETUP
-  getConfig();                       // Read LOG settings from Config.txt on uSD; 5x - FAILED
-  createDebugFile();                 // Creates debug file headers
-  getDates();                        // Read Dates (in unix epoch format) for log mode 5
+//  configureSD();                     // BLINK 2x pattern - FAILED SETUP
+//  getConfig();                       // Read LOG settings from Config.txt on uSD; 5x - FAILED
+//  createDebugFile();                 // Creates debug file headers
+//  getDates();                        // Read Dates (in unix epoch format) for log mode 5
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
@@ -194,7 +193,7 @@ void loop() {
       petDog();                      //
       if (online.gnss == false || online.uSD == false) {
         initializeBuses();           // Reconfigure GNSS/SD if necessary
-        configureSD();               //
+//        configureSD();               //
         configureGNSS();             //
         syncRtc();
       }                              //
@@ -203,7 +202,7 @@ void loop() {
       
       DEBUG_PRINTLN("Info: Logging Terminated");   
       closeGNSS(); 
-      logDebug("success");                 
+//      logDebug("success");                 
       configureSleepAlarm();
       deinitializeBuses();
     }
