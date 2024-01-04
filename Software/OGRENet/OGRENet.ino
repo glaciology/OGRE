@@ -1,7 +1,7 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 8/03/23
-   V1.1.1
+   Derek Pickell 01/04/24
+   V2.0.1
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
@@ -25,7 +25,7 @@
         *No Blinks: System deep sleep due to low battery or battery dead.
 */
 
-#define HARDWARE_VERSION 1  // 0 = CUSTOM DARTMOUTH HARDWARE v1/22, 1 = CUSTOM DARTMOUTH HARDWARE v3/22 - present
+#define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE v3/22 - present
 #define SOFTWARE_VERSION "1-1-1" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
@@ -77,12 +77,12 @@ byte logStartDay            = 8;              // Day of month between 1 and 28
 uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (i.e., 2628000 ~ 1 month)
 
 // LOG MODE 6: SUMMER/WINTER: LOG 24 HOURS, SLEEP FOR:
-uint32_t summerInterval     = 30;             // Sleep duration during May, June, July, August
-uint32_t winterInterval     = 777600;         // Sleep duration during winter, i.e., 9 days
+uint32_t summerInterval     = 1;              // Sleep duration during May, June, July, August
+int winterInterval          = 777600;         // Sleep duration during winter, i.e., 9 days
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 100;            // Sleep interval (Seconds)
-uint32_t secondsLog         = 600;            // Logging interval (Seconds)
+uint32_t secondsSleep       = 1;             // Sleep interval (Seconds)
+uint32_t secondsLog         = 99;             // Logging interval (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;              // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
@@ -98,7 +98,7 @@ int logL5                   = 0;              // WARNING: only set if using L5-c
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
 bool measureBattery         = true;           // If TRUE, uses battery circuit to measure V during debug logs
 int  stationName            = 0000;           // Station name, 4 digits
-int measurementRate         = 1;              // Produce a measurement every X seconds
+int measurementRate         = 15;             // Produce a measurement every X seconds
 
 // BATTERY PARAMETERS
 float gain                   = 17.2;          // Gain/offset for 68k/10k voltage divider battery voltage measure
@@ -117,7 +117,7 @@ volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 unsigned long dates[16]           = {};       // Array with Unix Epochs of log dates !!! MAX 15 !!!
-int           settings[17]        = {};       // Array that holds user settings on SD
+int           settings[19]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name
 
@@ -158,7 +158,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v1.1.1 (9/23)***");
+    Serial.println("***WELCOME TO GNSS LOGGER v2.0.1 (1/24)***");
   #endif
 
   //// CONFIGURE INITIAL SETTINGS  ////

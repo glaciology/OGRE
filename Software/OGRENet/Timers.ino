@@ -38,27 +38,29 @@ void configureLogAlarm() {
   if (logMode == 1) {
     rtc.setAlarm(logEndHr, 0, 0, 0, 0, 0); 
     rtc.setAlarmMode(4); // match every day
-    rtc.attachInterrupt();
   }
 
-  if (logMode == 2){ // empty - continuous
+  else if (logMode == 2){ // continuous: will generate new file at midnight
+    rtc.setAlarm(0, 0, 0, 0, 0, 0);
+    rtc.setAlarmMode(4);
   }
 
-  if (logMode == 3 || logMode == 4 || logMode == 5 || logMode ==6) {
+  else if (logMode == 3 || logMode == 4 || logMode == 5 || logMode ==6) {
     // WILL LOG FOR 24 HOURS
     rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
     rtc.setAlarmMode(4);
-    rtc.attachInterrupt();
   }
   
-  if (logMode == 99 || logMode == 7) {
-    time_t a;
-    a = rtc.getEpoch() + secondsLog;
-    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
-    rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
-    rtc.attachInterrupt();
+  else if (logMode == 99 || logMode == 7) {
+    rtc.setAlarm(0, 0, 0, 0, 0, 0);
+    rtc.setAlarmMode(6);
+//    time_t a;
+//    a = rtc.getEpoch() + secondsLog;
+//    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+//    rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
   }
-  
+
+  rtc.attachInterrupt();
   alarmFlag = false;
   DEBUG_PRINT("Info: Logging until "); printAlarm();
 }
@@ -74,12 +76,20 @@ void configureSleepAlarm() {
     rtc.setAlarmMode(4); // match every day
   }
 
-  if (logMode == 3) {
+  else if (logMode == 2) { 
+    DEBUG_PRINTLN("Info: Log Mode 2. No sleep.");
+    time_t a;
+    a = rtc.getEpoch() + 1; // fixed 5 second "break"
+    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+    rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+  }
+
+  else if (logMode == 3) {
     rtc.setAlarm(0, 0, 0, 0, logStartDay, 0); 
     rtc.setAlarmMode(2); // match every month
   }
 
-  if (logMode == 4 || logMode == 5) {
+  else if (logMode == 4 || logMode == 5) {
     // sleeps until specified unix epoch; if no longer specified defaults to epochSleep interval
     // note that a maximum of 15 dates can be provided. 
     time_t a;
@@ -99,10 +109,9 @@ void configureSleepAlarm() {
     a = rtc.getEpoch() + epochSleep;
     rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
     rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
-    
   }
 
-  if (logMode == 6){
+  else if (logMode == 6){
     time_t a;
     int whichMonth = rtc.month;
     DEBUG_PRINT("The month is: "); DEBUG_PRINTLN(whichMonth);
@@ -120,14 +129,14 @@ void configureSleepAlarm() {
     }
   }
 
-  if (logMode == 7){ // TO TEST LOG MODE 6 ON FASTER SCALE
+  else if (logMode == 7){ // TO TEST LOG MODE 6 ON FASTER SCALE
     time_t a;
     int whichHour = rtc.hour;
     DEBUG_PRINT("The hour is: "); DEBUG_PRINTLN(whichHour);
 
-    if (whichHour == 6 || whichHour == 7 ||  whichHour == 8) {
+    if (whichHour == 7) {
       DEBUG_PRINTLN("SUMMER MODE");
-      a = rtc.getEpoch() + 600; // sleep for ten minutes
+      a = rtc.getEpoch() + 1; // sleep for 1 second.
       rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     } else { 
@@ -138,7 +147,7 @@ void configureSleepAlarm() {
     }
   }
     
-  if (logMode == 99) {
+  else if (logMode == 99) {
     time_t a;
     a = rtc.getEpoch() + secondsSleep;
     rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
@@ -148,6 +157,7 @@ void configureSleepAlarm() {
   rtc.attachInterrupt();
   alarmFlag = false;
   DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
+
 }
 
 

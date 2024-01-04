@@ -57,8 +57,14 @@ void getConfig() {
     }
     
     char* parse1 = strtok(line, "=");               // split at '='
-    int hold = strtol(strtok(NULL, "="), NULL, 10); // take remaining string, convert to base 10
-    settings[i] = hold;
+
+    if (strcmp(parse1, "BAT_SHUTDOWN_V") == 0) {      // this value is a float
+      float hold = strtof(strtok(NULL, "="), NULL);
+      shutdownThreshold = hold;
+    } else {                                          // the remaining values are all strings
+      int hold = strtol(strtok(NULL, "="), NULL, 10); // take remaining string, convert to base 10
+      settings[i] = hold;
+    }
     i++;
   }
   
@@ -88,11 +94,12 @@ void getConfig() {
   logNav = settings[12];
   stationName = settings[13];
   measurementRate = settings[14];
+  winterInterval = settings[16];
   
   DEBUG_PRINTLN("Info: Settings read from SD:");
   DEBUG_PRINT(" - Log Mode: "); DEBUG_PRINTLN(logMode);
   DEBUG_PRINT(" - Log Rate: "); DEBUG_PRINTLN(measurementRate);
-  DEBUG_PRINT(" - Log Battery?: "); DEBUG_PRINTLN(measureBattery);
+  DEBUG_PRINT(" - Log Battery?: "); DEBUG_PRINT(measureBattery); DEBUG_PRINT("Shutdown V: "); DEBUG_PRINTLN(shutdownThreshold);
   DEBUG_PRINT(" - Flash LED?: "); DEBUG_PRINTLN(ledBlink);
 
   if (logMode == 1 ) {
@@ -105,6 +112,10 @@ void getConfig() {
 
   if (logMode == 4 ) {
     DEBUG_PRINT("Log Mode 4 - Sleep Interval "); DEBUG_PRINTLN(epochSleep);
+  }
+
+  if (logMode == 6 ) {
+    DEBUG_PRINT("Log Mode 6 - Winter Interval "); DEBUG_PRINTLN(winterInterval);
   }
 
   DEBUG_PRINT(" - Constellations: "); DEBUG_PRINT("GPS "); DEBUG_PRINT(logGPS); DEBUG_PRINT(" GLO "); DEBUG_PRINT(logGLO);
