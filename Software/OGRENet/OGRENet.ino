@@ -17,8 +17,8 @@
    - LED indicators:
         *2 Blink Pattern: uSD failed - waiting for RESET
         *3 Blink Pattern: Ublox I2C or config failed - waiting for RESET
-        *5 Rapid Blinks: CONFIG file failed to read
         *5 Blink Pattern: RTC sync fail - waiting for RESET
+        *6 Rapid Blinks: CONFIG file failed to read; using defaults
         *10 Blinks: RTC synced and System Configuration COMPLETE (After Initial Power On or Reset Only)
         *1 Blink every 12 seconds: Sleeping 
         *Random Rapid Blinks: System logging data.
@@ -45,12 +45,8 @@ FsFile configFile;                            // USER INPUT CONFIG FILE
 FsFile dateFile;                              // USER INPUT EPOCHS FILE
 
 ///////// HARDWARE-SPECIFIC PINOUTS & OBJECTS ////////
-#if HARDWARE_VERSION == 0
-const byte BAT                    = 32;       // ADC port for battery measure
-#elif HARDWARE_VERSION == 1                   //
 const byte BAT                    = 35;       //
 const byte SHIELD                 = 19;       // Use with Telemetry Shield
-#endif                                        //
 const byte PER_POWER              = 18;       // Drive to turn off uSD
 const byte ZED_POWER              = 34;       // Drive to turn off ZED
 const byte LED                    = 33;       //
@@ -88,17 +84,17 @@ uint32_t secondsLog         = 99;             // Logging interval (Seconds)
 int logGPS                  = 1;              // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
 int logGLO                  = 1;              //
 int logGAL                  = 1;              //
-int logBDS                  = 0;              //
+int logBDS                  = 1;              //
 int logQZSS                 = 0;              //
 int logSBAS                 = 0;              // Not on SD CONFIG File 
-int logNav                  = 1;              //
+int logNav                  = 0;              //
 int logL5                   = 0;              // WARNING: only set if using L5-capable ZED.
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = true;           // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = false;          // If TRUE, uses battery circuit to measure V during debug logs
 int  stationName            = 0000;           // Station name, 4 digits
-int measurementRate         = 15;             // Produce a measurement every X seconds
+int  measurementRate        = 15;             // Produce a measurement every X seconds
 
 // BATTERY PARAMETERS
 float gain                   = 17.2;          // Gain/offset for 68k/10k voltage divider battery voltage measure
@@ -116,7 +112,7 @@ volatile bool rtcSyncFlag         = false;    // Flag to indicate if RTC has bee
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
-unsigned long dates[16]           = {};       // Array with Unix Epochs of log dates !!! MAX 15 !!!
+unsigned long dates[21]           = {};       // Array with Unix Epochs of log dates !!! MAX 20 !!!
 int           settings[19]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name
@@ -163,7 +159,7 @@ void setup() {
 
   //// CONFIGURE INITIAL SETTINGS  ////
   pinMode(LED, OUTPUT);              //
-  pinMode(LED, HIGH);
+  pinMode(LED, HIGH);                //
   configureWdt();                    // 12s interrupt, 24s reset period
   checkBattery();                    // IF battery LOW, send back to sleep until recharged
   initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
