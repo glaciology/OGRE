@@ -45,10 +45,26 @@ void configureLogAlarm() {
     rtc.setAlarmMode(4);
   }
 
-  else if (logMode == 3 || logMode == 4 || logMode == 5 || logMode ==6) {
+  else if (logMode == 3 || logMode == 4 || logMode == 5) {
     // WILL LOG FOR 24 HOURS
     rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
     rtc.setAlarmMode(4);
+  }
+
+  else if (logMode == 6 ) { 
+    time_t a;
+    int whichMonth = rtc.month;
+    DEBUG_PRINT("The month is: "); DEBUG_PRINTLN(whichMonth);
+
+    if (whichMonth == 5 ||whichMonth == 6 || whichMonth == 7 || whichMonth == 8){
+      DEBUG_PRINTLN("SUMMER MODE");
+      rtc.setAlarm(0, 0, 0, 0, 0, 0);
+      rtc.setAlarmMode(4);
+    } else { 
+      DEBUG_PRINTLN("WINTER MODE");
+      rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
+      rtc.setAlarmMode(4);
+    }
   }
   
   else if (logMode == 99 || logMode == 7) {
@@ -123,8 +139,8 @@ void configureSleepAlarm() {
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     } else { 
       DEBUG_PRINTLN("WINTER MODE");
-      a = rtc.getEpoch() + winterInterval;
-      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      a = rtc.getEpoch() + winterInterval + 100; // 60 = RTC drift margin
+      rtc.setAlarm(0, 0, 0, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
   }
