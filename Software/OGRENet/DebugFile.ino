@@ -51,7 +51,7 @@ void logDebug(const char* errorCode) {
   debugFile.print(debugCounter);         debugFile.print(",");
   debugFile.print(online.gnss);          debugFile.print(",");
   debugFile.print(online.uSD);           debugFile.print(",");
-  debugFile.print(rtcSyncFlag);          debugFile.print(",");
+  debugFile.print(online.rtcSync);      debugFile.print(",");
   debugFile.print(rtcDrift);             debugFile.print(",");
   debugFile.print(bytesWritten);         debugFile.print(",");
   debugFile.print(maxBufferBytes);       debugFile.print(",");

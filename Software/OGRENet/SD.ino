@@ -73,35 +73,21 @@ void getConfig() {
   logEndHr        = settings[2];
   logStartDay     = settings[3];
   epochSleep      = settings[4];
-
-  if (settings[5] == 0) {
-    ledBlink = false;
-  } else {
-    ledBlink = true;
-  }
-
-  if (settings[6] == 0) {
-    measureBattery = false;
-  } else  {
-    measureBattery = true;
-  }
-
-  logGPS = settings[7];
-  logGLO = settings[8];
-  logGAL = settings[9];
-  logBDS = settings[10];
-  logQZSS = settings[11];
-  logNav = settings[12];
-  stationName = settings[13];
+  ledBlink        = (settings[5] != 0);
+  measureBattery  = (settings[6] != 0);
+  logGPS          = settings[7];
+  logGLO          = settings[8];
+  logGAL          = settings[9];
+  logBDS          = settings[10];
+  logQZSS         = settings[11];
+  logNav          = settings[12];
+  stationName     = settings[13];
   measurementRate = settings[14];
-  winterInterval = settings[16];
-  
-  DEBUG_PRINTLN("Info: Settings read from SD:");
-  DEBUG_PRINT(" - Log Mode: "); DEBUG_PRINTLN(logMode);
-  DEBUG_PRINT(" - Log Rate: "); DEBUG_PRINTLN(measurementRate);
-  DEBUG_PRINT(" - Log Battery?: "); DEBUG_PRINT(measureBattery); DEBUG_PRINT("Shutdown V: "); DEBUG_PRINTLN(shutdownThreshold);
-  DEBUG_PRINT(" - Flash LED?: "); DEBUG_PRINTLN(ledBlink);
+  winterInterval  = settings[16];
+  startMonth      = settings[17];
+  endMonth        = settings[18];
 
+  DEBUG_PRINT("Info: SD Settings from Device #: "); DEBUG_PRINTLN(stationName);
   if (logMode == 1 ) {
     DEBUG_PRINT("Log Mode 1 - Start/End Hours: "); DEBUG_PRINT(logStartHr); DEBUG_PRINT(", ");DEBUG_PRINTLN(logEndHr);
   }
@@ -115,9 +101,14 @@ void getConfig() {
   }
 
   if (logMode == 6 ) {
-    DEBUG_PRINT("Log Mode 6 - Winter Interval "); DEBUG_PRINTLN(winterInterval);
+    DEBUG_PRINT("Log Mode 6 - Winter Interval "); DEBUG_PRINT(winterInterval); DEBUG_PRINT("Summer months: "); DEBUG_PRINT(startMonth); DEBUG_PRINT(endMonth);
+  } else { 
+    DEBUG_PRINT(" - Log Mode: "); DEBUG_PRINTLN(logMode);
   }
-
+  
+  DEBUG_PRINT(" - Log Rate: "); DEBUG_PRINTLN(measurementRate);
+  DEBUG_PRINT(" - Log Battery?: "); DEBUG_PRINT(measureBattery); DEBUG_PRINT(" Shutdown V: "); DEBUG_PRINTLN(shutdownThreshold);
+  DEBUG_PRINT(" - Flash LED?: "); DEBUG_PRINTLN(ledBlink);
   DEBUG_PRINT(" - Constellations: "); DEBUG_PRINT("GPS "); DEBUG_PRINT(logGPS); DEBUG_PRINT(" GLO "); DEBUG_PRINT(logGLO);
   DEBUG_PRINT(" GAL "); DEBUG_PRINTLN(logGAL); DEBUG_PRINT("                   BDS "); DEBUG_PRINT(logBDS); DEBUG_PRINT(" QZSS "); 
   DEBUG_PRINT(logQZSS); DEBUG_PRINT(" NAV "); DEBUG_PRINTLN(logNav);
@@ -151,7 +142,7 @@ void getDates() {
   
     while ((n = dateFile.fgets(line, sizeof(line))) > 0) {
   
-      if (line[n - 1] == '\n') {
+      if (line[n - 1] == '\n') { // strip end line character
         line[n-1] = 0;
       }
       
@@ -161,7 +152,7 @@ void getDates() {
       i++;
     }
     
-//    for(int i=0; i<15; i++) {
+//    for(int i=0; i<20; i++) {
 //      DEBUG_PRINT(dates[i]); DEBUG_PRINTLN(" ");
 //    }
     

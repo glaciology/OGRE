@@ -11,6 +11,13 @@ void initializeBuses() {
 
 
 void deinitializeBuses() {
+  online.rtcSync = false; // This line must be at top! 
+  
+  if (logMode == 2 || summerInterval == true) { 
+    DEBUG_PRINTLN("Info: LOG MODE 2 or SUMMER... No Deinitialize."); 
+    return;
+  }
+  
   myWire.end();           // Power down I2C
   mySpi.end();            // Power down SPI
   zedPowerOff();
@@ -18,13 +25,17 @@ void deinitializeBuses() {
 
   online.gnss = false;   // Clear online/offline flags
   online.uSD = false;
+  closeFailCounter = 0;
+  lowBatteryCounter = 0;
+  
 }
 
 // POWER DOWN AND WAIT FOR INTERRUPT
 void goToSleep() {
-  
-  closeFailCounter = 0;
-  lowBatteryCounter = 0;
+  if (logMode == 2 || summerInterval == true) { // continuous mode or during summer in mode 6: no sleep
+    DEBUG_PRINTLN("Info: LOG MODE 2 or SUMMER... No Sleep."); 
+    return;
+  }
   
 # if DEBUG
   Serial.end();

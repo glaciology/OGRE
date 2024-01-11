@@ -73,12 +73,14 @@ byte logStartDay            = 8;              // Day of month between 1 and 28
 uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (i.e., 2628000 ~ 1 month)
 
 // LOG MODE 6: SUMMER/WINTER: LOG 24 HOURS, SLEEP FOR:
-uint32_t summerInterval     = 1;              // Sleep duration during May, June, July, August
-int winterInterval          = 777600;         // Sleep duration during winter, i.e., 9 days
+bool summerInterval         = false;          // 
+uint32_t winterInterval     = 777600;         // Sleep duration during winter, i.e., 9 days
+byte startMonth             = 5;              // Start month, inclusive (May)
+byte endMonth               = 8;              // End month, inclusive (August)
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
-uint32_t secondsSleep       = 1;             // Sleep interval (Seconds)
-uint32_t secondsLog         = 99;             // Logging interval (Seconds)
+uint32_t secondsSleep       = 50;             // Sleep interval (Seconds)
+uint32_t secondsLog         = 50;             // Logging interval (Seconds)
 
 // UBLOX MESSAGE CONFIGURATION: 
 int logGPS                  = 1;              // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
@@ -108,21 +110,20 @@ float shutdownThreshold      = 10.9;          // Shutdown if battery voltage dip
 const int     sdWriteSize         = 512;      // Write data to SD in blocks of 512 bytes
 const int     fileBufferSize      = 16384;    // Allocate 16KB RAM for UBX message storage
 volatile bool wdtFlag             = false;    // ISR WatchDog
-volatile bool rtcSyncFlag         = false;    // Flag to indicate if RTC has been synced with GNSS
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 unsigned long dates[21]           = {};       // Array with Unix Epochs of log dates !!! MAX 20 !!!
-int           settings[19]        = {};       // Array that holds user settings on SD
+int           settings[20]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name
 
 // DEBUGGING
-uint16_t      maxBufferBytes      = 0;        // How full the file buffer has been
+unsigned long maxBufferBytes      = 0;        // How full the file buffer has been
 unsigned long bytesWritten        = 0;        // used for printing to Serial Monitor bytes written to SD
-unsigned long syncFailCounter     = 0;        // Counts RTC sync failures
-unsigned long writeFailCounter    = 0;        // Counts uSD write failures
-unsigned long closeFailCounter    = 0;        // Counts uSD close failures
+unsigned int  syncFailCounter     = 0;        // Counts RTC sync failures
+unsigned int  writeFailCounter    = 0;        // Counts uSD write failures
+unsigned int  closeFailCounter    = 0;        // Counts uSD close failures
 unsigned int  lowBatteryCounter   = 0;        // Counts # times system sleeps due to low battery
 unsigned int  debugCounter        = 0;        // Counts Debug messages
 volatile int  wdtCounter          = 0;        // Counts WDT triggers
@@ -132,6 +133,7 @@ long          rtcDrift            = 0;        // Tracks drift of RTC
 struct struct_online {
   bool uSD      = false;
   bool gnss     = false;
+  bool rtcSync  = false;                      
 } online;
 //////////////////////////////////////////////////////
 
@@ -186,14 +188,17 @@ void loop() {
   
     if (alarmFlag) {                 // SLEEPS until alarmFlag = True
       checkBattery();                //
-      DEBUG_PRINTLN("Info: Alarm Triggered - Beginning Logging");
       petDog();                      //
       if (online.gnss == false || online.uSD == false) {
         initializeBuses();           // Reconfigure GNSS/SD if necessary
         configureSD();               //
         configureGNSS();             //
-        syncRtc();
       }                              //
+
+      if (!online.rtcSync) {        // sync clock if hasn't happened
+        syncRtc();                   // flag is reset in deinitializeBuses()
+      }
+      
       configureLogAlarm();           // 
       logGNSS();                     //
       

@@ -1,8 +1,8 @@
-LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=6
-LOG_START_HOUR_UTC(only if using mode 1)=17
-LOG_END_HOUR_UTC(only if using mode 1)=23
-LOG_START_DAY(only if using mode 3, 0-28)=25
-LOG_EPOCH_SLEEP(only if using mode 4/5, seconds)=3600
+LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=99
+LOG_START_HOUR_UTC(mode 1 only)=17
+LOG_END_HOUR_UTC(mode 1 only)=23
+LOG_START_DAY(mode 3 only, 0-28)=25
+LOG_EPOCH_SLEEP(modes 4/5 only, seconds)=3600
 LED_INDICATORS(0-false, 1-true)=1
 MEASURE_BATTERY(0-false, 1-true)=1
 ENABLE_GPS(0-false, 1-true)=1
@@ -10,9 +10,11 @@ ENABLE_GLO(0-false, 1-true)=1
 ENABLE_GAL(0-false, 1-true)=1
 ENABLE_BDS(0-false, 1-true)=1
 ENABLE_QZSS(0-false, 1-true)=0
-ENABLE_NAV_SFRBX((0-false, 1-true)=0
-STATION_NAME(0000)=0001
-MEASURE_RATE=1
-BAT_SHUTDOWN_V=10.9
-WINTER_INTERVAL(seconds, mode 6)=777601
-break;
+ENABLE_NAV_SFRBX(0-false, 1-true)=0
+STATION_NAME(0000, numeric)=0001
+MEASURE_RATE(integer seconds)=1
+BAT_SHUTDOWN_V(00.0, volts)=10.9
+WINTER_INTERVAL(seconds, mode 6 only)=777601
+SUMMER_START_MONTH(mode 6 only)=5
+SUMMER_END_MONTH(mode 6 only)=8
+end;

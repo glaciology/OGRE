@@ -33,47 +33,65 @@ void configureLogAlarm() {
   
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM); // Clear the RTC alarm interrupt
 
-  // 1 = daily at defined hours, 2 = continuous , 3 = monthly, 4 = test
+  // 1 = daily during defined hours, 2 = continuous (new file generated each midnight), 
+  // 3 = monthly on defined day, 4 = 24 hr log with defined spacing, 5 = programmed dates,
+  // 6 = summer log continuously, winter during defined interval, 99 = test mode
   
   if (logMode == 1) {
     rtc.setAlarm(logEndHr, 0, 0, 0, 0, 0); 
-    rtc.setAlarmMode(4); // match every day
+    rtc.setAlarmMode(4); // match every day during logEndHr
   }
 
   else if (logMode == 2){ // continuous: will generate new file at midnight
     rtc.setAlarm(0, 0, 0, 0, 0, 0);
-    rtc.setAlarmMode(4);
+    rtc.setAlarmMode(4); // match every day at midnight
   }
 
   else if (logMode == 3 || logMode == 4 || logMode == 5) {
-    // WILL LOG FOR 24 HOURS
     rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
-    rtc.setAlarmMode(4);
+    rtc.setAlarmMode(4); // WILL LOG FOR 24 HOURS from power-on
   }
 
   else if (logMode == 6 ) { 
+    // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
     time_t a;
     int whichMonth = rtc.month;
-    DEBUG_PRINT("The month is: "); DEBUG_PRINTLN(whichMonth);
 
-    if (whichMonth == 5 ||whichMonth == 6 || whichMonth == 7 || whichMonth == 8){
-      DEBUG_PRINTLN("SUMMER MODE");
+    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+
+    if (summerInterval){ // log continously
+      DEBUG_PRINTLN("Info: Logging to Midnight (SUMMER)");
       rtc.setAlarm(0, 0, 0, 0, 0, 0);
       rtc.setAlarmMode(4);
     } else { 
-      DEBUG_PRINTLN("WINTER MODE");
+      DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
       rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
       rtc.setAlarmMode(4);
     }
   }
   
-  else if (logMode == 99 || logMode == 7) {
-    rtc.setAlarm(0, 0, 0, 0, 0, 0);
-    rtc.setAlarmMode(6);
-//    time_t a;
-//    a = rtc.getEpoch() + secondsLog;
-//    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
-//    rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+  else if (logMode == 99) {
+    time_t a;
+    a = rtc.getEpoch() + secondsLog;
+    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+    rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+  }
+
+  else if (logMode == 7) { 
+    // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
+    time_t a;
+    int whichMonth = rtc.hour;
+    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+
+    if (summerInterval){ // log continously
+      DEBUG_PRINTLN("Info: Logging to Midnight (SUMMER)");
+      rtc.setAlarm(0, 0, 0, 0, 0, 0);
+      rtc.setAlarmMode(6);
+    } else { 
+      DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
+      rtc.setAlarm(0, 0, rtc.seconds, 0, 0, 0); 
+      rtc.setAlarmMode(6);
+    }
   }
 
   rtc.attachInterrupt();
@@ -94,10 +112,7 @@ void configureSleepAlarm() {
 
   else if (logMode == 2) { 
     DEBUG_PRINTLN("Info: Log Mode 2. No sleep.");
-    time_t a;
-    a = rtc.getEpoch() + 1; // fixed 5 second "break"
-    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
-    rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+    return;
   }
 
   else if (logMode == 3) {
@@ -112,7 +127,7 @@ void configureSleepAlarm() {
     time_t b;
     for(int i=0; i< sizeof(dates)/sizeof(dates[0]); i++) {
       if(dates[i] > rtc.getEpoch()) {
-        DEBUG_PRINT("Info: next date found: "); DEBUG_PRINTLN(dates[i]);
+        DEBUG_PRINT("Info: Next date found: "); DEBUG_PRINTLN(dates[i]);
         b = dates[i];
         rtc.setAlarm(gmtime(&b)->tm_hour, gmtime(&b)->tm_min, gmtime(&b)->tm_sec, 0, gmtime(&b)->tm_mday, gmtime(&b)->tm_mon+1);
         rtc.setAlarmMode(1); // Set the RTC alarm to match on minutes rollover
@@ -130,35 +145,31 @@ void configureSleepAlarm() {
   else if (logMode == 6){
     time_t a;
     int whichMonth = rtc.month;
-    DEBUG_PRINT("The month is: "); DEBUG_PRINTLN(whichMonth);
-
-    if (whichMonth == 5 ||whichMonth == 6 || whichMonth == 7 || whichMonth == 8){
-      DEBUG_PRINTLN("SUMMER MODE");
-      a = rtc.getEpoch() + summerInterval;
-      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
-      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+    
+    if (summerInterval){
+      DEBUG_PRINTLN("Info: SUMMER MODE");
+      return; 
     } else { 
-      DEBUG_PRINTLN("WINTER MODE");
-      a = rtc.getEpoch() + winterInterval + 100; // 60 = RTC drift margin
-      rtc.setAlarm(0, 0, 0, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      DEBUG_PRINTLN("Info: WINTER MODE");
+      a = rtc.getEpoch() + winterInterval; 
+      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, 0, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
   }
 
-  else if (logMode == 7){ // TO TEST LOG MODE 6 ON FASTER SCALE
+  else if (logMode == 7){ // TO TEST LOG MODE 6 ON FASTER SCALE (Hours & Minutes)
     time_t a;
-    int whichHour = rtc.hour;
-    DEBUG_PRINT("The hour is: "); DEBUG_PRINTLN(whichHour);
-
-    if (whichHour == 7) {
-      DEBUG_PRINTLN("SUMMER MODE");
-      a = rtc.getEpoch() + 1; // sleep for 1 second.
-      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
-      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+    int whichMonth = rtc.hour; // HOUR!!
+    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+    
+    if (summerInterval){
+      DEBUG_PRINTLN("Info: SUMMER MODE");
+      return; 
     } else { 
-      DEBUG_PRINTLN("WINTER MODE");
-      a = rtc.getEpoch() + 3600; //sleep for an hour
-      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      DEBUG_PRINTLN("Info: WINTER MODE");
+      a = rtc.getEpoch() + 3600; // Winter Interval for mode 7 is hardcoded to 1 hour
+      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, 0, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
   }
@@ -173,18 +184,17 @@ void configureSleepAlarm() {
   rtc.attachInterrupt();
   alarmFlag = false;
   DEBUG_PRINT("Info: Sleeping until: "); printAlarm();
-
 }
 
 
 void syncRtc() {
   unsigned long loopStartTime = millis();
-  rtcSyncFlag = false;
+  online.rtcSync = false;
   
   DEBUG_PRINTLN("Info: Attempting to synchronize RTC with GNSS...");
 
   // Attempt to acquire a valid GNSS position fix for up to 3 minutes
-  while (!rtcSyncFlag && millis() - loopStartTime < 3 * 60UL * 1000UL) {
+  while (!online.rtcSync && millis() - loopStartTime < 3 * 60UL * 1000UL) {
     petDog(); 
 
     // Check for UBX-NAV-PVT messages
@@ -212,7 +222,7 @@ void syncRtc() {
          unsigned long gnssEpoch = gnss.getUnixEpoch();  // Get GNSS epoch time
          rtc.setEpoch(gnssEpoch);                        // Set RTC date and time
          rtcDrift = gnssEpoch - rtcEpoch;                // Calculate RTC drift (debug)
-         rtcSyncFlag = true;                             // Set flag, end SYNC
+         online.rtcSync = true;                         // Set flag, end SYNC
          gnss.setAutoPVTrate(0);                         // Turn off PVT rate
 
          DEBUG_PRINT("Info: RTC drift: "); DEBUG_PRINTLN(rtcDrift);
@@ -220,7 +230,7 @@ void syncRtc() {
        }
      }
    }
-    if (!rtcSyncFlag){
+    if (!online.rtcSync){
       DEBUG_PRINTLN("Warning: Unable to sync RTC! Awaiting System Reset");
       logDebug("RTC_SYNC");
       while(1) {  //Awaiting WDT Reset
@@ -232,16 +242,12 @@ void syncRtc() {
 
 // Print the RTC's date and time
 void printDateTime() {
-  if (logMode == 3) {
-    DEBUG_PRINTLN("Continuous");
-  } else {
-    rtc.getTime(); // Get the RTC's date and time
-    char dateTimeBuffer[25];
-    sprintf(dateTimeBuffer, "20%02d-%02d-%02d %02d:%02d:%02d",
-            rtc.year, rtc.month, rtc.dayOfMonth,
-            rtc.hour, rtc.minute, rtc.seconds, rtc.hundredths);
-    DEBUG_PRINTLN(dateTimeBuffer);
-  }
+  rtc.getTime(); // Get the RTC's date and time
+  char dateTimeBuffer[25];
+  sprintf(dateTimeBuffer, "20%02d-%02d-%02d %02d:%02d:%02d",
+          rtc.year, rtc.month, rtc.dayOfMonth,
+          rtc.hour, rtc.minute, rtc.seconds, rtc.hundredths);
+  DEBUG_PRINTLN(dateTimeBuffer);
 }
 
 void printAlarm() {
