@@ -31,7 +31,7 @@ void deinitializeBuses() {
 }
 
 // POWER DOWN AND WAIT FOR INTERRUPT
-void goToSleep() {
+void goToSleep() { // Function from Sparkfun Example6_LowPower_Alarm.ino, see License/Readme.
   if (logMode == 2 || summerInterval == true) { // continuous mode or during summer in mode 6: no sleep
     DEBUG_PRINTLN("Info: LOG MODE 2 or SUMMER... No Sleep."); 
     return;

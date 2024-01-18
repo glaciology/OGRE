@@ -23,6 +23,12 @@
         *1 Blink every 12 seconds: Sleeping 
         *Random Rapid Blinks: System logging data.
         *No Blinks: System deep sleep due to low battery or battery dead.
+
+   Attributions: 
+   - Files, structure and ideas adapted from Sparkfun 
+   - and A. Garbo GVT [Copyright (c) 2020 SparkFun, Copyright (c) 2020 Adam Garbo]
+   - are dilineated in these pages, and further detailed in the documentation. 
+   - This project is open source and carries the same licensing as the above, see Readme/Licensing.
 */
 
 #define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE v3/22 - present

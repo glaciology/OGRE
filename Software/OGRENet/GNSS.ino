@@ -1,3 +1,7 @@
+/*The functions on this page are adapted from DataLoggingExample3_RXM_SFRBX_and_RAWX  
+ * and A. Garbo CVT "05_gnss".
+ * see license.
+*/
 void configureGNSS() {
   ///////// SEND GNSS SETTING CONFIG TO UBLOX
   #if DEBUG_GNSS

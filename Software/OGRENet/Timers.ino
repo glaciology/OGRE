@@ -1,3 +1,9 @@
+/* the WDT and Log alarm functions are adapted from Sparkfun examples Example2_WDT_LowPower 
+ *  and Example6_LowPower_Alarm. 
+ *  Snyc RTC functionality from A. Garbo GVT.
+ *  See license and readme. 
+ */
+
 void configureWdt() {
   
   //wdt.configure(WDT_16HZ, 160, 240); // 16 Hz clock, 10-second interrupt period, 15-second reset period
