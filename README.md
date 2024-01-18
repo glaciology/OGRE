@@ -127,4 +127,5 @@ While this system is optimized for 12V batteries, input voltage can range from 5
 ## License & Credits
 This project is open source! OGRENet software is released under the [MIT License](http://opensource.org/licenses/MIT).
 
-Some [code](Software/TestCode) for this project is adapted from Sparkfun, released under the same license. 
+Some code for this project adapted from [Sparkfun GNSS Library](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library) and 
+[Cryologger Glacier Velocity Tracker](https://github.com/adamgarbo/Cryologger_Glacier_Velocity_Tracker)
