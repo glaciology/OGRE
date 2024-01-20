@@ -1,6 +1,6 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 01/04/24
+   Derek Pickell 01/20/24
    V2.0.1
 
    Hardware:
@@ -28,20 +28,20 @@
    - Files, structure and ideas adapted/modified from Sparkfun 
    - and A. Garbo GVMS [Copyright (c) 2020 SparkFun, Copyright (c) 2020 Adam Garbo]
    - are dilineated in these pages, and further detailed in the documentation. 
-   - This project is open source and carries the same licensing as the above, see Readme/Licensing.
+   - This project is open source; see Readme/Licensing.
 */
 
 #define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE v3/22 - present
 #define SOFTWARE_VERSION "2-0-1" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
-#include <Wire.h>                             // 
-#include <SPI.h>                              // 
-#include <WDT.h>                              //
-#include <RTC.h>                              //
+#include <Wire.h>                             // Apollo3 Arduino Core v1.2.3
+#include <SPI.h>                              // ""
+#include <WDT.h>                              // ""
+#include <RTC.h>                              // ""
 #include <SdFat.h>                            // https://github.com/greiman/SdFat v2.1.0
-#include <SparkFun_u-blox_GNSS_Arduino_Library.h>  // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
-SFE_UBLOX_GNSS gnss;                          //
+#include <SparkFun_u-blox_GNSS_Arduino_Library.h> 
+SFE_UBLOX_GNSS gnss;                          // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
 SdFs sd;                                      // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
 APM3_RTC rtc;                                 //
 APM3_WDT wdt;                                 // 
@@ -79,7 +79,6 @@ byte logStartDay            = 8;              // Day of month between 1 and 28
 uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (i.e., 2628000 ~ 1 month)
 
 // LOG MODE 6: SUMMER/WINTER: LOG 24 HOURS, SLEEP FOR:
-bool summerInterval         = false;          // 
 uint32_t winterInterval     = 777600;         // Sleep duration during winter, i.e., 9 days
 byte startMonth             = 4;              // Start month, inclusive (May)
 byte endMonth               = 9;              // End month, inclusive (August)
@@ -116,6 +115,7 @@ float shutdownThreshold      = 10.9;          // Shutdown if battery voltage dip
 const int     sdWriteSize         = 512;      // Write data to SD in blocks of 512 bytes
 const int     fileBufferSize      = 16384;    // Allocate 16KB RAM for UBX message storage
 unsigned int  rtcSyncDay          = 0;        // Ensures only 1 file/day for LM 2, 6
+bool          summerInterval      = false;    // LM 6 only: when true, it's summer so it logs continuously
 volatile bool wdtFlag             = false;    // ISR WatchDog
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again

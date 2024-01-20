@@ -5,7 +5,6 @@
 void configureGNSS() {
   ///////// SEND GNSS SETTING CONFIG TO UBLOX
   #if DEBUG_GNSS
-//  gnss.enableDebugging();               // Sparkfun_GNSS library debugging messages on Serial
   gnss.enableDebugging(Serial, true);     // Simpler DEBUG messages
   #endif
   

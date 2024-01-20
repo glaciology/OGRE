@@ -35,9 +35,12 @@ void configureLogAlarm() {
   
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM); // Clear the RTC alarm interrupt
 
-  if ((logMode == 2 or logMode == 6 or logMode == 7) and (rtc.dayOfMonth == rtcSyncDay)){
-    delay(abs(rtcDrift));
+  if ((logMode == 2 || logMode == 6) and (rtc.dayOfMonth == rtcSyncDay)){
+    // when RTC is fast, sometimes we get a "ghost file" for several seconds between each daily file...
+    delay(abs(rtcDrift)*1000); // get rid of sign and convert to ms
   }
+  
+  rtcSyncDay = rtc.dayOfMonth;
 
   // 1 = daily during defined hours, 2 = continuous (new file generated each midnight), 
   // 3 = monthly on defined day, 4 = 24 hr log with defined spacing, 5 = programmed dates,

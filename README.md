@@ -40,7 +40,7 @@ Originally designed for easily logging multi-GNSS data in remote regions of the 
 
 ## Getting Started 
 
-V1.1.1 of the OGRE has 7 modes of operation: 
+V2.0.1 of the OGRE has 7 modes of operation: 
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER-defined start/stop hours, OR
   - (2) Continous Mode: Log GNSS data continously (single file!), OR
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER-specified day (1-28) each month, OR
@@ -57,32 +57,34 @@ Otherwise, software will default to hardcoded configuration. USER may also uploa
 The CONFIG.TXT file is formatted as follows: 
 
 ```
-LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=6
-LOG_START_HOUR_UTC(only if using mode 1)=17
-LOG_END_HOUR_UTC(only if using mode 1)=23
-LOG_START_DAY(only if using mode 3, 0-28)=25
-LOG_EPOCH_SLEEP(only if using mode 4/5, seconds)=3600
+LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=2
+LOG_START_HOUR_UTC(mode 1 only)=17
+LOG_END_HOUR_UTC(mode 1 only)=23
+LOG_START_DAY(mode 3 only, 0-28)=25
+LOG_EPOCH_SLEEP(modes 4/5 only, seconds)=3600
 LED_INDICATORS(0-false, 1-true)=1
-MEASURE_BATTERY(0-false, 1-true)=1
+MEASURE_BATTERY(0-false, 1-true)=0
 ENABLE_GPS(0-false, 1-true)=1
 ENABLE_GLO(0-false, 1-true)=1
 ENABLE_GAL(0-false, 1-true)=1
 ENABLE_BDS(0-false, 1-true)=1
 ENABLE_QZSS(0-false, 1-true)=0
-ENABLE_NAV_SFRBX((0-false, 1-true)=0
-STATION_NAME(0000)=0001
-MEASURE_RATE=1
-BAT_SHUTDOWN_V=10.9
-WINTER_INTERVAL(seconds, mode 6)=777601
-break;
+ENABLE_NAV_SFRBX(0-false, 1-true)=0
+STATION_NAME(0000, numeric)=0001
+MEASURE_RATE(integer seconds)=1
+BAT_SHUTDOWN_V(00.0, volts)=10.9
+WINTER_INTERVAL(seconds, mode 6 only)=777600
+SUMMER_START_MONTH(mode 6 only)=5
+SUMMER_END_MONTH(mode 6 only)=8
+end;
 ```
 
 - If the USER selects LOG_MODE=1, then LOG_START_HOUR_UTC and LOG_END_HOUR_UTC must be specified. 
 - If the USER selects LOG_MODE=3, then LOG_START_DAY must also be specified (day of each month GNSS data is logged). 
 - If the USER selects LOG_MODE=5, then unix epoch dates for logging are specified in EPOCH.txt. If no dates are specified or if all dates have elapsed, then log interval defaults to LOG_MODE 4, where LOG_EPOCH_SLEEP must be defined.
-- If the USER selects LOG_MODE=6, note that the months that are considered summer (May - Aug) and winter are hardcoded. Furthermore, the duration between logging during winter is set by WINTER_INTERVAL. Note: log sessions are 24 hours, and files start/end based on when the reciever first wakes up, rather dilineated at 00-UTC. 
+- If the USER selects LOG_MODE=6, the instrument logs continuously during SUMMER_START_MONTH through SUMMER_END_MONTH (inclusive). Furthermore, the duration between logging during winter is set by WINTER_INTERVAL. Note: log sessions are 24 hours.
 - LED_INDICATORS, if false, will disable all LEDs, excluding those present during initialization. 
-- MEASURE_BATTERY, if true, battery voltage is measured/monitored, and the instrument will be put to sleep when voltage dips below 10.9V (OR as defined by user in BAT_SHUTDOWN). System will restart when voltage measured above ~11.2V. 
+- MEASURE_BATTERY, if true, battery voltage is measured/monitored, and the instrument will be put to sleep when voltage dips below 10.9V (OR as defined by user in BAT_SHUTDOWN_V). System will restart when voltage measured above ~11.2V (or 0.5V above BAT_SHUTDOWN_V). 
 - STATION_NAME is a number between 0001 and 9999, and will be appended to the timestamped file names for each GNSS file.
 - MEASURE_RATE is frequency of epoch solutions logged to SD card: 1 = 1 per second, 15 = 1 per 15 seconds. 
 
@@ -95,15 +97,16 @@ Insert the uSD card (with or without CONFIG & EPOCH files), then connect battery
   - 2 Blink Pattern: uSD initialization failed (is the SD card seated properly?) - system awaiting automatic reset to try again (60 seconds).
   - 3 Blink Pattern: Ublox/antenna initialization failed (is the antenna properly connected?) - system awaiting automatic reset to try again (60 seconds).
   - 5 Blink Pattern: RTC failed to sync with GNSS time (are you outside?) - system awaiting automatic reset to try again (60 seconds). 
-  - 5 Rapid Blinks: uSD failed to read CONFIG settings (did you intend to not include the CONFIG file?). 
+  - 6 Rapid Blinks: uSD failed to read CONFIG settings (did you intend to not include the CONFIG file?). 
 
 Once the system is initialized, it will either sleep or begin logging data, depending on the specified log mode. 
 If the USER has enabled LED_INDICATORS, the following additional lights will flash: 
   - Flashes at measurement rate: System logging GNSS data
   - 1 Blink every 12 seconds: System sleeping
+  - No blinks: system is in deep sleep due to low battery, or system is dead due to dead battery.
 
 ## Software Upload
-A pre-compiled binary is avialable with each release. V1.0.6 [here](https://github.com/glaciology/OGRENet/releases/tag/v1.0.6). This binary file can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
+A pre-compiled binary is avialable with each release. This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
 
 You can also compile this code with the Arduino IDE, ensuring that the code and board libraries match the proper versions defined in the header of OGRENet.ino. 
 
