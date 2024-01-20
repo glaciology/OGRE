@@ -25,8 +25,8 @@
         *No Blinks: System deep sleep due to low battery or battery dead.
 
    Attributions: 
-   - Files, structure and ideas adapted from Sparkfun 
-   - and A. Garbo GVT [Copyright (c) 2020 SparkFun, Copyright (c) 2020 Adam Garbo]
+   - Files, structure and ideas adapted/modified from Sparkfun 
+   - and A. Garbo GVMS [Copyright (c) 2020 SparkFun, Copyright (c) 2020 Adam Garbo]
    - are dilineated in these pages, and further detailed in the documentation. 
    - This project is open source and carries the same licensing as the above, see Readme/Licensing.
 */
@@ -81,8 +81,8 @@ uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (i.e.,
 // LOG MODE 6: SUMMER/WINTER: LOG 24 HOURS, SLEEP FOR:
 bool summerInterval         = false;          // 
 uint32_t winterInterval     = 777600;         // Sleep duration during winter, i.e., 9 days
-byte startMonth             = 5;              // Start month, inclusive (May)
-byte endMonth               = 8;              // End month, inclusive (August)
+byte startMonth             = 4;              // Start month, inclusive (May)
+byte endMonth               = 9;              // End month, inclusive (August)
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 50;             // Sleep interval (Seconds)
@@ -102,7 +102,7 @@ int logL5                   = 0;              // WARNING: only set if using L5-c
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
 bool measureBattery         = false;          // If TRUE, uses battery circuit to measure V during debug logs
 int  stationName            = 0000;           // Station name, 4 digits
-int  measurementRate        = 15;             // Produce a measurement every X seconds
+int  measurementRate        = 5;              // Produce a measurement every X seconds
 
 // BATTERY PARAMETERS
 float gain                   = 17.2;          // Gain/offset for 68k/10k voltage divider battery voltage measure
@@ -115,6 +115,7 @@ float shutdownThreshold      = 10.9;          // Shutdown if battery voltage dip
 ///////// GLOBAL VARIABLES ///////////////////////////
 const int     sdWriteSize         = 512;      // Write data to SD in blocks of 512 bytes
 const int     fileBufferSize      = 16384;    // Allocate 16KB RAM for UBX message storage
+unsigned int  rtcSyncDay          = 0;        // Ensures only 1 file/day for LM 2, 6
 volatile bool wdtFlag             = false;    // ISR WatchDog
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again

@@ -1,3 +1,9 @@
+/* the Low Power functions are adapted from Sparkfun examples LowPower and OpenLog platform. 
+ *  and Example6_LowPower_Alarm. 
+ *  Snyc RTC functionality (sync, getDateTime, printAlarm) modified from A. Garbo GVT.
+ *  See license for more details. 
+ */
+
 void initializeBuses() {
   pinMode(ZED_POWER, OUTPUT);
   zedPowerOn();

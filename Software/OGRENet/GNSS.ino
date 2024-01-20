@@ -1,6 +1,6 @@
 /*The functions on this page are adapted from DataLoggingExample3_RXM_SFRBX_and_RAWX  
- * and A. Garbo CVT "05_gnss".
- * see license.
+ * Sparkfun OpenLog Artemis GNSS platform and GVMS.
+ * see license for more details.
 */
 void configureGNSS() {
   ///////// SEND GNSS SETTING CONFIG TO UBLOX

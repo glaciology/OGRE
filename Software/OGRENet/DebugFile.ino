@@ -1,3 +1,7 @@
+/* Code adapted from GVMS.
+ *  See license for more details. 
+ */
+
 void createDebugFile() {
   
   if (!debugFile.open("debug.csv", O_CREAT | O_APPEND | O_WRITE)) { // Create file if new, Append to end, Open to Write

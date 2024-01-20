@@ -1,13 +1,10 @@
-/* the WDT and Log alarm functions are adapted from Sparkfun examples Example2_WDT_LowPower 
+/* the WDT and RTC Log alarm functions are adapted from Sparkfun examples Example2_WDT_LowPower 
  *  and Example6_LowPower_Alarm. 
- *  Snyc RTC functionality from A. Garbo GVT.
+ *  Snyc RTC functionality (sync, getDateTime, printAlarm) from A. Garbo GVT.
  *  See license and readme. 
  */
 
 void configureWdt() {
-  
-  //wdt.configure(WDT_16HZ, 160, 240); // 16 Hz clock, 10-second interrupt period, 15-second reset period
-  //wdt.configure(WDT_16HZ, 240, 240); // 15 second interrupts, 15 second reset period
   wdt.configure(WDT_1HZ, 12, 24); // 12 second interrupts, 24 second reset period
   
   // Start the watchdog timer
@@ -34,10 +31,13 @@ void configureLogAlarm() {
    4: Alarm match hundredths, seconds, minute, hours              (every day)
    5: Alarm match hundredths, seconds, minutes                    (every hour)
    6: Alarm match hundredths, seconds                             (every minute)
-   7: Alarm match hundredths                                      (every second)
   */
   
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM); // Clear the RTC alarm interrupt
+
+  if ((logMode == 2 or logMode == 6 or logMode == 7) and (rtc.dayOfMonth == rtcSyncDay)){
+    delay(abs(rtcDrift));
+  }
 
   // 1 = daily during defined hours, 2 = continuous (new file generated each midnight), 
   // 3 = monthly on defined day, 4 = 24 hr log with defined spacing, 5 = programmed dates,
