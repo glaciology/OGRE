@@ -1,6 +1,6 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 01/20/24
+   Derek Pickell 01 Feb 2024
    V2.0.2
 
    Hardware:
@@ -114,7 +114,6 @@ float shutdownThreshold      = 10.9;          // Shutdown if battery voltage dip
 ///////// GLOBAL VARIABLES ///////////////////////////
 const int     sdWriteSize         = 512;      // Write data to SD in blocks of 512 bytes
 const int     fileBufferSize      = 16384;    // Allocate 16KB RAM for UBX message storage
-unsigned int  rtcSyncDay          = 0;        // Ensures only 1 file/day for LM 2, 6
 bool          summerInterval      = false;    // LM 6 only: when true, it's summer so it logs continuously
 volatile bool wdtFlag             = false;    // ISR WatchDog
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
@@ -163,7 +162,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v2.0.1 (1/24)***");
+    Serial.println("***WELCOME TO GNSS LOGGER v2.0.2 (2/24)***");
   #endif
 
   //// CONFIGURE INITIAL SETTINGS  ////

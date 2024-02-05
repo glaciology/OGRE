@@ -35,16 +35,9 @@ void configureLogAlarm() {
   
   am_hal_rtc_int_clear(AM_HAL_RTC_INT_ALM); // Clear the RTC alarm interrupt
 
-  if ((logMode == 2 || logMode == 6 || logMode == 7) && (rtc.dayOfMonth == rtcSyncDay)){
-    // when RTC is fast, sometimes we get a "ghost file" for several seconds between each daily file...
-    delay(2000);
-    DEBUG_PRINTLN("SYNC FAST");
-  }
-  rtcSyncDay = rtc.dayOfMonth;
-
   // 1 = daily during defined hours, 2 = continuous (new file generated each midnight), 
   // 3 = monthly on defined day, 4 = 24 hr log with defined spacing, 5 = programmed dates,
-  // 6 = summer log continuously, winter during defined interval, 99 = test mode
+  // 6 = summer log continuously, winter during defined interval, 99 = test  mode
   
   if (logMode == 1) {
     rtc.setAlarm(logEndHr, 0, 0, 0, 0, 0); 
@@ -52,6 +45,10 @@ void configureLogAlarm() {
   }
 
   else if (logMode == 2){ // continuous: will generate new file at midnight
+    if (rtcDrift < 0) { 
+        delay(2000);
+        DEBUG_PRINTLN("SYNC FAST");
+      }
     rtc.setAlarm(0, 0, 0, 0, 0, 0);
     rtc.setAlarmMode(4); // match every day at midnight
   }
@@ -62,8 +59,11 @@ void configureLogAlarm() {
   }
 
   else if (logMode == 6 ) { 
+    if (rtcDrift < 0) { 
+      delay(2000);
+      DEBUG_PRINTLN("SYNC FAST");
+    }
     // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
-    time_t a;
     int whichMonth = rtc.month;
 
     summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
@@ -88,7 +88,6 @@ void configureLogAlarm() {
 
   else if (logMode == 7) { 
     // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
-    time_t a;
     int whichMonth = rtc.hour;
     summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
 
