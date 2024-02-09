@@ -108,7 +108,7 @@ If the USER has enabled LED_INDICATORS, the following additional lights will fla
   - No blinks: system is in deep sleep due to low battery, or system is dead due to dead battery.
 
 ## Software Upload
-A pre-compiled binary is avialable with each release (see releases). This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). Example command line prompt using the svl.py script: [use baud -b 115200; provide path to binary file OGRENet.ino.bin; find path of usb serial converter port by typing ls /dev/tty.* on Linux and selecting the proper usb port.] 
+A pre-compiled binary is avialable with each release (see [releases](https://github.com/glaciology/OGRE/releases/tag/v2.0.3)). This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). Example command line prompt using the svl.py script: [use baud -b 115200; provide path to binary file OGRENet.ino.bin; find path of usb serial converter port by typing ls /dev/tty.* on Linux and selecting the proper usb port.] 
 ```
 python3 svl.py -b 115200 -f /PATH/TO/BINARY/FILE/OGRENet.ino.bin /dev/tty.usbserial-####
 ```
