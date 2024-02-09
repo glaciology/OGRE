@@ -46,7 +46,7 @@ V2.0.1 of the OGRE has 7 modes of operation:
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER-specified day (1-28) each month, OR
   - (4) Interval Mode: Each 24-hour log session is spaced by a USER-defined interval (e.g., log every 3 days for 24 hours), OR
   - (5) Log GNSS data for 24 hours on USER specified dates/times read from a .txt file. Defaults to mode 4 after last user-provided date.
-  - (6) Log GNSS data for 24 hours; During winter once every 9 days; During summer daily. "Summer" is May-August. 
+  - (6) Log GNSS data for 24 hours; During winter once on every 10th day (or USER-defined interval); During summer daily. "Summer" is May-August (or USER-defined months). 
   - (99) Test Mode: Used for development. Log GNSS data for 50 second interval, sleep for 50 second and repeat.
   
 OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, nav message etc.) are logged to a uSD card in .ubx (UBLOX) proprietary format. Under open sky conditions, we found that an epoch of data (1s) is ~2000-3000 bytes. If logging at 15 seconds for a year, this equates to 6GB of data. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery voltage, logging errors, etc.).
@@ -86,7 +86,7 @@ end;
 - LED_INDICATORS, if false, will disable all LEDs, excluding those present during initialization. 
 - MEASURE_BATTERY, if true, battery voltage is measured/monitored, and the instrument will be put to sleep when voltage dips below 10.9V (OR as defined by user in BAT_SHUTDOWN_V). System will restart when voltage measured above ~11.2V (or 0.5V above BAT_SHUTDOWN_V). 
 - STATION_NAME is a number between 0001 and 9999, and will be appended to the timestamped file names for each GNSS file.
-- MEASURE_RATE is frequency of epoch solutions logged to SD card: 1 = 1 per second, 15 = 1 per 15 seconds. 
+- MEASURE_RATE is frequency of epoch solutions logged to SD card: 1 = 1 solution per second, 15 = 1 solution per 15 seconds. 
 
 OPERATION:  
 Insert the uSD card (with or without CONFIG & EPOCH files), then connect battery to +/- sides of the screw terminal. The system will attempt to initialize and following LED indicators will flash: 
