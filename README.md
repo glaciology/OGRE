@@ -1,6 +1,7 @@
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/37055625/181100467-84fbc824-24a9-4d06-a20b-8dd893361870.PNG" width="250"/>
+<img src="https://github.com/glaciology/OGRE/assets/37055625/38e84161-e7fa-485c-b498-54799fec6b80" width="250"/>
+ <img src="https://user-images.githubusercontent.com/37055625/181100467-84fbc824-24a9-4d06-a20b-8dd893361870.PNG" width="250"/>
  </p>
 
 
@@ -8,6 +9,7 @@
 <p align="center">
 <img src="https://github.com/glaciology/OGRENet/assets/37055625/04b9404f-7409-4638-b8b2-81a605f01529" width="350"/>
 </p>
+
 
 
 
