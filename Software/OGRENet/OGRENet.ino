@@ -1,7 +1,7 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 01 Feb 2024
-   V2.0.2
+   Derek Pickell 08 Feb 2024
+   V2.0.3
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
@@ -31,8 +31,8 @@
    - This project is open source; see Readme/Licensing.
 */
 
-#define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE v3/22 - present
-#define SOFTWARE_VERSION "2-0-2" 
+#define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE 3/22 - present
+#define SOFTWARE_VERSION "V2.0.3" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
 #include <Wire.h>                             // Apollo3 Arduino Core v1.2.3
@@ -162,7 +162,7 @@ void setup() {
   #if DEBUG
     Serial.begin(115200);
     delay(1000);
-    Serial.println("***WELCOME TO GNSS LOGGER v2.0.2 (2/24)***");
+    Serial.println("***WELCOME TO GNSS LOGGER " SOFTWARE_VERSION "***");
   #endif
 
   //// CONFIGURE INITIAL SETTINGS  ////

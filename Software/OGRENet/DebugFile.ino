@@ -14,7 +14,7 @@ void createDebugFile() {
   }
 
   // Write header to file
-  debugFile.println("datetime, debugCounter, onlineGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
+  debugFile.println(SOFTWARE_VERSION"_datetime, debugCounter, onlineGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
   "maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, errorCode," 
   "lowBattery, Temperature, Battery");
 

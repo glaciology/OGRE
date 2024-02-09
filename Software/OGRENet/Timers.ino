@@ -38,7 +38,7 @@ void configureLogAlarm() {
   // 1 = daily during defined hours, 2 = continuous (new file generated each midnight), 
   // 3 = monthly on defined day, 4 = 24 hr log with defined spacing, 5 = programmed dates,
   // 6 = summer log continuously, winter during defined interval, 99 = test  mode
-  
+
   if (logMode == 1) {
     rtc.setAlarm(logEndHr, 0, 0, 0, 0, 0); 
     rtc.setAlarmMode(4); // match every day during logEndHr
@@ -48,7 +48,7 @@ void configureLogAlarm() {
     if (rtcDrift < 0) { 
         delay(2000);
         DEBUG_PRINTLN("SYNC FAST");
-      }
+    }
     rtc.setAlarm(0, 0, 0, 0, 0, 0);
     rtc.setAlarmMode(4); // match every day at midnight
   }
@@ -59,11 +59,13 @@ void configureLogAlarm() {
   }
 
   else if (logMode == 6 ) { 
+    // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
+
     if (rtcDrift < 0) { 
       delay(2000);
       DEBUG_PRINTLN("SYNC FAST");
     }
-    // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
+    
     int whichMonth = rtc.month;
 
     summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
@@ -88,6 +90,12 @@ void configureLogAlarm() {
 
   else if (logMode == 7) { 
     // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
+
+    if (rtcDrift < 0) { 
+      delay(2000);
+      DEBUG_PRINTLN("SYNC FAST");
+    }
+    
     int whichMonth = rtc.hour;
     summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
 
@@ -176,7 +184,7 @@ void configureSleepAlarm() {
       return; 
     } else { 
       DEBUG_PRINTLN("Info: WINTER MODE");
-      a = rtc.getEpoch() + 3600; // Winter Interval for mode 7 is hardcoded to 1 hour
+      a = rtc.getEpoch() + 3540; // Winter Interval for mode 7 is hardcoded to 1 hour
       rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, 0, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
