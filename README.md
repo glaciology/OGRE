@@ -106,7 +106,10 @@ If the USER has enabled LED_INDICATORS, the following additional lights will fla
   - No blinks: system is in deep sleep due to low battery, or system is dead due to dead battery.
 
 ## Software Upload
-A pre-compiled binary is avialable with each release. This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
+A pre-compiled binary is avialable with each release. This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). Example command line prompt using the svl.py script: [use baud -b 115200; provide path to binary file OGRENet.ino.bin; find path of usb serial converter port by ls /dev/tty.*] 
+```
+python3 svl.py -b 115200 -f ./OGRENet.ino.bin port /dev/tty.usbserial-1410
+```
 
 You can also compile this code with the Arduino IDE, ensuring that the code and board libraries match the proper versions defined in the header of OGRENet.ino. 
 
