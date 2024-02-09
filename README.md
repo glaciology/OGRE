@@ -16,7 +16,7 @@
 ## Overview
 Originally designed for easily logging multi-GNSS data in remote regions of the Arctic, this instruments incorporates low power, low cost components onto a single circuit board and features a Ublox ZED-F9P GNSS module and Sparkfun Artemis MCU (Ambiq Apollo3 MCU, Cortex-M4). 
 - Logs binary (.ubx) GPS, GLONASS, BEIDOU, GALILEO & Satellite Nav Messages to a microSD.
-- Nominal data rate under open sky conditions 2000-3000 bytes, equivalent to 5 GB of data for logging all constellations at 15 second interval for a year.
+- Nominal data rate under open sky conditions 2000-3000 bytes per solution, equivalent to 5 GB of data for logging all constellations at 15 second interval for a year.
 - Nominal current consumption with a 12V supply is 45-65mA (.5-.8W) awake, and 0.07mA (.8mW) asleep.
 - Features on-board battery measurement circuit and temperature sensor. 
 - Additional pins & peripherals include RX/TX for serial programming, 3-Wire Temperature sensor, secondary I2C bus, secondary UART bus, secondary SPI bus, several GPIO pins and I/O pins for streaming or receiving RTCM messages for RTK operation.  
@@ -40,7 +40,7 @@ Originally designed for easily logging multi-GNSS data in remote regions of the 
 
 ## Getting Started 
 
-V2.0.1 of the OGRE has 7 modes of operation: 
+V2.0.3 of the OGRE has 7 modes of operation: 
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER-defined start/stop hours, OR
   - (2) Continous Mode: Log GNSS data continously (single file!), OR
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER-specified day (1-28) each month, OR
@@ -57,7 +57,7 @@ Otherwise, software will default to hardcoded configuration. USER may also uploa
 The CONFIG.TXT file is formatted as follows: 
 
 ```
-LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=2
+LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=6
 LOG_START_HOUR_UTC(mode 1 only)=17
 LOG_END_HOUR_UTC(mode 1 only)=23
 LOG_START_DAY(mode 3 only, 0-28)=25
@@ -74,8 +74,8 @@ STATION_NAME(0000, numeric)=0001
 MEASURE_RATE(integer seconds)=1
 BAT_SHUTDOWN_V(00.0, volts)=10.9
 WINTER_INTERVAL(seconds, mode 6 only)=777600
-SUMMER_START_MONTH(mode 6 only)=5
-SUMMER_END_MONTH(mode 6 only)=8
+SUMMER_START_MONTH(mode 6 only)=4
+SUMMER_END_MONTH(mode 6 only)=9
 end;
 ```
 
@@ -101,17 +101,17 @@ Insert the uSD card (with or without CONFIG & EPOCH files), then connect battery
 
 Once the system is initialized, it will either sleep or begin logging data, depending on the specified log mode. 
 If the USER has enabled LED_INDICATORS, the following additional lights will flash: 
-  - Flashes at measurement rate: System logging GNSS data
-  - 1 Blink every 12 seconds: System sleeping
+  - Flashes (faint) at measurement rate: System logging GNSS data
+  - 1 Blink (bright) every 12 seconds: System sleeping
   - No blinks: system is in deep sleep due to low battery, or system is dead due to dead battery.
 
 ## Software Upload
-A pre-compiled binary is avialable with each release. This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). Example command line prompt using the svl.py script: [use baud -b 115200; provide path to binary file OGRENet.ino.bin; find path of usb serial converter port by ls /dev/tty.*] 
+A pre-compiled binary is avialable with each release (see releases). This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). Example command line prompt using the svl.py script: [use baud -b 115200; provide path to binary file OGRENet.ino.bin; find path of usb serial converter port by typing ls /dev/tty.* on Linux and selecting the proper usb port.] 
 ```
-python3 svl.py -b 115200 -f ./OGRENet.ino.bin /dev/tty.usbserial-1410
+python3 svl.py -b 115200 -f /PATH/TO/BINARY/FILE/OGRENet.ino.bin /dev/tty.usbserial-####
 ```
 
-You can also compile this code with the Arduino IDE, ensuring that the code and board libraries match the proper versions defined in the header of OGRENet.ino. 
+You can also compile the source code with the Arduino IDE, ensuring that the code and board libraries match the proper versions defined in the header of OGRENet.ino [Sparkfun Artemis Module v1.2.3, SDFat library v2.1.0, Sparkfun ublox GNSS library v2.2.8]. 
 
 ## Hardware Notes
 <p align="center">
