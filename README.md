@@ -44,7 +44,7 @@ Originally designed for easily logging multi-GNSS data in remote regions of the 
 
 V2.0.3 of the OGRE has 7 modes of operation: 
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER-defined start/stop hours, OR
-  - (2) Continous Mode: Log GNSS data continously (single file!), OR
+  - (2) Continous Mode: Log GNSS data continously (new file generated at each midnight UTC), OR
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER-specified day (1-28) each month, OR
   - (4) Interval Mode: Each 24-hour log session is spaced by a USER-defined interval (e.g., log every 3 days for 24 hours), OR
   - (5) Log GNSS data for 24 hours on USER specified dates/times read from a .txt file. Defaults to mode 4 after last user-provided date.
