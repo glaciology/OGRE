@@ -1,7 +1,7 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 08 Feb 2024
-   V2.0.3
+   Derek Pickell 20 Mar 2024
+   V2.1.1
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
@@ -32,7 +32,7 @@
 */
 
 #define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE 3/22 - present
-#define SOFTWARE_VERSION "V2.0.3" 
+#define SOFTWARE_VERSION "V2.1.1" 
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
 #include <Wire.h>                             // Apollo3 Arduino Core v1.2.3
@@ -80,8 +80,10 @@ uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (i.e.,
 
 // LOG MODE 6: SUMMER/WINTER: LOG 24 HOURS, SLEEP FOR:
 uint32_t winterInterval     = 777600;         // Sleep duration during winter, i.e., 9 days
-byte startMonth             = 4;              // Start month, inclusive (May)
+byte startMonth             = 4;              // Start month, inclusive (April)
 byte endMonth               = 9;              // End month, inclusive (August)
+byte startDay               = 21;             // Start day (of month), inclusive, e.g., Apr 21
+byte endDay                 = 21;             // End day (of month), inclusive, e.g., Sep 21
  
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 50;             // Sleep interval (Seconds)
@@ -120,7 +122,7 @@ volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
 unsigned long dates[21]           = {};       // Array with Unix Epochs of log dates !!! MAX 20 !!!
-int           settings[20]        = {};       // Array that holds user settings on SD
+int           settings[22]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name
 

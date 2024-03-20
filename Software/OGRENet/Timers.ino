@@ -67,8 +67,12 @@ void configureLogAlarm() {
     }
     
     int whichMonth = rtc.month;
+    int whichDay = rtc.alarmDayOfMonth;
 
-    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+//    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
+                     ((whichMonth != startMonth || whichDay >= startDay) &&
+                     (whichMonth != endMonth || whichDay <= endDay));
 
     if (summerInterval){ // log continously
       DEBUG_PRINTLN("Info: Logging to Midnight (SUMMER)");
@@ -97,12 +101,16 @@ void configureLogAlarm() {
     }
     
     int whichMonth = rtc.hour;
-    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
-
+    int whichDay = rtc.minute;
+//    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
+                     ((whichMonth != startMonth || whichDay >= startDay) &&
+                     (whichMonth != endMonth || whichDay <= endDay));
+                     
     if (summerInterval){ // log continously
       DEBUG_PRINTLN("Info: Logging to Midnight (SUMMER)");
       rtc.setAlarm(0, 0, 0, 0, 0, 0);
-      rtc.setAlarmMode(6);
+      rtc.setAlarmMode(6); // log 1 minute
     } else { 
       DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
       rtc.setAlarm(0, 0, rtc.seconds, 0, 0, 0); 
@@ -161,7 +169,11 @@ void configureSleepAlarm() {
   else if (logMode == 6){
     time_t a;
     int whichMonth = rtc.month;
-    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+    int whichDay = rtc.alarmDayOfMonth;
+//    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
+                     ((whichMonth != startMonth || whichDay >= startDay) &&
+                     (whichMonth != endMonth || whichDay <= endDay));
     
     if (summerInterval){
       DEBUG_PRINTLN("Info: SUMMER MODE");
@@ -177,7 +189,10 @@ void configureSleepAlarm() {
   else if (logMode == 7){ // TO TEST LOG MODE 6 ON FASTER SCALE (Hours & Minutes)
     time_t a;
     int whichMonth = rtc.hour; // HOUR!!
-    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+    int whichDay = rtc.minute;
+    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
+                     ((whichMonth != startMonth || whichDay >= startDay) &&
+                     (whichMonth != endMonth || whichDay <= endDay));
     
     if (summerInterval){
       DEBUG_PRINTLN("Info: SUMMER MODE");

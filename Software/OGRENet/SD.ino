@@ -86,6 +86,8 @@ void getConfig() {
   winterInterval  = settings[16];
   startMonth      = settings[17];
   endMonth        = settings[18];
+  startDay        = settings[19];
+  endDay          = settings[20];
 
   DEBUG_PRINT("Info: SD Settings from Device #: "); DEBUG_PRINTLN(stationName);
   if (logMode == 1 ) {
