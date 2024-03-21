@@ -42,7 +42,7 @@ Originally designed for easily logging multi-GNSS data in remote regions of the 
 
 ## Getting Started 
 
-V2.0.3 of the OGRE has 7 modes of operation: 
+V2.1.1 of the OGRE has 7 modes of operation: 
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER-defined start/stop hours, OR
   - (2) Continous Mode: Log GNSS data continously (new file generated at each midnight UTC), OR
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER-specified day (1-28) each month, OR
@@ -84,7 +84,7 @@ end;
 - If the USER selects LOG_MODE=1, then LOG_START_HOUR_UTC and LOG_END_HOUR_UTC must be specified. 
 - If the USER selects LOG_MODE=3, then LOG_START_DAY must also be specified (day of each month GNSS data is logged). 
 - If the USER selects LOG_MODE=5, then unix epoch dates for logging are specified in EPOCH.txt. If no dates are specified or if all dates have elapsed, then log interval defaults to LOG_MODE 4, where LOG_EPOCH_SLEEP must be defined.
-- If the USER selects LOG_MODE=6, the instrument logs continuously during SUMMER_START_MONTH through SUMMER_END_MONTH (inclusive). Furthermore, the duration between logging during winter is set by WINTER_INTERVAL. Note: log sessions are 24 hours.
+- If the USER selects LOG_MODE=6, the instrument logs continuously during SUMMER_START_MONTH + SUMMER_START_DAY through SUMMER_END_MONTH + SUMMER_END_DAY (inclusive). Furthermore, the duration between logging during winter is set by WINTER_INTERVAL. Note: log sessions are 24 hours.
 - LED_INDICATORS, if false, will disable all LEDs, excluding those present during initialization. 
 - MEASURE_BATTERY, if true, battery voltage is measured/monitored, and the instrument will be put to sleep when voltage dips below 10.9V (OR as defined by user in BAT_SHUTDOWN_V). System will restart when voltage measured above ~11.2V (or 0.5V above BAT_SHUTDOWN_V). 
 - STATION_NAME is a number between 0001 and 9999, and will be appended to the timestamped file names for each GNSS file.
