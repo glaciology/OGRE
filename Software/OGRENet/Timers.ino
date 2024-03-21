@@ -67,9 +67,8 @@ void configureLogAlarm() {
     }
     
     int whichMonth = rtc.month;
-    int whichDay = rtc.alarmDayOfMonth;
+    int whichDay = rtc.dayOfMonth;
 
-//    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
     summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
                      ((whichMonth != startMonth || whichDay >= startDay) &&
                      (whichMonth != endMonth || whichDay <= endDay));
@@ -102,7 +101,7 @@ void configureLogAlarm() {
     
     int whichMonth = rtc.hour;
     int whichDay = rtc.minute;
-//    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+
     summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
                      ((whichMonth != startMonth || whichDay >= startDay) &&
                      (whichMonth != endMonth || whichDay <= endDay));
@@ -169,8 +168,8 @@ void configureSleepAlarm() {
   else if (logMode == 6){
     time_t a;
     int whichMonth = rtc.month;
-    int whichDay = rtc.alarmDayOfMonth;
-//    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth);
+    int whichDay = rtc.dayOfMonth;
+
     summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
                      ((whichMonth != startMonth || whichDay >= startDay) &&
                      (whichMonth != endMonth || whichDay <= endDay));
