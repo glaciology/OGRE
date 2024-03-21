@@ -103,7 +103,7 @@ void getConfig() {
   }
 
   if (logMode == 6 ) {
-    DEBUG_PRINT("Log Mode 6 - Winter Interval "); DEBUG_PRINT(winterInterval); DEBUG_PRINT("Summer months: "); DEBUG_PRINT(startMonth); DEBUG_PRINT(endMonth);
+    DEBUG_PRINT("Log Mode 6 - Winter Interval "); DEBUG_PRINT(winterInterval); DEBUG_PRINT(" Summer months: "); DEBUG_PRINT(startMonth); DEBUG_PRINT(", "); DEBUG_PRINT(endMonth);
   } else { 
     DEBUG_PRINT(" - Log Mode: "); DEBUG_PRINTLN(logMode);
   }
