@@ -50,11 +50,27 @@ void getConfig() {
     return;
   }
 
+  // Count the number of lines in the file
+  int lineCount = 0;
+  while ((n = configFile.fgets(line, sizeof(line))) > 0) {
+    lineCount++;
+  }
+
+  if (lineCount != CONFIG_FILE) {
+    DEBUG_PRINT("Warning: detected an incompatable Config file. Your version: v");
+    DEBUG_PRINT(lineCount); DEBUG_PRINT(" Should be: v");
+    DEBUG_PRINTLN(CONFIG_FILE); DEBUG_PRINTLN("Warning: Using hard-coded settings");
+    blinkLed(6, 100);
+    delay(1000);
+    return;
+  }
+  
+  configFile.seek(0);  // Reset file pointer to the beginning of the file
+
   while ((n = configFile.fgets(line, sizeof(line))) > 0) {
 
-    if (line[n - 1] == '\n') {
-      line[n-1] = 0;
-    }
+    size_t len = strcspn(line, "\r\n");
+    line[len] = '\0';  //  Strip \r and/or \n chars and null-terminate the string at the position of the first occurrence
     
     char* parse1 = strtok(line, "=");               // split at '='
 
@@ -141,12 +157,28 @@ void getDates() {
       delay(1000);
       return;
     }
+
+    // Count the number of lines in the file
+    int lineCount = 0;
+    while ((n = dateFile.fgets(line, sizeof(line))) > 0) {
+      lineCount++;
+    }
+
+    if (lineCount != EPOCH_FILE) {
+      DEBUG_PRINT("Warning: detected an incompatable Config file. Your version: v");
+      DEBUG_PRINT(lineCount); DEBUG_PRINT(" Should be: v");
+      DEBUG_PRINTLN(CONFIG_FILE); DEBUG_PRINTLN("Warning: Using hard-coded settings");
+      blinkLed(5, 100);
+      delay(1000);
+      return;
+    }
+    
+    dateFile.seek(0);  // Reset file pointer to the beginning of the file
   
     while ((n = dateFile.fgets(line, sizeof(line))) > 0) {
-  
-      if (line[n - 1] == '\n') { // strip end line character
-        line[n-1] = 0;
-      }
+
+      size_t len = strcspn(line, "\r\n");
+      line[len] = '\0';  //  Strip \r and/or \n chars and null-terminate the string at the position of the first occurrence
       
       char* parse1 = strtok(line, "=");               // split at '='
       int hold = strtol(strtok(NULL, "="), NULL, 10); // take remaining string, convert to base 10

@@ -32,7 +32,9 @@
 */
 
 #define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE 3/22 - present
-#define SOFTWARE_VERSION "V2.1.1" 
+#define SOFTWARE_VERSION "V2.1.2" 
+#define CONFIG_FILE 22
+#define EPOCH_FILE 20
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
 #include <Wire.h>                             // Apollo3 Arduino Core v1.2.3
@@ -66,7 +68,7 @@ SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 41, 42, 43
 //////////////////////////////////////////////////////
 //--------- USER DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: 
-byte logMode                = 6;              // {1, 2, 3, 4, 5, 6, 99}
+byte logMode                = 5;              // {1, 2, 3, 4, 5, 6, 99}
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour 
@@ -76,7 +78,7 @@ byte logEndHr               = 14;             // UTC Hour
 byte logStartDay            = 8;              // Day of month between 1 and 28
 
 // LOG MODE 4/5: SLEEP FOR SPECIFIED DURATION
-uint32_t epochSleep         = 2628000;        // Sleep duration (Seconds) (i.e., 2628000 ~ 1 month)
+uint32_t epochSleep         = 518400;        // Sleep duration (Seconds) (i.e., 2628000 ~ 1 month, 518400 ~ 6 days)
 
 // LOG MODE 6: SUMMER/WINTER: LOG 24 HOURS, SLEEP FOR:
 uint32_t winterInterval     = 777600;         // Sleep duration during winter, i.e., 9 days
@@ -101,7 +103,7 @@ int logL5                   = 0;              // WARNING: only set if using L5-c
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = false;          // If TRUE, uses battery circuit to measure V during debug logs
+bool measureBattery         = true;          // If TRUE, uses battery circuit to measure V during debug logs
 int  stationName            = 0000;           // Station name, 4 digits
 int  measurementRate        = 5;              // Produce a measurement every X seconds
 
