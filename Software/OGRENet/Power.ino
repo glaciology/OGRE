@@ -211,3 +211,51 @@ void blinkLed(byte ledFlashes, unsigned int ledDelay) {
   // Turn off LED
   digitalWrite(LED, LOW);
 }
+
+
+// Used to read reset codes from status register memory
+String getStatusCodes(uint32_t stat_value) {
+  String statusCodes = "";
+  
+  if ((stat_value >> 31) & 0x1) {
+    statusCodes += "SBOOT ";
+  }
+  if ((stat_value >> 30) & 0x1) {
+    statusCodes += "FBOOT ";
+  }
+  if ((stat_value >> 10) & 0x1) {
+    statusCodes += "BOBSTAT ";
+  }
+  if ((stat_value >> 9) & 0x1) {
+    statusCodes += "BOFSTAT ";
+  }
+  if ((stat_value >> 8) & 0x1) {
+    statusCodes += "BOCSTAT ";
+  }
+  if ((stat_value >> 7) & 0x1) {
+    statusCodes += "BOUSTAT ";
+  }
+  if ((stat_value >> 6) & 0x1) {
+    statusCodes += "WDRSTAT ";
+  }
+  if ((stat_value >> 5) & 0x1) {
+    statusCodes += "DBGRSTAT ";
+  }
+  if ((stat_value >> 4) & 0x1) {
+    statusCodes += "POIRSTAT ";
+  }
+  if ((stat_value >> 3) & 0x1) {
+    statusCodes += "SWRSTAT ";
+  }
+  if ((stat_value >> 2) & 0x1) {
+    statusCodes += "BORSTAT ";
+  }
+  if ((stat_value >> 1) & 0x1) {
+    statusCodes += "PORSTAT ";
+  }
+  if (stat_value & 0x1) {
+    statusCodes += "EXRSTAT ";
+  }
+  
+  return statusCodes;
+}

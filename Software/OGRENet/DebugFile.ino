@@ -13,10 +13,14 @@ void createDebugFile() {
     DEBUG_PRINTLN("Info: Created debug file"); 
   }
 
+  volatile uint32_t *stat_register = (uint32_t *)STAT_REGISTER_ADDRESS;
+  uint32_t stat_value = *stat_register;
+  String STAT_CODES = getStatusCodes(stat_value);
+
   // Write header to file
   debugFile.println(SOFTWARE_VERSION"_datetime, debugCounter, onlineGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
   "maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, errorCode," 
-  "lowBattery, Temperature, Battery");
+  "lowBattery, Temperature, Battery, " + STAT_CODES);
 
   // Sync the debug file
   if (!debugFile.sync()) {
