@@ -42,7 +42,7 @@ Originally designed for easily logging multi-GNSS data in remote regions of the 
 
 ## Getting Started 
 
-V2.1.1 of the OGRE has 7 modes of operation: 
+V2.1.3 of the OGRE has 7 modes of operation: 
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER-defined start/stop hours, OR
   - (2) Continous Mode: Log GNSS data continously (new file generated at each midnight UTC), OR
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER-specified day (1-28) each month, OR
@@ -54,7 +54,7 @@ V2.1.1 of the OGRE has 7 modes of operation:
 OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, nav message etc.) are logged to a uSD card in .ubx (UBLOX) proprietary format. Under open sky conditions, we found that an epoch of data (1s) is ~2000-3000 bytes. If logging at 15 seconds for a year, this equates to 6GB of data. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery voltage, logging errors, etc.).
   
 INPUTs: USERS specify settings in the [CONFIG.txt](OGRENet/CONFIG) file, which, if uploaded to the SD card, will be read into the software. 
-Otherwise, software will default to hardcoded configuration. USER may also upload a [EPOCH.txt](OGRENet/EPOCH) file, which allows the user to specify up to 16 log dates (unix epoch format) for logging in Mode 5. 
+Otherwise, software will default to hardcoded configuration. USER may also upload a [EPOCH.txt](OGRENet/EPOCH) file, which allows the user to specify up to 16 log dates (unix epoch format) for logging in Mode 5. As of the most recent release, the CONFIG.txt and EPOCH.txt files are Windows and Mac (e.g., Notepad or Textedit) compatable (previously, carriage return characters \n caused issues for Windows-generated files). Using an older CONFIG.txt version will not crash the OGRE. 
 
 The CONFIG.TXT file is formatted as follows: 
 
@@ -98,7 +98,7 @@ Insert the uSD card (with or without CONFIG & EPOCH files), then connect battery
  The following indicate failure of initialization: 
   - 2 Blink Pattern: uSD initialization failed (is the SD card seated properly?) - system awaiting automatic reset to try again (60 seconds).
   - 3 Blink Pattern: Ublox/antenna initialization failed (is the antenna properly connected?) - system awaiting automatic reset to try again (60 seconds).
-  - 5 Blink Pattern: RTC failed to sync with GNSS time (are you outside?) - system awaiting automatic reset to try again (60 seconds). 
+  - 5 Blink Pattern: RTC failed to sync with GNSS time (are you outside?) - system awaiting automatic reset to try again (60 seconds).
   - 6 Rapid Blinks: uSD failed to read CONFIG settings (did you intend to not include the CONFIG file?). 
 
 Once the system is initialized, it will either sleep or begin logging data, depending on the specified log mode. 
