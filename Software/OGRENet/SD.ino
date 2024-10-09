@@ -45,6 +45,8 @@ void getConfig() {
   if (!configFile.isOpen()) {
     DEBUG_PRINTLN("Warning: Could not open CONFIG.TXT");
     DEBUG_PRINTLN("Warning: Using hard-coded settings");
+    createDefaultConfig();  // Generate default CONFIG.TXT
+    DEBUG_PRINTLN("Created new CONFIG.TXT");
     blinkLed(6, 100);
     delay(1000);
     return;
@@ -77,10 +79,9 @@ void getConfig() {
     if (strcmp(parse1, "BAT_SHUTDOWN_V(00.0, volts)") == 0) {      // this value is a float
       float hold = strtof(strtok(NULL, "="), NULL);
       shutdownThreshold = hold;
-    } else if (strcmp(parse1, "STATION_NAME(0000, numeric)") == 0) {  // Parse stationName as string
-        char* stationValue = strtok(NULL, "=");  // Get the value after '='
+    } else if (strcmp(parse1, "STATION_NAME(0000, numeric)") == 0) {  // this value is a string
+        char* stationValue = strtok(NULL, "=");  
         if (stationValue != NULL) {
-            // Copy up to 4 characters and ensure null-termination
             strncpy(stationName, stationValue, 4);
             stationName[4] = '\0'; // Ensure null-termination
         }
@@ -203,4 +204,67 @@ void getDates() {
       }
     }
   }
+}
+
+void createDefaultConfig() {
+    if (!configFile.open("CONFIG.TXT", O_CREAT | O_WRITE)) { // Create file if new, Append to end, Open to Write
+      DEBUG_PRINTLN("Warning: Failed to create CONFIG file.");
+      return;
+    } else {
+      DEBUG_PRINTLN("Info: Created debug file"); 
+    }
+
+    // Write default configuration settings to the file
+    configFile.print("LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=");
+    configFile.println(logMode);
+    configFile.print("LOG_START_HOUR_UTC(mode 1 only)=");
+    configFile.println(logStartHr);
+    configFile.print("LOG_END_HOUR_UTC(mode 1 only)=");
+    configFile.println(logEndHr);
+    configFile.print("LOG_START_DAY(mode 3 only, 0-28)=");
+    configFile.println(logStartDay);
+    configFile.print("LOG_EPOCH_SLEEP(modes 4/5 only, seconds)=");
+    configFile.println(epochSleep);
+    configFile.print("LED_INDICATORS(0-false, 1-true)=");
+    configFile.println(ledBlink ? "1" : "0");  // Ternary operator!
+    configFile.print("MEASURE_BATTERY(0-false, 1-true)=");
+    configFile.println(measureBattery ? "1" : "0"); 
+    configFile.print("ENABLE_GPS(0-false, 1-true)=");
+    configFile.println(logGPS ? "1" : "0");
+    configFile.print("ENABLE_GLO(0-false, 1-true)=");
+    configFile.println(logGLO ? "1" : "0");
+    configFile.print("ENABLE_GAL(0-false, 1-true)=");
+    configFile.println(logGAL ? "1" : "0");
+    configFile.print("ENABLE_BDS(0-false, 1-true)=");
+    configFile.println(logBDS ? "1" : "0");
+    configFile.print("ENABLE_QZSS(0-false, 1-true)=");
+    configFile.println(logQZSS ? "1" : "0");
+    configFile.print("ENABLE_NAV_SFRBX(0-false, 1-true)=");
+    configFile.println(logNav ? "1" : "0");
+    configFile.print("STATION_NAME(0000, numeric)=");
+    configFile.println(stationName);
+    configFile.print("MEASURE_RATE(integer seconds)=");
+    configFile.println(measurementRate);
+    configFile.print("BAT_SHUTDOWN_V(00.0, volts)=");
+    configFile.println(shutdownThreshold);
+    configFile.print("WINTER_INTERVAL(seconds, mode 6 only)=");
+    configFile.println(winterInterval);
+    configFile.print("SUMMER_START_MONTH(mode 6 only)=");
+    configFile.println(startMonth);
+    configFile.print("SUMMER_END_MONTH(mode 6 only)=");
+    configFile.println(endMonth);
+    configFile.print("SUMMER_START_DAY(mode 6 only)=");
+    configFile.println(startDay);
+    configFile.print("SUMMER_END_DAY(mode 6 only)=");
+    configFile.println(endDay);
+    configFile.println("end;"); // End marker for config
+
+    // Sync the debug file
+    if (!configFile.sync()) {
+      DEBUG_PRINTLN("Warning: Failed to sync config file.");
+    }
+    // Close the file
+    if (!configFile.close()) {
+      DEBUG_PRINTLN("Warning: Failed to close CONFIG file.");
+    }
 }
