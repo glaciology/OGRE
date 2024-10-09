@@ -79,7 +79,7 @@ void getConfig() {
     if (strcmp(parse1, "BAT_SHUTDOWN_V(00.0, volts)") == 0) {      // this value is a float
       float hold = strtof(strtok(NULL, "="), NULL);
       shutdownThreshold = hold;
-    } else if (strcmp(parse1, "STATION_NAME(0000, numeric)") == 0) {  // this value is a string
+    } else if (strcmp(parse1, "STATION_NAME(0000, char)") == 0) {  // this value is a string
         char* stationValue = strtok(NULL, "=");  
         if (stationValue != NULL) {
             strncpy(stationName, stationValue, 4);
