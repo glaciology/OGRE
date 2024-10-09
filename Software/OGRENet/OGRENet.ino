@@ -1,7 +1,7 @@
 /*
    OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 31 May 2024
-   V2.1.3
+   Derek Pickell 09 Oct 2024
+   V2.1.4
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
@@ -32,7 +32,7 @@
 */
 
 #define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE 3/22 - present
-#define SOFTWARE_VERSION "V2.1.3" 
+#define SOFTWARE_VERSION "V2.1.4" 
 #define CONFIG_FILE 22
 #define EPOCH_FILE 20
 #define STAT_REGISTER_ADDRESS 0x4FFFF000    
@@ -69,7 +69,7 @@ SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 41, 42, 43
 //////////////////////////////////////////////////////
 //--------- USER DEFAULT CONFIGURATION HERE ------------
 // LOG MODE: 
-byte logMode                = 5;              // {1, 2, 3, 4, 5, 6, 99}
+byte logMode                = 2;              // {1, 2, 3, 4, 5, 6, 99}
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour 
@@ -99,13 +99,13 @@ int logGAL                  = 1;              //
 int logBDS                  = 1;              //
 int logQZSS                 = 0;              //
 int logSBAS                 = 0;              // Not on SD CONFIG File 
-int logNav                  = 0;              //
+int logNav                  = 1;              //
 int logL5                   = 0;              // WARNING: only set if using L5-capable ZED.
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
-bool measureBattery         = true;          // If TRUE, uses battery circuit to measure V during debug logs
-int  stationName            = 0000;           // Station name, 4 digits
+bool measureBattery         = false;          // If TRUE, uses battery circuit to measure V during debug logs
+char stationName[5]         = "0000";           // Station name, 4 digits
 int  measurementRate        = 5;              // Produce a measurement every X seconds
 
 // BATTERY PARAMETERS
@@ -128,6 +128,7 @@ unsigned long dates[21]           = {};       // Array with Unix Epochs of log d
 int           settings[22]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name
+char          debugFileName[15] = "";         // Debug file name
 
 // DEBUGGING
 unsigned long maxBufferBytes      = 0;        // How full the file buffer has been

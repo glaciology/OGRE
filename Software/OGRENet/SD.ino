@@ -27,7 +27,7 @@ void configureSD() {
 // Create timestamped log file name
 void getLogFileName() { 
   rtc.getTime();
-  sprintf(logFileNameDate, "%04d_20%02d%02d%02d_%02d%02d.ubx", stationName,
+  sprintf(logFileNameDate, "%s_20%02d%02d%02d_%02d%02d.ubx", stationName,
           rtc.year, rtc.month, rtc.dayOfMonth,
           rtc.hour, rtc.minute);
 }
@@ -74,9 +74,16 @@ void getConfig() {
     
     char* parse1 = strtok(line, "=");               // split at '='
 
-    if (strcmp(parse1, "BAT_SHUTDOWN_V") == 0) {      // this value is a float
+    if (strcmp(parse1, "BAT_SHUTDOWN_V(00.0, volts)") == 0) {      // this value is a float
       float hold = strtof(strtok(NULL, "="), NULL);
       shutdownThreshold = hold;
+    } else if (strcmp(parse1, "STATION_NAME(0000, numeric)") == 0) {  // Parse stationName as string
+        char* stationValue = strtok(NULL, "=");  // Get the value after '='
+        if (stationValue != NULL) {
+            // Copy up to 4 characters and ensure null-termination
+            strncpy(stationName, stationValue, 4);
+            stationName[4] = '\0'; // Ensure null-termination
+        }
     } else {                                          // the remaining values are all strings
       int hold = strtol(strtok(NULL, "="), NULL, 10); // take remaining string, convert to base 10
       settings[i] = hold;
@@ -97,7 +104,6 @@ void getConfig() {
   logBDS          = settings[10];
   logQZSS         = settings[11];
   logNav          = settings[12];
-  stationName     = settings[13];
   measurementRate = settings[14];
   winterInterval  = settings[16];
   startMonth      = settings[17];

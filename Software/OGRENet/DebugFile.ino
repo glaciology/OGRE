@@ -3,8 +3,9 @@
  */
 
 void createDebugFile() {
-  
-  if (!debugFile.open("debug.csv", O_CREAT | O_APPEND | O_WRITE)) { // Create file if new, Append to end, Open to Write
+  sprintf(debugFileName, "debug_%s.csv", stationName);  // Generate "debug_1234.csv", e.g.
+
+  if (!debugFile.open(debugFileName, O_CREAT | O_APPEND | O_WRITE)) { // Create file if new, Append to end, Open to Write
     DEBUG_PRINTLN("Warning: Failed to create debug file.");
     return;
   }
@@ -80,6 +81,12 @@ void logDebug(const char* errorCode) {
   if (!debugFile.sync()) {
     DEBUG_PRINTLN("Warning: Failed to sync debug file.");
     syncFailCounter++; // Count number of failed file syncs
+  }
+
+  // Update filestamp
+  if (!debugFile.timestamp(T_ACCESS, (rtc.year + 2000), rtc.month, rtc.dayOfMonth, rtc.hour, rtc.minute, rtc.seconds))
+  {
+    DEBUG_PRINT("Warning: File update timestamp issue.");
   }
 
   // Close the debug file

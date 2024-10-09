@@ -113,6 +113,13 @@ void logGNSS() {
   }
   
   DEBUG_PRINT("Info: Creating new file: "); DEBUG_PRINTLN(logFileNameDate);
+
+  rtc.getTime();
+  if (!myFile.timestamp(T_CREATE, (rtc.year + 2000), rtc.month, rtc.dayOfMonth, rtc.hour, rtc.minute, rtc.seconds))
+    {
+      DEBUG_PRINT("Warning: Failed to update timestamp.");
+    }
+  
   
   bytesWritten      = 0;          // Reset debug counters
   writeFailCounter  = 0;
