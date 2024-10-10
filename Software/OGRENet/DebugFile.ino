@@ -39,13 +39,14 @@ void logDebug(const char* errorCode) {
   
   debugCounter++; // Increment debug counter
 
-  if (!debugFile.open("debug.csv", O_APPEND | O_WRITE)) {
+  if (!debugFile.open(debugFileName, O_APPEND | O_WRITE)) {
     DEBUG_PRINTLN("Warning: Failed to open debug file.");
     return;
   }
   
   else {
-    DEBUG_PRINTLN("Info: Debug Dumped to: debug.csv");
+    DEBUG_PRINT("Info: Debug dumped to: ");
+    DEBUG_PRINTLN(debugFileName);
   }
 
   // Create datetime string
