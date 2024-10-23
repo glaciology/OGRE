@@ -48,36 +48,38 @@ V2.1.3 of the OGRE has 7 modes of operation:
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER-specified day (1-28) each month, OR
   - (4) Interval Mode: Each 24-hour log session is spaced by a USER-defined interval (e.g., log every 3 days for 24 hours), OR
   - (5) Log GNSS data for 24 hours on USER specified dates/times read from a .txt file. Defaults to mode 4 after last user-provided date.
-  - (6) Log GNSS data for 24 hours; During winter once on every 10th day (or USER-defined interval); During summer daily. "Summer" is May-August (or USER-defined months). 
+  - (6) Log GNSS data for 24 hours; During winter once on every Nth day (or USER-defined interval, in # of days); During summer daily. "Summer" is May-August (or USER-defined months). 
   - (99) Test Mode: Used for development. Log GNSS data for 50 second interval, sleep for 50 second and repeat.
   
 OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, nav message etc.) are logged to a uSD card in .ubx (UBLOX) proprietary format. Under open sky conditions, we found that an epoch of data (1s) is ~2000-3000 bytes. If logging at 15 seconds for a year, this equates to 6GB of data. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery voltage, logging errors, etc.).
   
-INPUTs: USERS specify settings in the [CONFIG.txt](OGRENet/CONFIG) file, which, if uploaded to the SD card, will be read into the software. 
-Otherwise, software will default to hardcoded configuration. USER may also upload a [EPOCH.txt](OGRENet/EPOCH) file, which allows the user to specify up to 16 log dates (unix epoch format) for logging in Mode 5. As of the most recent release, the CONFIG.txt and EPOCH.txt files are Windows and Mac (e.g., Notepad or Textedit) compatable (previously, carriage return characters \n caused issues for Windows-generated files). Using an older CONFIG.txt version will not crash the OGRE. 
+INPUTs: USERS specify settings in the [CONFIG.txt](OGRENet/CONFIG) file, which, if uploaded to the SD card, will be read into the software. If no CONFIG.txt exists on the attached SD card, it will automatically be added with the default settings.
+Otherwise, software will default to hardcoded configuration. USER may also upload a [EPOCH.txt](OGRENet/EPOCH) file, which allows the user to specify up to 16 log dates (unix epoch format) for logging in Mode 5. As of the most recent release, the CONFIG.txt and EPOCH.txt files are Windows and Mac (e.g., Notepad or Textedit) compatable (previously, carriage return characters \n caused issues for Windows-generated files). Using an older CONFIG.txt version will not crash the OGRE, but will cause the OGRE to use the default settings instead. 
 
 The CONFIG.TXT file is formatted as follows: 
 
 ```
-LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=6
+LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=2
 LOG_START_HOUR_UTC(mode 1 only)=17
 LOG_END_HOUR_UTC(mode 1 only)=23
 LOG_START_DAY(mode 3 only, 0-28)=25
 LOG_EPOCH_SLEEP(modes 4/5 only, seconds)=3600
 LED_INDICATORS(0-false, 1-true)=1
-MEASURE_BATTERY(0-false, 1-true)=0
+MEASURE_BATTERY(0-false, 1-true)=1
 ENABLE_GPS(0-false, 1-true)=1
 ENABLE_GLO(0-false, 1-true)=1
 ENABLE_GAL(0-false, 1-true)=1
 ENABLE_BDS(0-false, 1-true)=1
 ENABLE_QZSS(0-false, 1-true)=0
-ENABLE_NAV_SFRBX(0-false, 1-true)=0
-STATION_NAME(0000, numeric)=0001
+ENABLE_NAV_SFRBX(0-false, 1-true)=1
+STATION_NAME(0000, char)=roof
 MEASURE_RATE(integer seconds)=1
 BAT_SHUTDOWN_V(00.0, volts)=10.9
-WINTER_INTERVAL(seconds, mode 6 only)=777600
+WINTER_INTERVAL(seconds, mode 6 only)=172800
 SUMMER_START_MONTH(mode 6 only)=4
-SUMMER_END_MONTH(mode 6 only)=9
+SUMMER_END_MONTH(mode 6 only)=10
+SUMMER_START_DAY(mode 6 only)=5
+SUMMER_END_DAY(mode 6 only)=15
 end;
 ```
 
@@ -87,7 +89,7 @@ end;
 - If the USER selects LOG_MODE=6, the instrument logs continuously during SUMMER_START_MONTH + SUMMER_START_DAY through SUMMER_END_MONTH + SUMMER_END_DAY (inclusive). Furthermore, the duration between logging during winter is set by WINTER_INTERVAL. Note: log sessions are 24 hours.
 - LED_INDICATORS, if false, will disable all LEDs, excluding those present during initialization. 
 - MEASURE_BATTERY, if true, battery voltage is measured/monitored, and the instrument will be put to sleep when voltage dips below 10.9V (OR as defined by user in BAT_SHUTDOWN_V). System will restart when voltage measured above ~11.2V (or 0.5V above BAT_SHUTDOWN_V). 
-- STATION_NAME is a number between 0001 and 9999, and will be appended to the timestamped file names for each GNSS file.
+- STATION_NAME is a number between 0000 and zzzz (no special characters, please!), and will be appended to the timestamped file names for each GNSS file.
 - MEASURE_RATE is frequency of epoch solutions logged to SD card: 1 = 1 solution per second, 15 = 1 solution per 15 seconds. 
 
 OPERATION:  
