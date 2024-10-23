@@ -46,7 +46,7 @@ void getConfig() {
     DEBUG_PRINTLN("Warning: Could not open CONFIG.TXT");
     DEBUG_PRINTLN("Warning: Using hard-coded settings");
     createDefaultConfig();  // Generate default CONFIG.TXT
-    DEBUG_PRINTLN("Created new CONFIG.TXT");
+    DEBUG_PRINTLN("Info: Created new CONFIG.TXT");
     blinkLed(6, 100);
     delay(1000);
     return;
