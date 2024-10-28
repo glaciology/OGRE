@@ -18,8 +18,12 @@ void createDebugFile() {
   uint32_t stat_value = *stat_register;
   String STAT_CODES = getStatusCodes(stat_value);
 
+  uint32_t chip_id_value = *unique_chip_id;
+  String chip_id_string = String(chip_id_value, HEX);
+
+
   // Write header to file
-  debugFile.println(SOFTWARE_VERSION"_datetime, debugCounter, onlineGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
+  debugFile.println(String(SOFTWARE_VERSION) + "_" + chip_id_string + ", debugCounter, onlineGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
   "maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, errorCode," 
   "lowBattery, Temperature, Battery, " + STAT_CODES);
 

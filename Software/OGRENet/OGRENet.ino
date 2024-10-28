@@ -1,6 +1,6 @@
 /*
-   OGRENet: On-ice GNSS Research Experimental Network for Greenland
-   Derek Pickell 09 Oct 2024
+   OGRE: Open GNSS Research Equipment (On-ice GNSS Research Experimental Network for Greenland)
+   Derek Pickell 28 Oct 2024
    V2.1.4
 
    Hardware:
@@ -35,7 +35,9 @@
 #define SOFTWARE_VERSION "V2.1.4" 
 #define CONFIG_FILE 22
 #define EPOCH_FILE 20
-#define STAT_REGISTER_ADDRESS 0x4FFFF000    
+#define STAT_REGISTER_ADDRESS 0x4FFFF000
+#define UNIQUE_ID_ADDRESS     0x40020004
+volatile uint32_t *unique_chip_id = (uint32_t *)UNIQUE_ID_ADDRESS;
 
 ///////// LIBRARIES & OBJECT INSTANTIATIONS //////////
 #include <Wire.h>                             // Apollo3 Arduino Core v1.2.3
@@ -170,6 +172,9 @@ void setup() {
     Serial.begin(115200);
     delay(1000);
     Serial.println("***WELCOME TO GNSS LOGGER " SOFTWARE_VERSION "***");
+    uint32_t chip_id = *unique_chip_id;
+    Serial.print("Unique Chip ID: ");
+    Serial.println(chip_id, HEX);
   #endif
 
   //// CONFIGURE INITIAL SETTINGS  ////
