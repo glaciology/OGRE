@@ -1,7 +1,7 @@
 /*
    OGRE: Open GNSS Research Equipment (On-ice GNSS Research Experimental Network for Greenland)
-   Derek Pickell 28 Oct 2024
-   V2.1.4
+   Derek Pickell 13 Feb 2025
+   V2.1.5
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
@@ -32,7 +32,7 @@
 */
 
 #define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE 3/22 - present
-#define SOFTWARE_VERSION "V2.1.4" 
+#define SOFTWARE_VERSION "V2.1.5" 
 #define CONFIG_FILE 22
 #define EPOCH_FILE 20
 #define STAT_REGISTER_ADDRESS 0x4FFFF000

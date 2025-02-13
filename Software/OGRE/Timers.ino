@@ -69,9 +69,19 @@ void configureLogAlarm() {
     int whichMonth = rtc.month;
     int whichDay = rtc.dayOfMonth;
 
-    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
-                     ((whichMonth != startMonth || whichDay >= startDay) &&
-                     (whichMonth != endMonth || whichDay <= endDay));
+    // summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
+    //                  ((whichMonth != startMonth || whichDay >= startDay) &&
+    //                  (whichMonth != endMonth || whichDay <= endDay));
+
+    // First check if month falls into summer interval
+    summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
+                     (startMonth > endMonth && (whichMonth >= startMonth || whichMonth <= endMonth));
+
+    // Now, confirm month + day are inside summer interval
+    if (summerInterval) {
+        summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
+                        (whichMonth != endMonth || whichDay <= endDay);
+    }
 
     if (summerInterval){ // log continously
       DEBUG_PRINTLN("Info: Logging to Midnight (SUMMER)");
@@ -102,10 +112,20 @@ void configureLogAlarm() {
     int whichMonth = rtc.hour;
     int whichDay = rtc.minute;
 
-    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
-                     ((whichMonth != startMonth || whichDay >= startDay) &&
-                     (whichMonth != endMonth || whichDay <= endDay));
-                     
+    // summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
+    //                  ((whichMonth != startMonth || whichDay >= startDay) &&
+    //                  (whichMonth != endMonth || whichDay <= endDay));
+    
+    // First check if month falls into summer interval
+    summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
+                     (startMonth > endMonth && (whichMonth >= startMonth || whichMonth <= endMonth));
+
+    // Now, confirm month + day are inside summer interval
+    if (summerInterval) {
+        summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
+                        (whichMonth != endMonth || whichDay <= endDay);
+    }
+
     if (summerInterval){ // log continously
       DEBUG_PRINTLN("Info: Logging to Midnight (SUMMER)");
       rtc.setAlarm(0, 0, 0, 0, 0, 0);
@@ -170,10 +190,20 @@ void configureSleepAlarm() {
     int whichMonth = rtc.month;
     int whichDay = rtc.dayOfMonth;
 
-    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
-                     ((whichMonth != startMonth || whichDay >= startDay) &&
-                     (whichMonth != endMonth || whichDay <= endDay));
+    // summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
+    //                  ((whichMonth != startMonth || whichDay >= startDay) &&
+    //                  (whichMonth != endMonth || whichDay <= endDay));
     
+    // First check if month falls into summer interval
+    summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
+                     (startMonth > endMonth && (whichMonth >= startMonth || whichMonth <= endMonth));
+
+    // Now, confirm month + day are inside summer interval
+    if (summerInterval) {
+        summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
+                        (whichMonth != endMonth || whichDay <= endDay);
+    }
+
     if (summerInterval){
       DEBUG_PRINTLN("Info: SUMMER MODE");
       return; 
@@ -189,9 +219,19 @@ void configureSleepAlarm() {
     time_t a;
     int whichMonth = rtc.hour; // HOUR!!
     int whichDay = rtc.minute;
-    summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
-                     ((whichMonth != startMonth || whichDay >= startDay) &&
-                     (whichMonth != endMonth || whichDay <= endDay));
+    // summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
+    //                  ((whichMonth != startMonth || whichDay >= startDay) &&
+    //                  (whichMonth != endMonth || whichDay <= endDay));
+
+    // First check if month falls into summer interval
+    summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
+                     (startMonth > endMonth && (whichMonth >= startMonth || whichMonth <= endMonth));
+
+    // Now, confirm month + day are inside summer interval
+    if (summerInterval) {
+        summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
+                        (whichMonth != endMonth || whichDay <= endDay);
+    }
     
     if (summerInterval){
       DEBUG_PRINTLN("Info: SUMMER MODE");
