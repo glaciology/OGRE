@@ -3,8 +3,14 @@
  */
 
 void createDebugFile() {
-  sprintf(debugFileName, "debug_%s.csv", stationName);  // Generate "debug_1234.csv", e.g.
+  volatile uint32_t *stat_register = (uint32_t *)STAT_REGISTER_ADDRESS;
+  uint32_t stat_value = *stat_register;
+  String STAT_CODES = getStatusCodes(stat_value);
 
+  uint32_t chip_id_value = *unique_chip_id;
+  String chip_id_string = String(chip_id_value, HEX);
+
+  sprintf(debugFileName, "debug_%s.csv", chip_id_string.c_str());  // Generate "debug_1234.csv", e.g.
   if (!debugFile.open(debugFileName, O_CREAT | O_APPEND | O_WRITE)) { // Create file if new, Append to end, Open to Write
     DEBUG_PRINTLN("Warning: Failed to create debug file.");
     return;
@@ -14,16 +20,8 @@ void createDebugFile() {
     DEBUG_PRINTLN("Info: Created debug file"); 
   }
 
-  volatile uint32_t *stat_register = (uint32_t *)STAT_REGISTER_ADDRESS;
-  uint32_t stat_value = *stat_register;
-  String STAT_CODES = getStatusCodes(stat_value);
-
-  uint32_t chip_id_value = *unique_chip_id;
-  String chip_id_string = String(chip_id_value, HEX);
-
-
   // Write header to file
-  debugFile.println(String(SOFTWARE_VERSION) + "_" + chip_id_string + ", debugCounter, onlineGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
+  debugFile.println(String(SOFTWARE_VERSION) + ", debugCounter, onlineGNSS, onlineSD, rtcSync, rtcDrift, bytesWritten,"
   "maxBufferBytes, wdtCounterMax, writeFailCounter, syncFailCounter, closeFailCounter, LogMode, errorCode," 
   "lowBattery, Temperature, Battery, " + STAT_CODES);
 
@@ -100,3 +98,34 @@ void logDebug(const char* errorCode) {
     closeFailCounter++; // Count number of failed file closes
   }
 }
+
+//void renameDebugFile() {
+//
+//   // Get new name
+//  sprintf(debugFileName, "debug_%s.csv", stationName); 
+//
+//  // Check if new Rename already exists
+//  if (debugFile.open(debugFileName, O_READ)) {
+//    if (!debugFile.close()) {
+//      DEBUG_PRINTLN("Warning: Failed to close debug file.");
+//    }
+//    return;
+//  }
+//  
+//  // Make sure the old file exists before renaming
+//  if (!debugFile.open("debug_0000.csv", O_READ)) {
+//    DEBUG_PRINTLN("ORIGINAL DEBUG DOESN'T eXIST");
+//    return;
+//  }
+//  
+//  if (debugFile.rename(debugFileName)) {
+//    DEBUG_PRINTLN("Info: Successfully renamed debug file.");
+//  } else {
+//    DEBUG_PRINTLN("Warning: Failed to rename debug file.");
+//  }
+//
+//    // Close log file
+//  if (!debugFile.close()) {
+//    DEBUG_PRINTLN("Warning: Failed to close debug file.");
+//  }
+//}

@@ -184,8 +184,8 @@ void setup() {
   checkBattery();                    // IF battery LOW, send back to sleep until recharged
   initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
   configureSD();                     // BLINK 2x pattern - FAILED SETUP
-  getConfig();                       // Read LOG settings from Config.txt on uSD; 5x - FAILED
   createDebugFile();                 // Creates debug file headers
+  getConfig();                       // Read LOG settings from Config.txt on uSD; 5x - FAILED
   getDates();                        // Read Dates (in unix epoch format) for log mode 5
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
