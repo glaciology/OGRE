@@ -1,6 +1,6 @@
 /*
    OGRE: Open GNSS Research Equipment (On-ice GNSS Research Experimental Network for Greenland)
-   Derek Pickell 13 Feb 2025
+   Derek Pickell 18 Feb 2025
    V2.2
 
    Hardware:
