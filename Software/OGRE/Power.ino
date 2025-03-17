@@ -19,7 +19,7 @@ void initializeBuses() {
 void deinitializeBuses() {
   online.rtcSync = false; // This line must be at top! 
   
-  if (logMode == 2 || summerInterval == true) { 
+  if ((logMode == 2 || summerInterval == true) && online.chargedBat == true) { 
     DEBUG_PRINTLN("Info: LOG MODE 2 or SUMMER... No Deinitialize."); 
     return;
   }
@@ -38,7 +38,7 @@ void deinitializeBuses() {
 
 // POWER DOWN AND WAIT FOR INTERRUPT
 void goToSleep() { // Function from Sparkfun Example6_LowPower_Alarm.ino, see License/Readme.
-  if (logMode == 2 || summerInterval == true) { // continuous mode or during summer in mode 6: no sleep
+  if ((logMode == 2 || summerInterval == true) && online.chargedBat == true) { // continuous mode or during summer in mode 6: no sleep
     DEBUG_PRINTLN("Info: LOG MODE 2 or SUMMER... No Sleep."); 
     return;
   }
@@ -183,6 +183,7 @@ void checkBattery() {
   if (measureBattery == true) {
     if (measBat() < shutdownThreshold) {
       DEBUG_PRINTLN("Info: BATTERY LOW. SLEEPING");
+      online.chargedBat == false;
       pinMode(PER_POWER, OUTPUT);  // define as OUTPUT in case pins haven't been initialized
       pinMode(ZED_POWER, OUTPUT);
       deinitializeBuses();
@@ -193,6 +194,7 @@ void checkBattery() {
       }
       DEBUG_PRINTLN("Info: Battery Charged."); 
       lowBatteryCounter++;
+      online.chargedBat == true;
     }
   }
 }

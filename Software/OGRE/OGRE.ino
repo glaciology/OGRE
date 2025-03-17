@@ -101,7 +101,7 @@ int logGAL                  = 1;              //
 int logBDS                  = 1;              //
 int logQZSS                 = 0;              //
 int logSBAS                 = 0;              // Not on SD CONFIG File 
-int logNav                  = 1;              //
+int logNav                  = 0;              //
 int logL5                   = 0;              // WARNING: only set if using L5-capable ZED.
 
 // ADDITIONAL CONFIGURATION
@@ -147,7 +147,8 @@ long          rtcDrift            = 0;        // Tracks drift of RTC
 struct struct_online {
   bool uSD      = false;
   bool gnss     = false;
-  bool rtcSync  = false;                      
+  bool rtcSync  = false;
+  bool chargedBat = true;                      
 } online;
 //////////////////////////////////////////////////////
 
@@ -214,7 +215,7 @@ void loop() {
       }                              //
 
       if (!online.rtcSync) {        // sync clock if hasn't happened
-        syncRtc();                   // flag is reset in deinitializeBuses()
+        syncRtc();                   // flag is reset in deinitializeBuses(), incl. mode 2, 6
       }
       
       configureLogAlarm();           // 
