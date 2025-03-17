@@ -208,6 +208,7 @@ void loop() {
     if (alarmFlag) {                 // SLEEPS until alarmFlag = True
       checkBattery();                //
       petDog();                      //
+      
       if (online.gnss == false || online.uSD == false) {
         initializeBuses();           // Reconfigure GNSS/SD if necessary
         configureSD();               //
