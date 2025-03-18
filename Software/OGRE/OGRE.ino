@@ -1,6 +1,6 @@
 /*
    OGRE: Open GNSS Research Equipment (On-ice GNSS Research Experimental Network for Greenland)
-   Derek Pickell 18 Feb 2025
+   Derek Pickell 18 Mar 2025
    V3.0.1
 
    Hardware:
@@ -107,7 +107,7 @@ int logL5                   = 0;              // WARNING: only set if using L5-c
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
 bool measureBattery         = false;          // If TRUE, uses battery circuit to measure V during debug logs
-char stationName[5]         = "0000";           // Station name, 4 digits
+char stationName[5]         = "0000";         // Station name, 4 digits
 int  measurementRate        = 5;              // Produce a measurement every X seconds
 
 // BATTERY PARAMETERS

@@ -102,7 +102,7 @@ void configureLogAlarm() {
   }
 
   else if (logMode == 7) { 
-    // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
+    // TEST MODE FOR LM 6. Logs continuously during 'summer' where months are hours, and days are minutes
 
     if (rtcDrift < 0) { 
       delay(2000);
@@ -112,10 +112,6 @@ void configureLogAlarm() {
     int whichMonth = rtc.hour;
     int whichDay = rtc.minute;
 
-    // summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
-    //                  ((whichMonth != startMonth || whichDay >= startDay) &&
-    //                  (whichMonth != endMonth || whichDay <= endDay));
-    
     // First check if month falls into summer interval
     summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
                      (startMonth > endMonth && (whichMonth >= startMonth || whichMonth <= endMonth));
@@ -123,7 +119,7 @@ void configureLogAlarm() {
     // Now, confirm month + day are inside summer interval
     if (summerInterval) {
         summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
-                        (whichMonth != endMonth || whichDay <= endDay);
+                         (whichMonth != endMonth || whichDay <= endDay);
     }
 
     if (summerInterval){ // log continously
@@ -132,7 +128,7 @@ void configureLogAlarm() {
       rtc.setAlarmMode(6); // log 1 minute
     } else { 
       DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
-      rtc.setAlarm(0, 0, rtc.seconds, 0, 0, 0); 
+      rtc.setAlarm(0, 0, rtc.seconds, 0, 0, 0);  // log 1 minute
       rtc.setAlarmMode(6);
     }
   }
@@ -219,9 +215,6 @@ void configureSleepAlarm() {
     time_t a;
     int whichMonth = rtc.hour; // HOUR!!
     int whichDay = rtc.minute;
-    // summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
-    //                  ((whichMonth != startMonth || whichDay >= startDay) &&
-    //                  (whichMonth != endMonth || whichDay <= endDay));
 
     // First check if month falls into summer interval
     summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
@@ -230,7 +223,7 @@ void configureSleepAlarm() {
     // Now, confirm month + day are inside summer interval
     if (summerInterval) {
         summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
-                        (whichMonth != endMonth || whichDay <= endDay);
+                         (whichMonth != endMonth || whichDay <= endDay);
     }
     
     if (summerInterval){
