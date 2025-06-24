@@ -17,12 +17,15 @@
 
 ## Overview
 Originally designed for easily logging multi-GNSS data in remote regions of the Arctic, this instruments incorporates low power, low cost components onto a single circuit board and features a Ublox ZED-F9P GNSS module and Sparkfun Artemis MCU (Ambiq Apollo3 MCU, Cortex-M4). 
-- Logs binary (.ubx) GPS, GLONASS, BEIDOU, GALILEO & Satellite Nav Messages to a microSD.
-- Nominal data rate under open sky conditions 2000-3000 bytes per solution, equivalent to 5 GB of data for logging all constellations at 15 second interval for a year.
-- Nominal current consumption with a 12V supply is 45-65mA (.5-.8W) awake, and 0.07mA (.8mW) asleep.
-- Features on-board battery measurement circuit and temperature sensor. 
-- Additional pins & peripherals include RX/TX for serial programming, 3-Wire Temperature sensor, secondary I2C bus, secondary UART bus, secondary SPI bus, several GPIO pins and I/O pins for streaming or receiving RTCM messages for RTK operation.  
+- Logs binary (.ubx) GPS, GLONASS, BEIDOU, GALILEO & Satellite Nav Messages to a microSD, which can be easily converted to standard RINEX format for positioning with PPK or PPP.
+- Easily configurable via microSD card. Many configuration options to optimize data and battery needs, such as daily logging during summertime and weekly logging during the winter.
 - Simple 2 layer PCB with SMD components totaling ~$260, including patch antenna. PCB inside enclosure measures 7x6.5x2.5cm. 
+- Nominal data rate under open sky conditions 2000-3000 bytes per solution, equivalent to 5 GB of data for logging all constellations at 15 second interval for a year.
+- Current consumption with a 12V supply is 45-65mA (.5-.8W) awake, and 0.07mA (.8mW) asleep. We have used a single 12V 40Amp hr battery with a 10W solar panel to log continuously for 3 hours a day every day, including throughout the long polar night in Greenland.
+- Features on-board battery measurement circuit and temperature sensor.
+- Programmed in Arduino environment.
+- Additional pins & peripherals include RX/TX for serial programming, 3-Wire Temperature sensor, secondary I2C bus, secondary UART bus, secondary SPI bus, several GPIO pins and I/O pins for streaming or receiving RTCM messages for RTK operation.  
+
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/37055625/207705142-4ba32b05-6b62-4d18-bcf7-4f9eb635589c.jpeg" width="500"/>
@@ -30,19 +33,19 @@ Originally designed for easily logging multi-GNSS data in remote regions of the 
 
 ## Project Organization 
 [Software: Contains Arduino Code and Test Scripts](Software/)
-- [OGRENet: Software and software config files for upload to OGRE instrument](Software/OGRENet) <br>
+- [OGRE: Software and software config files for upload to OGRE instrument](Software/OGRE) <br>
 
 
 [Hardware: Hardware & Manufacturing Files](Hardware/)
 - [Components: List of PCB parts](Hardware/Components1-3.md)
-- [OGRENET Manufacturing Files: PCB Computer Aided Manufacturing Files](Hardware/OGRE_PCB_Gerbers.zip)
+- [OGRE Manufacturing Files: PCB Computer Aided Manufacturing Files](Hardware/OGRE_PCB_Gerbers.zip)
 - [Hardware Docs: Linked documentation for critical components](Hardware/HardwareDocuments.md)
 - [Schematic: Electrical connection schematic](Hardware/OGRE_Schematic1-3.pdf)
 
 
 ## Getting Started 
 
-V2.1.3 of the OGRE has 7 modes of operation: 
+V3.0.1 of the OGRE has 7 modes of operation: 
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER-defined start/stop hours, OR
   - (2) Continous Mode: Log GNSS data continously (new file generated at each midnight UTC), OR
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER-specified day (1-28) each month, OR
@@ -53,8 +56,8 @@ V2.1.3 of the OGRE has 7 modes of operation:
   
 OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, nav message etc.) are logged to a uSD card in .ubx (UBLOX) proprietary format. Under open sky conditions, we found that an epoch of data (1s) is ~2000-3000 bytes. If logging at 15 seconds for a year, this equates to 6GB of data. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery voltage, logging errors, etc.).
   
-INPUTs: USERS specify settings in the [CONFIG.txt](OGRENet/CONFIG) file, which, if uploaded to the SD card, will be read into the software. If no CONFIG.txt exists on the attached SD card, it will automatically be added with the default settings.
-Otherwise, software will default to hardcoded configuration. USER may also upload a [EPOCH.txt](OGRENet/EPOCH) file, which allows the user to specify up to 16 log dates (unix epoch format) for logging in Mode 5. As of the most recent release, the CONFIG.txt and EPOCH.txt files are Windows and Mac (e.g., Notepad or Textedit) compatable (previously, carriage return characters \n caused issues for Windows-generated files). Using an older CONFIG.txt version will not crash the OGRE, but will cause the OGRE to use the default settings instead. 
+INPUTs: USERS specify settings in the [CONFIG.txt](OGRENet/CONFIG) file, which, if uploaded to the SD card, will be read into the software. If no CONFIG.txt exists on the attached SD card, it will automatically be added to the SD card with the default settings upon initial power-on.
+Otherwise, software will default to hardcoded configuration. USER may also upload a [EPOCH.txt](OGRENet/EPOCH) file, which allows the user to specify up to 20 log dates (unix epoch format) for logging in Mode 5. The CONFIG.txt and EPOCH.txt files are Windows and Mac (e.g., Notepad or Textedit) compatable (previously, carriage return characters \n caused issues for Windows-generated files). Using an older CONFIG.txt version will not crash the OGRE, but will cause the OGRE to use the default settings instead. 
 
 The CONFIG.TXT file is formatted as follows: 
 
@@ -65,22 +68,22 @@ LOG_END_HOUR_UTC(mode 1 only)=23
 LOG_START_DAY(mode 3 only, 0-28)=25
 LOG_EPOCH_SLEEP(modes 4/5 only, seconds)=3600
 LED_INDICATORS(0-false, 1-true)=1
-MEASURE_BATTERY(0-false, 1-true)=1
+MEASURE_BATTERY(0-false, 1-true)=0
 ENABLE_GPS(0-false, 1-true)=1
 ENABLE_GLO(0-false, 1-true)=1
 ENABLE_GAL(0-false, 1-true)=1
 ENABLE_BDS(0-false, 1-true)=1
 ENABLE_QZSS(0-false, 1-true)=0
 ENABLE_NAV_SFRBX(0-false, 1-true)=1
-STATION_NAME(0000, char)=roof
+STATION_NAME(0000, char)=tes1
 MEASURE_RATE(integer seconds)=1
 BAT_SHUTDOWN_V(00.0, volts)=10.9
-WINTER_INTERVAL(seconds, mode 6 only)=172800
+WINTER_INTERVAL(seconds, mode 6 only)=777600
 SUMMER_START_MONTH(mode 6 only)=4
-SUMMER_END_MONTH(mode 6 only)=10
-SUMMER_START_DAY(mode 6 only)=5
-SUMMER_END_DAY(mode 6 only)=15
-end;
+SUMMER_END_MONTH(mode 6 only)=9
+SUMMER_START_DAY(mode 6 only)=21
+SUMMER_END_DAY(mode 6 only)=21
+v3.0.1 end;
 ```
 
 - If the USER selects LOG_MODE=1, then LOG_START_HOUR_UTC and LOG_END_HOUR_UTC must be specified. 
@@ -90,9 +93,9 @@ end;
 - LED_INDICATORS, if false, will disable all LEDs, excluding those present during initialization. 
 - MEASURE_BATTERY, if true, battery voltage is measured/monitored, and the instrument will be put to sleep when voltage dips below 10.9V (OR as defined by user in BAT_SHUTDOWN_V). System will restart when voltage measured above ~11.2V (or 0.5V above BAT_SHUTDOWN_V). 
 - STATION_NAME is a number between 0000 and zzzz (no special characters, please!), and will be appended to the timestamped file names for each GNSS file.
-- MEASURE_RATE is frequency of epoch solutions logged to SD card: 1 = 1 solution per second, 15 = 1 solution per 15 seconds. 
+- MEASURE_RATE is frequency of epoch solutions logged to SD card: 1 = 1 solution per second, 15 = 1 solution per 15 seconds. Range is .5 to 60 (seconds). 
 
-OPERATION:  
+BASIC OPERATION:  
 Insert the uSD card (with or without CONFIG & EPOCH files), then connect battery to +/- sides of the screw terminal. The system will attempt to initialize and following LED indicators will flash: 
   - 1 Hz Blinks: System acquiring GPS time and attempting to sync real time clock (RTC).
   - 10 rapid Blinks: System Configuration Complete!
@@ -128,7 +131,10 @@ You can also compile the source code with the Arduino IDE, ensuring that the cod
 </p>
 
 MATERIALS
-Cost of PCB and all components totals ~$200. Detailed list of components found [here](Hardware/Components1-3.md). <br>
+Cost of PCB and all components totals ~$170. Detailed list of components found [here](Hardware/Components1-3.md). <br>
+
+ASSEMBLY
+Assembly services are available through PCBWay, and the OGRE can be ordered directly from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_Receiver_33a809f3.html). Note that this assembly service does not include the [Pololu](https://www.pololu.com/product/3792) component, which must be soldered (4 through-hole) by the user. The user must also program the device following the instructions from the Software Upload section. 
 
 POWER REQUIREMENTS: 
 In standard configuration, this system is powered by a 12V lead-acid battery. 
