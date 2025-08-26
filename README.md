@@ -113,7 +113,7 @@ If the USER has enabled LED_INDICATORS, the following additional lights will fla
   - No blinks: system is in deep sleep due to low battery, or system is dead due to dead battery.
 
 ## Software Upload
-Only do this if you want to update the firmware on the OGRE, or if the OGRE has not yet had the firmware installed. A pre-compiled binary file is avialable with each release (see [releases](https://github.com/glaciology/OGRE/releases/tag/v2.1.4)). This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
+Only do this if you want to update the firmware on the OGRE, or if the OGRE has not yet had the firmware installed. A pre-compiled binary file is avialable with each release (see [releases](https://github.com/glaciology/OGRE/releases/tag/v.3.0)). This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
 
 *Before following the prompts below, ensure that the power is applied to the OGRE power terminal with a DC source (6-20V). Then connect the serial converter. The USB to Serial converter is attached to the OGRE via the 5 through-hole pins on the PCB: attach Ground to GND, RX -> TX, TX->RX, etc. * NOTE: the serial converter must be 3.3V. DO NOT EXPOSE pins to 5V. 
 
