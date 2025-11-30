@@ -1,7 +1,7 @@
 /*
    OGRE: Open GNSS Research Equipment (On-ice GNSS Research Experimental Network for Greenland)
-   Derek Pickell 18 Mar 2025
-   V3.0.1
+   Derek Pickell 30 Nov 2025
+   V3.0.2
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
@@ -32,7 +32,7 @@
 */
 
 #define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE 3/22 - present
-#define SOFTWARE_VERSION "V3.0.1" 
+#define SOFTWARE_VERSION "V3.0.2" 
 #define CONFIG_FILE 22
 #define EPOCH_FILE 20
 #define STAT_REGISTER_ADDRESS 0x4FFFF000
@@ -126,6 +126,8 @@ volatile bool wdtFlag             = false;    // ISR WatchDog
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
+unsigned long syncStartTime       = 0;        // Global, used to 
+unsigned long syncDuration        = 0;        // How long it took to sync (used for LM 6
 unsigned long dates[21]           = {};       // Array with Unix Epochs of log dates !!! MAX 20 !!!
 int           settings[22]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
@@ -180,7 +182,6 @@ void setup() {
 
   //// CONFIGURE INITIAL SETTINGS  ////
   pinMode(LED, OUTPUT);              //
-  pinMode(LED, HIGH);                //
   configureWdt();                    // 12s interrupt, 24s reset period
   checkBattery();                    // IF battery LOW, send back to sleep until recharged
   initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
@@ -208,6 +209,7 @@ void loop() {
     if (alarmFlag) {                 // SLEEPS until alarmFlag = True
       checkBattery();                //
       petDog();                      //
+      syncStartTime = millis();      // After checkBattery() due to potential for low battery 
       
       if (online.gnss == false || online.uSD == false) {
         initializeBuses();           // Reconfigure GNSS/SD if necessary

@@ -1,6 +1,6 @@
 /* the WDT and RTC Log alarm functions are adapted from Sparkfun examples Example2_WDT_LowPower 
  *  and Example6_LowPower_Alarm. 
- *  Snyc RTC functionality (sync, getDateTime, printAlarm) from A. Garbo GVT.
+ *  Sync RTC functionality (sync, getDateTime, printAlarm) from A. Garbo GVT.
  *  See license and readme. 
  */
 
@@ -45,10 +45,9 @@ void configureLogAlarm() {
   }
 
   else if (logMode == 2){ // continuous: will generate new file at midnight
-    if (rtcDrift < 0) { 
-        delay(2000);
-        DEBUG_PRINTLN("SYNC FAST");
-    }
+    
+    delayForRtcDrift(rtcDrift);
+    
     rtc.setAlarm(0, 0, 0, 0, 0, 0);
     rtc.setAlarmMode(4); // match every day at midnight
   }
@@ -61,10 +60,7 @@ void configureLogAlarm() {
   else if (logMode == 6 ) { 
     // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
 
-    if (rtcDrift < 0) { 
-      delay(2000);
-      DEBUG_PRINTLN("SYNC FAST");
-    }
+    delayForRtcDrift(rtcDrift);
     
     int whichMonth = rtc.month;
     int whichDay = rtc.dayOfMonth;
@@ -87,10 +83,21 @@ void configureLogAlarm() {
       DEBUG_PRINTLN("Info: Logging to Midnight (SUMMER)");
       rtc.setAlarm(0, 0, 0, 0, 0, 0);
       rtc.setAlarmMode(4);
-    } else { 
+    } else {
+        // First, remove time from sync
+       unsigned long loopEndTime = millis();
+       syncDuration = loopEndTime - syncStartTime;
+       DEBUG_PRINT("Info: Configuration time (ms): "); DEBUG_PRINTLN(syncDuration);
+       if (syncDuration > 180UL*1000UL) syncDuration = 180UL*1000UL; // 3 minute cap
+       
       DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
-      rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
-      rtc.setAlarmMode(4);
+      time_t a;
+      a = rtc.getEpoch() + 86400UL - (syncDuration + 999UL) / 1000UL; ;
+      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+      
+//      rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
+//      rtc.setAlarmMode(4);
     }
   }
   
@@ -104,10 +111,7 @@ void configureLogAlarm() {
   else if (logMode == 7) { 
     // TEST MODE FOR LM 6. Logs continuously during 'summer' where months are hours, and days are minutes
 
-    if (rtcDrift < 0) { 
-      delay(2000);
-      DEBUG_PRINTLN("SYNC FAST");
-    }
+    delayForRtcDrift(rtcDrift);
     
     int whichMonth = rtc.hour;
     int whichDay = rtc.minute;
@@ -128,8 +132,17 @@ void configureLogAlarm() {
       rtc.setAlarmMode(6); // log 1 minute
     } else { 
       DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
-      rtc.setAlarm(0, 0, rtc.seconds, 0, 0, 0);  // log 1 minute
-      rtc.setAlarmMode(6);
+
+       unsigned long loopEndTime = millis();
+       syncDuration = loopEndTime - syncStartTime;
+       DEBUG_PRINT("Info: Configuration time (s): "); DEBUG_PRINTLN(syncDuration);
+       if (syncDuration > 60UL*1000UL) syncDuration = 60UL*1000UL; // capped at 1 minute
+       
+      DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
+      time_t a;
+      a = rtc.getEpoch() + 60UL - (syncDuration + 999UL) / 1000UL; ;
+      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
   }
 
@@ -204,7 +217,7 @@ void configureSleepAlarm() {
       DEBUG_PRINTLN("Info: SUMMER MODE");
       return; 
     } else { 
-      DEBUG_PRINTLN("Info: WINTER MODE");
+      DEBUG_PRINTLN("Info: WINTER MODE");       
       a = rtc.getEpoch() + winterInterval; 
       rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, 0, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
@@ -296,6 +309,7 @@ void syncRtc() {
     if (!online.rtcSync){
       DEBUG_PRINTLN("Warning: Unable to sync RTC! Awaiting System Reset");
       logDebug("RTC_SYNC");
+
       while(1) {  //Awaiting WDT Reset
         blinkLed(5, 500); 
         delay(2000);
@@ -309,7 +323,7 @@ void printDateTime() {
   char dateTimeBuffer[25];
   sprintf(dateTimeBuffer, "20%02d-%02d-%02d %02d:%02d:%02d",
           rtc.year, rtc.month, rtc.dayOfMonth,
-          rtc.hour, rtc.minute, rtc.seconds, rtc.hundredths);
+          rtc.hour, rtc.minute, rtc.seconds);
   DEBUG_PRINTLN(dateTimeBuffer);
 }
 
@@ -318,8 +332,33 @@ void printAlarm() {
   char alarmBuffer[25];
   sprintf(alarmBuffer, "20%02d-%02d-%02d %02d:%02d:%02d",
           rtc.year, rtc.alarmMonth, rtc.alarmDayOfMonth,
-          rtc.alarmHour, rtc.alarmMinute, rtc.alarmSeconds, rtc.alarmHundredths);
+          rtc.alarmHour, rtc.alarmMinute, rtc.alarmSeconds);
   DEBUG_PRINTLN(alarmBuffer);
+}
+
+// IF RTC is FAST (log mode 2, 6, 7)
+void delayForRtcDrift(int rtcDriftSeconds) {
+    // Only act when RTC is set back
+    if (rtcDriftSeconds >= 0) return;
+
+    // Convert to milliseconds
+    unsigned long waitMs = (unsigned long)(-rtcDriftSeconds * 1000UL);
+
+    // Clamp to 5 seconds (WDT LIMIT is 12 seconds!!!)
+    const unsigned long MAX_WAIT_MS = 5000UL;
+    if (waitMs > MAX_WAIT_MS) {
+        waitMs = MAX_WAIT_MS;
+    }
+
+    // Debug output
+    DEBUG_PRINT("RTC fast by ");
+    DEBUG_PRINT(-rtcDriftSeconds);
+    DEBUG_PRINT(" s — waiting ");
+    DEBUG_PRINT(waitMs);
+    DEBUG_PRINTLN(" ms for true midnight...");
+
+    // Perform the wait
+    delay(waitMs);
 }
     
  

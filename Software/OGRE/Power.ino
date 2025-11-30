@@ -1,6 +1,6 @@
 /* the Low Power functions are adapted from Sparkfun examples LowPower and OpenLog platform. 
  *  and Example6_LowPower_Alarm. 
- *  Snyc RTC functionality (sync, getDateTime, printAlarm) modified from A. Garbo GVT.
+ *  Sync RTC functionality (sync, getDateTime, printAlarm) modified from A. Garbo GVT.
  *  See license for more details. 
  */
 
@@ -183,7 +183,7 @@ void checkBattery() {
   if (measureBattery == true) {
     if (measBat() < shutdownThreshold) {
       DEBUG_PRINTLN("Info: BATTERY LOW. SLEEPING");
-      online.chargedBat == false;
+      online.chargedBat = false;
       pinMode(PER_POWER, OUTPUT);  // define as OUTPUT in case pins haven't been initialized
       pinMode(ZED_POWER, OUTPUT);
       deinitializeBuses();
@@ -194,7 +194,7 @@ void checkBattery() {
       }
       DEBUG_PRINTLN("Info: Battery Charged."); 
       lowBatteryCounter++;
-      online.chargedBat == true;
+      online.chargedBat = true;
     }
   }
 }

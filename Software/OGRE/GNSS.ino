@@ -55,7 +55,7 @@ void configureGNSS() {
     if (!success) {
       DEBUG_PRINTLN("Warning: GNSS CONSTELLATION CONFIG FAILED - ATTEMPTING AGAIN"); 
       delay(2000);
-      bool success = true;
+      success = true;
       success &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, logGPS);     // Enable GPS (define in USER SETTINGS)
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);     // Enable GLONASS
       success &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);     // Enable Galileo
