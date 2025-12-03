@@ -135,10 +135,9 @@ void configureLogAlarm() {
 
        unsigned long loopEndTime = millis();
        syncDuration = loopEndTime - syncStartTime;
-       DEBUG_PRINT("Info: Configuration time (s): "); DEBUG_PRINTLN(syncDuration);
+       DEBUG_PRINT("Info: Configuration time (ms): "); DEBUG_PRINTLN(syncDuration);
        if (syncDuration > 60UL*1000UL) syncDuration = 60UL*1000UL; // capped at 1 minute
        
-      DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
       time_t a;
       a = rtc.getEpoch() + 60UL - (syncDuration + 999UL) / 1000UL; ;
       rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
