@@ -126,7 +126,7 @@ volatile bool wdtFlag             = false;    // ISR WatchDog
 volatile bool alarmFlag           = true;     // RTC alarm true when interrupt (initialized as true for first loop)
 volatile bool initSetup           = true;     // False once GNSS messages configured-will not configure again
 unsigned long prevMillis          = 0;        // Global time keeper, not affected by Millis rollover
-unsigned long syncStartTime       = 0;        // Global, used to 
+uint32_t      intendedWakeEpoch   = 0;        // For Log Mode 6 to deal with drift
 unsigned long syncDuration        = 0;        // How long it took to sync (used for LM 6
 unsigned long dates[21]           = {};       // Array with Unix Epochs of log dates !!! MAX 20 !!!
 int           settings[22]        = {};       // Array that holds user settings on SD
@@ -209,10 +209,9 @@ void loop() {
     if (alarmFlag) {                 // SLEEPS until alarmFlag = True
       checkBattery();                //
       petDog();                      //
-      syncStartTime = millis();      // After checkBattery() due to potential for low battery 
       
       if (online.gnss == false || online.uSD == false) {
-        initializeBuses();           // Reconfigure GNSS/SD if necessary
+        initializeBuses();           // Reconfigure GNSS/SD if necessary, e.g., after low battery
         configureSD();               //
         configureGNSS();             //
       }                              //

@@ -59,15 +59,9 @@ void configureLogAlarm() {
 
   else if (logMode == 6 ) { 
     // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
-
-    delayForRtcDrift(rtcDrift);
     
     int whichMonth = rtc.month;
     int whichDay = rtc.dayOfMonth;
-
-    // summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
-    //                  ((whichMonth != startMonth || whichDay >= startDay) &&
-    //                  (whichMonth != endMonth || whichDay <= endDay));
 
     // First check if month falls into summer interval
     summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
@@ -80,38 +74,42 @@ void configureLogAlarm() {
     }
 
     if (summerInterval){ // log continously
+      delayForRtcDrift(rtcDrift); // prevents a second file for the same day if rtc drift is fast
       DEBUG_PRINTLN("Info: Logging to Midnight (SUMMER)");
       rtc.setAlarm(0, 0, 0, 0, 0, 0);
       rtc.setAlarmMode(4);
-    } else {
-        // First, remove time from sync
-       unsigned long loopEndTime = millis();
-       syncDuration = loopEndTime - syncStartTime;
-       DEBUG_PRINT("Info: Configuration time (ms): "); DEBUG_PRINTLN(syncDuration);
-       if (syncDuration > 180UL*1000UL) syncDuration = 180UL*1000UL; // 3 minute cap
-       
-      DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
-      time_t a;
-      a = rtc.getEpoch() + 86400UL - (syncDuration + 999UL) / 1000UL; ;
-      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
-      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+    } 
+    
+    else { // WINTER
+      // check if intended start time is stale, due to battery or unitialized
+      uint32_t nowEpoch = rtc.getEpoch();
+      const uint32_t STALE_THRESHOLD = 300;  // 5 minutes in seconds
+
+      if (intendedWakeEpoch == 0 || intendedWakeEpoch + STALE_THRESHOLD < nowEpoch) {
+        intendedWakeEpoch = nowEpoch;
+        DEBUG_PRINT("Info: Stale intendedWakeEpoch, resetting to current epoch: ");
+        DEBUG_PRINTLN(intendedWakeEpoch);
+      }
       
-//      rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0); 
-//      rtc.setAlarmMode(4);
+      DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
+      time_t a = intendedWakeEpoch + 86400UL; // 24 hours
+      struct tm t;
+      gmtime_r(&a, &t);
+      rtc.setAlarm(t.tm_hour, t.tm_min, t.tm_sec, 0, t.tm_mday, t.tm_mon+1);
+      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
   }
   
   else if (logMode == 99) {
-    time_t a;
-    a = rtc.getEpoch() + secondsLog;
-    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+    time_t a = rtc.getEpoch() + secondsLog;
+    struct tm t;
+    gmtime_r(&a, &t);
+    rtc.setAlarm(t.tm_hour, t.tm_min, t.tm_sec, 0, t.tm_mday, t.tm_mon+1);
     rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
   }
 
   else if (logMode == 7) { 
     // TEST MODE FOR LM 6. Logs continuously during 'summer' where months are hours, and days are minutes
-
-    delayForRtcDrift(rtcDrift);
     
     int whichMonth = rtc.hour;
     int whichDay = rtc.minute;
@@ -127,20 +125,28 @@ void configureLogAlarm() {
     }
 
     if (summerInterval){ // log continously
+      delayForRtcDrift(rtcDrift);
       DEBUG_PRINTLN("Info: Logging to Midnight (SUMMER)");
       rtc.setAlarm(0, 0, 0, 0, 0, 0);
-      rtc.setAlarmMode(6); // log 1 minute
-    } else { 
-      DEBUG_PRINTLN("Info: Logging 24 hours (WINTER MODE)");
+      rtc.setAlarmMode(5); // log 1 hour
+    } 
+    
+    else { // WINTER
+      // check if intended start time is stale, due to battery or unitialized
+      uint32_t nowEpoch = rtc.getEpoch();
+      const uint32_t STALE_THRESHOLD = 300;  // 5 minutes in seconds
 
-       unsigned long loopEndTime = millis();
-       syncDuration = loopEndTime - syncStartTime;
-       DEBUG_PRINT("Info: Configuration time (ms): "); DEBUG_PRINTLN(syncDuration);
-       if (syncDuration > 60UL*1000UL) syncDuration = 60UL*1000UL; // capped at 1 minute
-       
-      time_t a;
-      a = rtc.getEpoch() + 60UL - (syncDuration + 999UL) / 1000UL; ;
-      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      if (intendedWakeEpoch == 0 || intendedWakeEpoch + STALE_THRESHOLD < nowEpoch) {
+        intendedWakeEpoch = nowEpoch;
+        DEBUG_PRINT("Info: Stale intendedWakeEpoch, resetting to current epoch: ");
+        DEBUG_PRINTLN(intendedWakeEpoch);
+      }
+      
+      DEBUG_PRINTLN("Info: Logging 1 hr (WINTER MODE)");
+      time_t a = intendedWakeEpoch + 3600UL; // 1 hour
+      struct tm t;
+      gmtime_r(&a, &t);
+      rtc.setAlarm(t.tm_hour, t.tm_min, t.tm_sec, 0, t.tm_mday, t.tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
   }
@@ -198,10 +204,6 @@ void configureSleepAlarm() {
     int whichMonth = rtc.month;
     int whichDay = rtc.dayOfMonth;
 
-    // summerInterval = (whichMonth >= startMonth && whichMonth <= endMonth) &&
-    //                  ((whichMonth != startMonth || whichDay >= startDay) &&
-    //                  (whichMonth != endMonth || whichDay <= endDay));
-    
     // First check if month falls into summer interval
     summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
                      (startMonth > endMonth && (whichMonth >= startMonth || whichMonth <= endMonth));
@@ -209,7 +211,7 @@ void configureSleepAlarm() {
     // Now, confirm month + day are inside summer interval
     if (summerInterval) {
         summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
-                        (whichMonth != endMonth || whichDay <= endDay);
+                         (whichMonth != endMonth || whichDay <= endDay);
     }
 
     if (summerInterval){
@@ -218,7 +220,10 @@ void configureSleepAlarm() {
     } else { 
       DEBUG_PRINTLN("Info: WINTER MODE");       
       a = rtc.getEpoch() + winterInterval; 
-      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, 0, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      intendedWakeEpoch = a;
+      struct tm t;
+      gmtime_r(&a, &t);
+      rtc.setAlarm(t.tm_hour, t.tm_min, t.tm_sec, 0, t.tm_mday, t.tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
   }
@@ -243,16 +248,20 @@ void configureSleepAlarm() {
       return; 
     } else { 
       DEBUG_PRINTLN("Info: WINTER MODE");
-      a = rtc.getEpoch() + 3540; // Winter Interval for mode 7 is hardcoded to 1 hour
-      rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, 0, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+      a = rtc.getEpoch() + 3600UL; // Winter Interval for mode 7 is hardcoded to 1 hour
+      intendedWakeEpoch = a;
+      struct tm t;
+      gmtime_r(&a, &t);
+      rtc.setAlarm(t.tm_hour, t.tm_min, t.tm_sec, 0, t.tm_mday, t.tm_mon+1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
   }
     
   else if (logMode == 99) {
-    time_t a;
-    a = rtc.getEpoch() + secondsSleep;
-    rtc.setAlarm(gmtime(&a)->tm_hour, gmtime(&a)->tm_min, gmtime(&a)->tm_sec, 0, gmtime(&a)->tm_mday, gmtime(&a)->tm_mon+1);
+    time_t a = rtc.getEpoch() + secondsSleep;
+    struct tm t;
+    gmtime_r(&a, &t);
+    rtc.setAlarm(t.tm_hour, t.tm_min, t.tm_sec, 0, t.tm_mday, t.tm_mon+1);
     rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
   }
 
@@ -337,27 +346,32 @@ void printAlarm() {
 
 // IF RTC is FAST (log mode 2, 6, 7)
 void delayForRtcDrift(int rtcDriftSeconds) {
-    // Only act when RTC is set back
+    // Only act when RTC is set back (fast)
     if (rtcDriftSeconds >= 0) return;
 
-    // Convert to milliseconds
-    unsigned long waitMs = (unsigned long)(-rtcDriftSeconds * 1000UL);
+    // Total wait in milliseconds
+    unsigned long remainingMs = (unsigned long)(-rtcDriftSeconds) * 1000UL;
 
-    // Clamp to 5 seconds (WDT LIMIT is 12 seconds!!!)
-    const unsigned long MAX_WAIT_MS = 5000UL;
-    if (waitMs > MAX_WAIT_MS) {
-        waitMs = MAX_WAIT_MS;
-    }
-
-    // Debug output
     DEBUG_PRINT("RTC fast by ");
     DEBUG_PRINT(-rtcDriftSeconds);
     DEBUG_PRINT(" s — waiting ");
-    DEBUG_PRINT(waitMs);
+    DEBUG_PRINT(remainingMs);
     DEBUG_PRINTLN(" ms for true midnight...");
 
-    // Perform the wait
-    delay(waitMs);
+    // Break the wait into slices shorter than WDT timeout
+    const unsigned long SLICE_MS = 1000;  // safe margin (WDT = 12s)
+
+    unsigned long start = millis();
+
+    while (remainingMs > 0) {
+        // Compute slice
+        unsigned long thisSlice = (remainingMs > SLICE_MS) ? SLICE_MS : remainingMs;
+
+        delay(thisSlice);
+        petDog();              // 🐶 Keep watchdog happy
+
+        remainingMs -= thisSlice;
+    }
 }
     
  

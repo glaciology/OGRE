@@ -186,7 +186,7 @@ void checkBattery() {
       online.chargedBat = false;
       pinMode(PER_POWER, OUTPUT);  // define as OUTPUT in case pins haven't been initialized
       pinMode(ZED_POWER, OUTPUT);
-      deinitializeBuses();
+      deinitializeBuses(); // turn off GNSS, etc.
       while((measBat() < shutdownThreshold + .5)) { // IMPORTANT - RECHARGE THRESHOLD SET HERE
         goToSleep();
         petDog(); 
