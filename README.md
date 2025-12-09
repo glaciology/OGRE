@@ -113,7 +113,7 @@ If the USER has enabled LED_INDICATORS, the following additional lights will fla
   - No blinks: system is in deep sleep due to low battery, or system is dead due to dead battery.
 
 ## Software Upload
-Only do this if you want to update the firmware on the OGRE, or if the OGRE has not yet had the firmware installed. A pre-compiled binary file is avialable with each release (see [releases](https://github.com/glaciology/OGRE/releases/tag/v.3.0)). This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
+Only do this if you want to update the firmware on the OGRE, or if the OGRE has not yet had the firmware installed. A pre-compiled binary file is available with each release (see [releases](https://github.com/glaciology/OGRE/releases/tag/v.3.0)). This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
 
 *Before following the prompts below, ensure that the power is applied to the OGRE power terminal with a DC source (6-20V). Then connect the serial converter. The USB to Serial converter is attached to the OGRE via the 5 through-hole pins on the PCB: attach Ground to GND, RX -> TX, TX->RX, etc. * NOTE: the serial converter must be 3.3V. DO NOT EXPOSE pins to 5V. 
 
@@ -141,9 +141,9 @@ POWER REQUIREMENTS:
 In standard configuration, this system is powered by a 12V lead-acid battery. 
   
 While this system is optimized for 12V batteries, input voltage can range from 5.2V to 20V with the following considerations/customizations:  
-  - The DC-DC converter minimum input is 5.2V and maximum input is 50V, although aditional power filtering at high voltages is required. 
+  - The DC-DC converter minimum input is 5.2V and maximum input is 50V, although additional power filtering at high voltages is required. 
   - The Battery Measurement circuit features a voltage divider circuit that must scale max voltage to 3.3V for the ADC pin. Standard dividers for a 12V battery use 68kOhm and 10kOhm resistors. USER must adjust gain/offset of ADC battery measurement conversion in software if using different power configuration (i.e., different resistor dividers and/or a non-12V battery). 
-  - The reverse polarity protection MOSFET has a limit of 20V. **Do not exeed 20V** without either removing this part or finding an appropriate substitute component. 
+  - The reverse polarity protection MOSFET has a limit of 20V. **Do not exceed 20V** without either removing this part or finding an appropriate substitute component. 
 
 ## License & Credits
 This project is open source! OGRENet software is released under the [MIT License](http://opensource.org/licenses/MIT).
