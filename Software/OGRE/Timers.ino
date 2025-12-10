@@ -109,7 +109,7 @@ void configureLogAlarm() {
   }
 
   else if (logMode == 7) { 
-    // TEST MODE FOR LM 6. Logs continuously during 'summer' where months are hours, and days are minutes
+    // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
     
     int whichMonth = rtc.hour;
     int whichDay = rtc.minute;
@@ -121,14 +121,14 @@ void configureLogAlarm() {
     // Now, confirm month + day are inside summer interval
     if (summerInterval) {
         summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
-                         (whichMonth != endMonth || whichDay <= endDay);
+                        (whichMonth != endMonth || whichDay <= endDay);
     }
 
     if (summerInterval){ // log continously
-      delayForRtcDrift(rtcDrift);
+      delayForRtcDrift(rtcDrift); // prevents a second file for the same day if rtc drift is fast
       DEBUG_PRINTLN("Info: Logging to Midnight (SUMMER)");
       rtc.setAlarm(0, 0, 0, 0, 0, 0);
-      rtc.setAlarmMode(5); // log 1 hour
+      rtc.setAlarmMode(6); // log until minute match
     } 
     
     else { // WINTER
@@ -142,8 +142,8 @@ void configureLogAlarm() {
         DEBUG_PRINTLN(intendedWakeEpoch);
       }
       
-      DEBUG_PRINTLN("Info: Logging 1 hr (WINTER MODE)");
-      time_t a = intendedWakeEpoch + 3600UL; // 1 hour
+      DEBUG_PRINTLN("Info: Logging 1 min (WINTER MODE)");
+      time_t a = intendedWakeEpoch + 60UL; // 1 min
       struct tm t;
       gmtime_r(&a, &t);
       rtc.setAlarm(t.tm_hour, t.tm_min, t.tm_sec, 0, t.tm_mday, t.tm_mon+1);
@@ -228,9 +228,9 @@ void configureSleepAlarm() {
     }
   }
 
-  else if (logMode == 7){ // TO TEST LOG MODE 6 ON FASTER SCALE (Hours & Minutes)
+  else if (logMode == 7){
     time_t a;
-    int whichMonth = rtc.hour; // HOUR!!
+    int whichMonth = rtc.hour;
     int whichDay = rtc.minute;
 
     // First check if month falls into summer interval
@@ -242,13 +242,13 @@ void configureSleepAlarm() {
         summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
                          (whichMonth != endMonth || whichDay <= endDay);
     }
-    
+
     if (summerInterval){
       DEBUG_PRINTLN("Info: SUMMER MODE");
       return; 
     } else { 
-      DEBUG_PRINTLN("Info: WINTER MODE");
-      a = rtc.getEpoch() + 3600UL; // Winter Interval for mode 7 is hardcoded to 1 hour
+      DEBUG_PRINTLN("Info: WINTER MODE");       
+      a = rtc.getEpoch() + winterInterval; 
       intendedWakeEpoch = a;
       struct tm t;
       gmtime_r(&a, &t);
