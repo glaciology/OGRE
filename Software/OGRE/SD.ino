@@ -205,6 +205,12 @@ void getConfig() {
       configError = true;
   }
 
+  // Validate TERMINAL_LOG
+  if (terminalLogging && measurementRate < 5) {
+    DEBUG_PRINTLN("Warning: Terminal logging disabled because measurementRate < 5s");
+    terminalLogging = false;
+  }
+
   DEBUG_PRINT("Info: SD Settings from Device #: "); DEBUG_PRINTLN(stationName);
   if (logMode == 1 ) {
     DEBUG_PRINT("Log Mode 1 - Start/End Hours: "); DEBUG_PRINT(logStartHr); DEBUG_PRINT(", ");DEBUG_PRINTLN(logEndHr);

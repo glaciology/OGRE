@@ -1,7 +1,7 @@
 /*
    OGRE: Open GNSS Research Equipment (On-ice GNSS Research Experimental Network for Greenland)
    Derek Pickell 30 Nov 2025
-   V3.0.2
+   V3.1.0
 
    Hardware:
    - OGRENet PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
@@ -32,7 +32,7 @@
 */
 
 #define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE 3/22 - present
-#define SOFTWARE_VERSION "V3.0.2" 
+#define SOFTWARE_VERSION "V3.1.0" 
 #define CONFIG_FILE 22
 #define EPOCH_FILE 20
 #define STAT_REGISTER_ADDRESS 0x4FFFF000
@@ -107,6 +107,7 @@ int logL5                   = 0;              // WARNING: only set if using L5-c
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
 bool measureBattery         = false;          // If TRUE, uses battery circuit to measure V during debug logs
+bool terminalLogging        = false;          // If TRUE, log raw ubx to terminal
 char stationName[5]         = "0000";         // Station name, 4 digits
 int  measurementRate        = 5;              // Produce a measurement every X seconds
 
@@ -171,9 +172,12 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 void setup() {
+  if (DEBUG || terminalLogging) {
+      Serial.begin(115200);
+      delay(1000);  // Give time for Serial to start
+  }
+
   #if DEBUG
-    Serial.begin(115200);
-    delay(1000);
     Serial.println("***WELCOME TO GNSS LOGGER " SOFTWARE_VERSION "***");
     uint32_t chip_id = *unique_chip_id;
     Serial.print("Unique Chip ID: ");

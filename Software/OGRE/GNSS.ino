@@ -147,6 +147,12 @@ void logGNSS() {
           DEBUG_PRINTLN("Warning: Failed to write to log file!");
           writeFailCounter++;
       }
+
+      if (terminalLogging) {
+        for (int j = 0; j < sdWriteSize; j++) {
+            Serial.write(myBuffer[j]);  // Print raw UBX bytes to terminal
+        }
+      }
       
       bytesWritten += sdWriteSize;                                   // Update bytesWritten
       gnss.checkUblox();                                             // Check for the arrival of new data and process it if SD slow
@@ -188,6 +194,15 @@ void closeGNSS() {
       }
       gnss.extractFileBufferData((uint8_t *)&myBuffer, bytesToWrite); // Extract bytesToWrite bytes from the UBX file buffer and put them into myBuffer
       myFile.write(myBuffer, bytesToWrite);                       // Write bytesToWrite bytes from myBuffer to the ubxDataFile on the SD card
+
+      if (terminalLogging) {
+        for (int j = 0; j < bytesToWrite; j++) {
+            Serial.write(myBuffer[j]);  // Print raw UBX bytes to terminal
+//            Serial.write(myBuffer, bytesToWrite);  // Writes the whole chunk at once
+
+        }
+      }
+      
       remainingBytes -= bytesToWrite;                             // Decrement remainingBytes
     }
 
