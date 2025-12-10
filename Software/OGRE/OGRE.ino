@@ -25,9 +25,10 @@
         *No Blinks: System deep sleep due to low battery or battery dead.
 
    Attributions: 
-   - Files, structure and ideas adapted/modified from Sparkfun 
+   - Some code, structure and ideas adapted/modified from Sparkfun 
    - and A. Garbo GVMS [Copyright (c) 2020 SparkFun, Copyright (c) 2020 Adam Garbo]
-   - are dilineated in these pages, and further detailed in the documentation. 
+   - are dilineated in these pages, and further detailed in the documentation.
+   - Libraries are detailed and attributed below. 
    - This project is open source; see Readme/Licensing.
 */
 
