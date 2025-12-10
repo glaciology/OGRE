@@ -35,7 +35,7 @@ void getLogFileName() {
 
 void getConfig() {
   ///////// gets configuration settings from user via SD card
-  int n;
+  int n;                                                      // number of lines
   int i = 0;
   bool configError = false;
   
@@ -52,7 +52,7 @@ void getConfig() {
     return;
   }
 
-  // Count the number of lines in the file
+  // Count the number of lines in the file to validate
   int lineCount = 0;
   while ((n = configFile.fgets(line, sizeof(line))) > 0) {
     lineCount++;
@@ -66,22 +66,37 @@ void getConfig() {
     logDebug("CFG_FILE_VERSION");
     blinkLed(6, 100);
     delay(1000);
+
+    if (!configFile.close()) {
+      DEBUG_PRINTLN("Warning: Failed to close config file.");
+      closeFailCounter++; // Count number of failed file closes
+      while(1) {
+      }
+    }
     return;
   }
   
   configFile.seek(0);  // Reset file pointer to the beginning of the file
 
+  // MAIN PARSING LOOP
   while ((n = configFile.fgets(line, sizeof(line))) > 0) {
 
-    size_t len = strcspn(line, "\r\n");
-    line[len] = '\0';  //  Strip \r and/or \n chars and null-terminate the string at the position of the first occurrence
-    
-    char* parse1 = strtok(line, "=");                              // split at '='
+    // Strip CR/LF *carriage return - 0x0D or line feed 0x0A (Mac) or CRLF (Windows)
+    size_t len = strcspn(line, "\r\n");       // strcspn: length of line, excluding \r and \n
+    line[len] = '\0';                         //  Strip \r and/or \n chars and null-terminate the string at the position of the first occurrence
 
-    if (strcmp(parse1, "BAT_SHUTDOWN_V(00.0, volts)") == 0) {      // shutdownThreshold is a float
+    // Parse left side of "="
+    char* key = strtok(line, "=");                              // split at '='
+    if (!key) {
+      configError = true;
+      continue;
+    }
+
+    // Parse right side of "="
+    if (strcmp(key, "BAT_SHUTDOWN_V(00.0, volts)") == 0) {      // shutdownThreshold is a float
       float hold = strtof(strtok(NULL, "="), NULL);
       shutdownThreshold = hold;
-    } else if (strcmp(parse1, "STATION_NAME(0000, char)") == 0) {  // stationValue is a string
+    } else if (strcmp(key, "STATION_NAME(0000, char)") == 0) {  // stationValue is a string
         char* stationValue = strtok(NULL, "=");  
         if (stationValue != NULL) {
             strncpy(stationName, stationValue, 4);
@@ -103,6 +118,7 @@ void getConfig() {
       logModeRead == 7 || logModeRead == 99) {
       
       logMode = logModeRead;  // Set the logMode if it's valid
+      
   } else {
       DEBUG_PRINTLN("Error: Invalid LOG_MODE value in CONFIG.TXT! Using default value.");
       configError = true;
@@ -115,7 +131,6 @@ void getConfig() {
 
   int ledBlinkRead        = settings[5];
   int measureBatteryRead  = settings[6];
-  
   if (ledBlinkRead == 0 || ledBlinkRead == 1) {
       ledBlink = (settings[5] != 0);
   } else {
@@ -138,18 +153,57 @@ void getConfig() {
   configError |= checkAndAssign(logNav, settings[12], "ENABLE_NAV_SFRBX");
 
   int measurementRateRead = settings[14];
-  if (measurementRateRead >= 1) {
+  if (measurementRateRead >= 1 && measurementRateRead <=60) {
     measurementRate = settings[14];
   } else {
     DEBUG_PRINTLN("Warning: Invalid value for MEASUREMENT_RATE. Retaining default.");
     configError = true;
   }
   
-  winterInterval  = settings[16];
-  startMonth      = settings[17];
-  endMonth        = settings[18];
-  startDay        = settings[19];
-  endDay          = settings[20];
+  // Validate winterInterval
+  int winterIntervalRead = settings[16];
+  if (winterIntervalRead > 0) {
+      winterInterval = winterIntervalRead;
+  } else {
+      DEBUG_PRINTLN("Warning: Invalid WINTER_INTERVAL. Retaining default.");
+      configError = true;
+  }
+  
+  // Validate startMonth
+  int startMonthRead = settings[17];
+  if (startMonthRead >= 1 && startMonthRead <= 12) {
+      startMonth = startMonthRead;
+  } else {
+      DEBUG_PRINTLN("Warning: Invalid START_MONTH. Retaining default.");
+      configError = true;
+  }
+  
+  // Validate endMonth
+  int endMonthRead = settings[18];
+  if (endMonthRead >= 1 && endMonthRead <= 12) {
+      endMonth = endMonthRead;
+  } else {
+      DEBUG_PRINTLN("Warning: Invalid END_MONTH. Retaining default.");
+      configError = true;
+  }
+  
+  // Validate startDay (cap at 28)
+  int startDayRead = settings[19];
+  if (startDayRead >= 1) {
+      startDay = (startDayRead > 28) ? 28 : startDayRead;
+  } else {
+      DEBUG_PRINTLN("Warning: Invalid START_DAY. Retaining default.");
+      configError = true;
+  }
+  
+  // Validate endDay (cap at 28)
+  int endDayRead = settings[20];
+  if (endDayRead >= 1) {
+      endDay = (endDayRead > 28) ? 28 : endDayRead;
+  } else {
+      DEBUG_PRINTLN("Warning: Invalid END_DAY. Retaining default.");
+      configError = true;
+  }
 
   DEBUG_PRINT("Info: SD Settings from Device #: "); DEBUG_PRINTLN(stationName);
   if (logMode == 1 ) {
@@ -243,7 +297,7 @@ void getDates() {
       size_t len = strcspn(line, "\r\n");
       line[len] = '\0';  //  Strip \r and/or \n chars and null-terminate the string at the position of the first occurrence
       
-      char* parse1 = strtok(line, "=");               // split at '='
+      char* key = strtok(line, "=");               // split at '='
       int hold = strtol(strtok(NULL, "="), NULL, 10); // take remaining string, convert to base 10
       dates[i] = hold;
       i++;
@@ -317,7 +371,7 @@ void createDefaultConfig() {
 
     // Sync the debug file
     if (!configFile.sync()) {
-      DEBUG_PRINTLN("Warning: Failed to sync config file.");
+      DEBUG_PRINTLN("Warning: Failed to sync CONFIG file.");
     }
     // Close the file
     if (!configFile.close()) {
