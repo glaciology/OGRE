@@ -198,11 +198,19 @@ void configureSleepAlarm() {
     rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
   }
 
-  else if (logMode == 6) {
-    time_t a;
-    int whichMonth = rtc.month;
-    int whichDay = rtc.dayOfMonth;
-
+  else if (logMode == 6 || logMode == 7) {
+    time_t desiredWake;
+    int whichMonth; 
+    int whichDay; 
+    
+    if (logMode == 6) {
+      whichMonth = rtc.month;
+      whichDay = rtc.dayOfMonth;
+    } else { 
+      whichMonth = rtc.hour;
+      whichDay = rtc.minute;
+    }
+    
     // First check if month falls into summer interval
     summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
                      (startMonth > endMonth && (whichMonth >= startMonth || whichMonth <= endMonth));
@@ -218,39 +226,31 @@ void configureSleepAlarm() {
       return;
     } else {
       DEBUG_PRINTLN("Info: WINTER MODE");
-      a = rtc.getEpoch() + winterInterval;
-      intendedWakeEpoch = a;
+
+      // FIGURE OUT IF SUMMER IS COMING SOONER THAN EXPECTED
+      struct tm summerStartTm = {0};
+      summerStartTm.tm_year = rtc.year + 100;       // current year (years since 1900)
+      summerStartTm.tm_mon  = startMonth - 1;       // 0-11
+      summerStartTm.tm_mday = startDay;             // 1-31
+      summerStartTm.tm_hour = 0;
+      summerStartTm.tm_min  = 0;
+      summerStartTm.tm_sec  = 0;
+
+      time_t summerStartEpoch = mktime(&summerStartTm);
+
+      // If summer start has already passed this year, use next year
+      if (summerStartEpoch <= rtc.getEpoch()) {
+          summerStartTm.tm_year += 1;
+          summerStartEpoch = mktime(&summerStartTm);
+      }
+
+      time_t winterWake = rtc.getEpoch() + winterInterval;
+      desiredWake = (winterWake < summerStartEpoch) ? winterWake : summerStartEpoch;
+
+      intendedWakeEpoch = (uint32_t)desiredWake;
+      
       struct tm t;
-      gmtime_r(&a, &t);
-      rtc.setAlarm(t.tm_hour, t.tm_min, t.tm_sec, 0, t.tm_mday, t.tm_mon + 1);
-      rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
-    }
-  }
-
-  else if (logMode == 7) {
-    time_t a;
-    int whichMonth = rtc.hour;
-    int whichDay = rtc.minute;
-
-    // First check if month falls into summer interval
-    summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
-                     (startMonth > endMonth && (whichMonth >= startMonth || whichMonth <= endMonth));
-
-    // Now, confirm month + day are inside summer interval
-    if (summerInterval) {
-      summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
-                       (whichMonth != endMonth || whichDay <= endDay);
-    }
-
-    if (summerInterval) {
-      DEBUG_PRINTLN("Info: SUMMER MODE");
-      return;
-    } else {
-      DEBUG_PRINTLN("Info: WINTER MODE");
-      a = rtc.getEpoch() + winterInterval;
-      intendedWakeEpoch = a;
-      struct tm t;
-      gmtime_r(&a, &t);
+      gmtime_r(&desiredWake, &t);
       rtc.setAlarm(t.tm_hour, t.tm_min, t.tm_sec, 0, t.tm_mday, t.tm_mon + 1);
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
@@ -346,7 +346,7 @@ void printAlarm() {
 // IF RTC is FAST (log mode 2, 6, 7)
 void delayForRtcDrift(int rtcDriftSeconds) {
   // Only act when RTC is set back (fast)
-  if (rtcDriftSeconds >= 0 && rtcDriftSeconds <= 600) return;
+  if (rtcDriftSeconds >= 0 && rtcDriftSeconds <= 600 || abs(rtcDriftSeconds) > 600) return;
 
   // Total wait in milliseconds
   unsigned long remainingMs = (unsigned long)(-rtcDriftSeconds) * 1000UL;

@@ -34,7 +34,7 @@
 
 #define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE 3/22 - present
 #define SOFTWARE_VERSION "V3.1.0" 
-#define CONFIG_FILE 22
+#define CONFIG_FILE 23
 #define EPOCH_FILE 20
 #define STAT_REGISTER_ADDRESS 0x4FFFF000
 #define UNIQUE_ID_ADDRESS     0x40020004
@@ -131,7 +131,7 @@ unsigned long prevMillis          = 0;        // Global time keeper, not affecte
 uint32_t      intendedWakeEpoch   = 0;        // For Log Mode 6 to deal with drift
 unsigned long syncDuration        = 0;        // How long it took to sync (used for LM 6
 unsigned long dates[21]           = {};       // Array with Unix Epochs of log dates !!! MAX 20 !!!
-int           settings[22]        = {};       // Array that holds user settings on SD
+int           settings[23]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name
 char          debugFileName[15] = "";         // Debug file name
@@ -173,10 +173,9 @@ struct struct_online {
 //////////////////////////////////////////////////////
 
 void setup() {
-  if (DEBUG || terminalLogging) {
-      Serial.begin(115200);
-      delay(1000);  // Give time for Serial to start
-  }
+
+  Serial.begin(115200);
+  delay(1000);  // Give time for Serial to start
 
   #if DEBUG
     Serial.println("***WELCOME TO GNSS LOGGER " SOFTWARE_VERSION "***");

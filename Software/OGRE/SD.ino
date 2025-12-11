@@ -206,6 +206,14 @@ void getConfig() {
   }
 
   // Validate TERMINAL_LOG
+  int terminalLogRead = settings[21];
+  if (terminalLogRead == 0 || terminalLogRead == 1) {
+      terminalLogging = (settings[21] != 0);
+  } else {
+      DEBUG_PRINTLN("Warning: Invalid value for MEASURE_BATTERY. Retaining default.");
+      configError = true;
+  }
+  
   if (terminalLogging && measurementRate < 5) {
     DEBUG_PRINTLN("Warning: Terminal logging disabled because measurementRate < 5s");
     terminalLogging = false;
