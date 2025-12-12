@@ -199,6 +199,7 @@ void configureSleepAlarm() {
   }
 
   else if (logMode == 6 || logMode == 7) {
+    time_t summerStartEpoch;
     time_t desiredWake;
     int whichMonth; 
     int whichDay; 
@@ -228,21 +229,48 @@ void configureSleepAlarm() {
       DEBUG_PRINTLN("Info: WINTER MODE");
 
       // FIGURE OUT IF SUMMER IS COMING SOONER THAN EXPECTED
-      struct tm summerStartTm = {0};
-      summerStartTm.tm_year = rtc.year + 100;       // current year (years since 1900)
-      summerStartTm.tm_mon  = startMonth - 1;       // 0-11
-      summerStartTm.tm_mday = startDay;             // 1-31
-      summerStartTm.tm_hour = 0;
-      summerStartTm.tm_min  = 0;
-      summerStartTm.tm_sec  = 0;
+      if (logMode == 6) {
+        struct tm summerStartTm = {0};
+        summerStartTm.tm_year = rtc.year + 100;       // current year (years since 1900)
+        summerStartTm.tm_mon  = startMonth - 1;       // 0-11
+        summerStartTm.tm_mday = startDay;             // 1-31
+        summerStartTm.tm_hour = 0;
+        summerStartTm.tm_min  = 0;
+        summerStartTm.tm_sec  = 0;
 
-      time_t summerStartEpoch = mktime(&summerStartTm);
+        summerStartEpoch = mktime(&summerStartTm);
 
-      // If summer start has already passed this year, use next year
-      if (summerStartEpoch <= rtc.getEpoch()) {
-          summerStartTm.tm_year += 1;
-          summerStartEpoch = mktime(&summerStartTm);
+        // If summer start has already passed this year, use next year
+        if (summerStartEpoch <= rtc.getEpoch()) {
+            summerStartTm.tm_year += 1;
+            summerStartEpoch = mktime(&summerStartTm);
+        }
+      
+      } else {
+        struct tm summerStartTm = {0};
+        summerStartTm.tm_year = rtc.year + 100;       // current year (years since 1900)
+        summerStartTm.tm_mon  = rtc.month - 1;       // 0-11
+        summerStartTm.tm_mday = rtc.dayOfMonth;             // 1-31
+        summerStartTm.tm_hour = startMonth;
+        summerStartTm.tm_min  = startDay;
+        summerStartTm.tm_sec  = 0;
+
+        summerStartEpoch = mktime(&summerStartTm);
+
+        // If summer start has already passed this year, use next year
+        if (summerStartEpoch <= rtc.getEpoch()) {
+            summerStartTm.tm_mday += 1;
+            summerStartEpoch = mktime(&summerStartTm);
+        }
       }
+//
+//      time_t summerStartEpoch = mktime(&summerStartTm);
+//
+//      // If summer start has already passed this year, use next year
+//      if (summerStartEpoch <= rtc.getEpoch()) {
+//          summerStartTm.tm_year += 1;
+//          summerStartEpoch = mktime(&summerStartTm);
+//      }
 
       time_t winterWake = rtc.getEpoch() + winterInterval;
       desiredWake = (winterWake < summerStartEpoch) ? winterWake : summerStartEpoch;
