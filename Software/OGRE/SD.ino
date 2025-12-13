@@ -381,6 +381,8 @@ void createDefaultConfig() {
     configFile.println(startDay);
     configFile.print("SUMMER_END_DAY(mode 6 only)=");
     configFile.println(endDay);
+    configFile.print("OUTPUT_UART_RAWX=");
+    configFile.println(terminalLogging ? "1" : "0");
     configFile.println(SOFTWARE_VERSION " end;"); // End marker for config
 
     // Sync the debug file
