@@ -133,7 +133,7 @@ void configureLogAlarm() {
     else { // WINTER
       // check if intended start time is stale, due to battery or unitialized
       uint32_t nowEpoch = rtc.getEpoch();
-      const uint32_t STALE_THRESHOLD = 60UL/2;  // 5 minutes in seconds
+      const uint32_t STALE_THRESHOLD = 60UL/2;  // 30 seconds
 
       if (intendedWakeEpoch == 0 || intendedWakeEpoch + STALE_THRESHOLD < nowEpoch) {
         intendedWakeEpoch = nowEpoch;
@@ -263,14 +263,6 @@ void configureSleepAlarm() {
             summerStartEpoch = mktime(&summerStartTm);
         }
       }
-//
-//      time_t summerStartEpoch = mktime(&summerStartTm);
-//
-//      // If summer start has already passed this year, use next year
-//      if (summerStartEpoch <= rtc.getEpoch()) {
-//          summerStartTm.tm_year += 1;
-//          summerStartEpoch = mktime(&summerStartTm);
-//      }
 
       time_t winterWake = rtc.getEpoch() + winterInterval;
       desiredWake = (winterWake < summerStartEpoch) ? winterWake : summerStartEpoch;

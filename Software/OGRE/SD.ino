@@ -296,11 +296,19 @@ void getDates() {
     }
 
     if (lineCount != EPOCH_FILE) {
-      DEBUG_PRINT("Warning: detected an incompatable Config file. Your version: v");
-      DEBUG_PRINT(lineCount); DEBUG_PRINT(" Should be: v");
-      DEBUG_PRINTLN(CONFIG_FILE); DEBUG_PRINTLN("Warning: Using hard-coded settings");
+      DEBUG_PRINT("Warning: detected an incompatable Date file. Your version # of dates: ");
+      DEBUG_PRINT(lineCount); DEBUG_PRINT(" Should be: ");
+      DEBUG_PRINTLN(CONFIG_FILE); DEBUG_PRINTLN("Warning: Not using dates.");
       blinkLed(5, 100);
       delay(1000);
+
+      if (!dateFile.close()) {
+        DEBUG_PRINTLN("Warning: Failed to close config file.");
+        closeFailCounter++; // Count number of failed file closes
+        while(1) {
+        }
+      }
+      
       return;
     }
     

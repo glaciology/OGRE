@@ -199,7 +199,7 @@ void checkBattery() {
   }
 }
 
-// Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)
+// blink LED (https://forum.arduino.cc/index.php?topic=503368.0)
 void blinkLed(byte ledFlashes, unsigned int ledDelay) {
   byte i = 0;
   while (i < ledFlashes * 2) {
