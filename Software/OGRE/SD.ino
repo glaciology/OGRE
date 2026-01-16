@@ -60,8 +60,8 @@ void getConfig() {
 
   // Verify file version has correct number of lines
   if (lineCount != CONFIG_FILE) {
-    DEBUG_PRINT("Warning: detected an incompatable Config file. Your version: v");
-    DEBUG_PRINT(lineCount); DEBUG_PRINT(" Should be: v");
+    DEBUG_PRINT("Warning: detected an incompatable Config file. Your version has this many settings:");
+    DEBUG_PRINT(lineCount); DEBUG_PRINT(" Should be: ");
     DEBUG_PRINTLN(CONFIG_FILE); DEBUG_PRINTLN("Warning: Using hard-coded settings");
     logDebug("CFG_FILE_VERSION");
     blinkLed(6, 100);
@@ -210,7 +210,7 @@ void getConfig() {
   if (terminalLogRead == 0 || terminalLogRead == 1) {
       terminalLogging = (settings[21] != 0);
   } else {
-      DEBUG_PRINTLN("Warning: Invalid value for MEASURE_BATTERY. Retaining default.");
+      DEBUG_PRINTLN("Warning: Invalid value for TERMINAL_LOG. Retaining default.");
       configError = true;
   }
   

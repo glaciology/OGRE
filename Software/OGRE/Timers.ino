@@ -63,12 +63,12 @@ void configureLogAlarm() {
     int whichDay = rtc.dayOfMonth;
 
     // First check if month falls into summer interval
-    summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) ||
-                     (startMonth > endMonth && (whichMonth >= startMonth || whichMonth <= endMonth));
+    summerInterval = (startMonth <= endMonth && whichMonth >= startMonth && whichMonth <= endMonth) || // E.g., log June-August (northern hemisphere)
+                     (startMonth > endMonth && (whichMonth >= startMonth || whichMonth <= endMonth));  // E.g., Dec-Feb (southern hemisphere)
 
     // Now, confirm month + day are inside summer interval
     if (summerInterval) {
-      summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&
+      summerInterval = (whichMonth != startMonth || whichDay >= startDay) &&  
                        (whichMonth != endMonth || whichDay <= endDay);
     }
 
@@ -246,7 +246,7 @@ void configureSleepAlarm() {
             summerStartEpoch = mktime(&summerStartTm);
         }
       
-      } else {
+      } else { // LOG MODE 7
         struct tm summerStartTm = {0};
         summerStartTm.tm_year = rtc.year + 100;       // current year (years since 1900)
         summerStartTm.tm_mon  = rtc.month - 1;       // 0-11
@@ -373,8 +373,8 @@ void printAlarm() {
 
 // IF RTC is FAST (log mode 2, 6, 7)
 void delayForRtcDrift(int rtcDriftSeconds) {
-  // Only act when RTC is set back (fast)
-  if (rtcDriftSeconds >= 0 && rtcDriftSeconds <= 600 || abs(rtcDriftSeconds) > 600) return;
+  // Only act when RTC fast
+  if (rtcDriftSeconds >= 0 || rtcDriftSeconds < -600) return;
 
   // Total wait in milliseconds
   unsigned long remainingMs = (unsigned long)(-rtcDriftSeconds) * 1000UL;
@@ -388,14 +388,12 @@ void delayForRtcDrift(int rtcDriftSeconds) {
   // Break the wait into slices shorter than WDT timeout
   const unsigned long SLICE_MS = 1000;  // safe margin (WDT = 12s)
 
-  unsigned long start = millis();
-
   while (remainingMs > 0) {
     // Compute slice
     unsigned long thisSlice = (remainingMs > SLICE_MS) ? SLICE_MS : remainingMs;
 
     delay(thisSlice);
-    petDog();              // 🐶 Keep watchdog happy
+    petDog();              // Keep watchdog happy
 
     remainingMs -= thisSlice;
   }
