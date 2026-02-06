@@ -22,7 +22,7 @@ void configureGNSS() {
       logDebug("I2C");
       zedPowerOff();
       while(1) {
-        blinkLed(3, 250);
+        blinkLed(3, 250, RED);
         delay(2000);
       }
     }
@@ -73,7 +73,7 @@ void configureGNSS() {
         DEBUG_PRINTLN("Warning: GNSS CONSTELLATION CONFIG FAILED AGAIN. Waiting for system reset.");
         logDebug("CFG");
         while(1){
-          blinkLed(3, 250);
+          blinkLed(3, 250, RED);
           delay(2000);
         }
       }
@@ -107,7 +107,7 @@ void logGNSS() {
     DEBUG_PRINTLN(F("Warning: Failed to create UBX data file! Freezing..."));
     logDebug("GNSS_FILE_CREATE");
     while (1) {
-      blinkLed(3, 250);
+      blinkLed(3, 250, RED);
       delay(2000); 
     }
   }

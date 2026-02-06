@@ -1,10 +1,11 @@
 /*
    OGRE: Open GNSS Research Equipment (On-ice GNSS Research Experimental Network for Greenland)
-   Derek Pickell 30 Nov 2025
-   V3.1.0
+   Derek Pickell 06 Feb 2026
+   V3.1.1
 
    Hardware:
-   - OGRENet PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
+   - OGRE PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
+   - OGREv2 PCB w/ZED-X20P
 
    Dependencies:
    - SparkFun_u-blox_GNSS_Arduino_Library v2.2.8
@@ -32,8 +33,8 @@
    - This project is open source; see Readme/Licensing.
 */
 
-#define HARDWARE_VERSION 1  // 1 = CUSTOM DARTMOUTH HARDWARE 3/22 - present
-#define SOFTWARE_VERSION "V3.1.0" 
+#define HARDWARE_VERSION 1  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
+#define SOFTWARE_VERSION "V3.1.1" 
 #define CONFIG_FILE 23
 #define EPOCH_FILE 20
 #define STAT_REGISTER_ADDRESS 0x4FFFF000
@@ -57,15 +58,24 @@ FsFile configFile;                            // USER INPUT CONFIG FILE
 FsFile dateFile;                              // USER INPUT EPOCHS FILE
 
 ///////// HARDWARE-SPECIFIC PINOUTS & OBJECTS ////////
-const byte BAT                    = 35;       //
-const byte SHIELD                 = 19;       // Use with Telemetry Shield
-const byte PER_POWER              = 18;       // Drive to turn off uSD
-const byte ZED_POWER              = 34;       // Drive to turn off ZED
-const byte LED                    = 33;       //
+#if HARDWARE_VERSION == 1
+  const byte BAT                    = 35;       // Measure Battery Voltage
+  const byte SHIELD                 = 19;       // Use with Telemetry Shield (v1 only)
+  const byte PER_POWER              = 18;       // Drive to turn off uSD 
+  const byte ZED_POWER              = 34;       // Drive to turn off ZED 
+  const byte LED                    = 33;       // LED
+  const byte BAT_CNTRL              = 22;       // Drive high to turn on Bat measure 
+  TwoWire myWire(2);                            // USE I2C bus 2, SDA/SCL 25/27
+#elif HARDWARE_VERSION == 2
+  const byte BAT                    = 12;       // Measure Battery Voltage
+  const byte PER_POWER              = 2;        // Drive to turn off uSD
+  const byte ZED_POWER              = 28;       // Drive to turn off ZED 
+  const byte LED                    = 31;       // LED1
+  const byte LED2                   = 32;       // LED2
+  const byte BAT_CNTRL              = 7;        // Drive high to turn on Bat measure 
+  TwoWire myWire(0);                            // USE I2C bus 0, SDA/SCL 5/6
+#endif
 const byte PIN_SD_CS              = 41;       //
-const byte BAT_CNTRL              = 22;       // Drive high to turn on Bat measure
-
-TwoWire myWire(2);                            // USE I2C bus 2, SDA/SCL 25/27
 SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 41, 42, 43
 #define SD_CONFIG SdSpiConfig(PIN_SD_CS, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
 
@@ -147,6 +157,8 @@ unsigned int  debugCounter        = 0;        // Counts Debug messages
 volatile int  wdtCounter          = 0;        // Counts WDT triggers
 volatile int  wdtCounterMax       = 0;        // Tracks Max times WDT interrupts
 long          rtcDrift            = 0;        // Tracks drift of RTC
+enum LedColor { GREEN, RED }; 
+void blinkLed(byte ledFlashes, unsigned int ledDelay, LedColor color = GREEN);
 
 struct struct_online {
   bool uSD      = false;
@@ -186,6 +198,9 @@ void setup() {
 
   //// CONFIGURE INITIAL SETTINGS  ////
   pinMode(LED, OUTPUT);              //
+  #if HARDWARE_VERSION == 2
+    pinMode(LED2, OUTPUT);             //
+  #endif
   configureWdt();                    // 12s interrupt, 24s reset period
   checkBattery();                    // IF battery LOW, send back to sleep until recharged
   initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
@@ -203,7 +218,7 @@ void setup() {
   }
 //----------------------------------------------------  
 
-  blinkLed(10, 100);                 // BLINK 10x - SETUP COMPLETE
+  blinkLed(10, 100, GREEN);                 // BLINK 10x - SETUP COMPLETE
   DEBUG_PRINTLN("Info: SETUP COMPLETE");
 }
 
@@ -237,7 +252,7 @@ void loop() {
     petDog();
 
     if (ledBlink) {                  // Only if User wants blinking every WDT interrupt
-      blinkLed(1, 100);      
+      blinkLed(1, 100, GREEN);      
     }
  
     goToSleep();  

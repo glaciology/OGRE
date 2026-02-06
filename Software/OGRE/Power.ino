@@ -49,6 +49,9 @@ void goToSleep() { // Function from Sparkfun Example6_LowPower_Alarm.ino, see Li
 
   power_adc_disable();    // Disable ADC
   digitalWrite(LED, LOW); // Turn off LED
+  #if HARDWARE_VERSION == 2
+    digitalWrite(LED2, LOW); // Turn off LED
+  #endif
 
   // Turn peripherals off
   am_hal_pwrctrl_periph_disable(AM_HAL_PWRCTRL_PERIPH_IOM0);
@@ -200,20 +203,29 @@ void checkBattery() {
 }
 
 // blink LED (https://forum.arduino.cc/index.php?topic=503368.0)
-void blinkLed(byte ledFlashes, unsigned int ledDelay) {
+void blinkLed(byte ledFlashes, unsigned int ledDelay, LedColor color) {
   byte i = 0;
+  byte ledPin;
+
+    #if HARDWARE_VERSION == 1
+        // v1 hardware: ignore color, always use the single LED
+        ledPin = LED;
+    #elif HARDWARE_VERSION == 2
+        // v2 hardware: choose pin based on requested color
+        ledPin = (color == GREEN) ? LED : LED2;
+    #endif
+
   while (i < ledFlashes * 2) {
     unsigned long currMillis = millis();
     if (currMillis - prevMillis >= ledDelay) {
-      digitalWrite(LED, !digitalRead(LED));
+      digitalWrite(ledPin, !digitalRead(ledPin));
       prevMillis = currMillis;
       i++;
     }
   }
   // Turn off LED
-  digitalWrite(LED, LOW);
+  digitalWrite(ledPin, LOW);
 }
-
 
 // Used to read reset codes from status register memory
 String getStatusCodes(uint32_t stat_value) {

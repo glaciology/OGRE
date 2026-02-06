@@ -302,7 +302,11 @@ void syncRtc() {
 
     // Check for UBX-NAV-PVT messages
     if (gnss.getPVT()) {
-      digitalWrite(LED, !digitalRead(LED)); // Blink LED
+      #if HARDWARE_VERSION == 1
+        digitalWrite(LED, !digitalRead(LED)); // Blink LED
+      #elif HARDWARE_VERSION == 2
+        digitalWrite(LED2, !digitalRead(LED2)); // Blink LED
+      #endif
 
       bool dateValidFlag = gnss.getConfirmedDate();
       bool timeValidFlag = gnss.getConfirmedTime();
@@ -338,7 +342,7 @@ void syncRtc() {
     logDebug("RTC_SYNC");
 
     while (1) { //Awaiting WDT Reset
-      blinkLed(5, 500);
+      blinkLed(5, 500, RED);
       delay(2000);
     }
   }

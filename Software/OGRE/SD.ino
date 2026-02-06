@@ -9,7 +9,7 @@ void configureSD() {
       online.uSD = false;
       peripheralPowerOff();
       while (1) {
-        blinkLed(2, 250);
+        blinkLed(2, 250, RED);
         delay(2000);
       }
     }
@@ -47,7 +47,7 @@ void getConfig() {
     DEBUG_PRINTLN("Warning: Could not open CONFIG.TXT");
     DEBUG_PRINTLN("Warning: Using hard-coded settings");
     createDefaultConfig();  // Generate default CONFIG.TXT
-    blinkLed(6, 100);
+    blinkLed(6, 100, RED);
     delay(1000);
     return;
   }
@@ -64,7 +64,7 @@ void getConfig() {
     DEBUG_PRINT(lineCount); DEBUG_PRINT(" Should be: ");
     DEBUG_PRINTLN(CONFIG_FILE); DEBUG_PRINTLN("Warning: Using hard-coded settings");
     logDebug("CFG_FILE_VERSION");
-    blinkLed(6, 100);
+    blinkLed(6, 100, RED);
     delay(1000);
 
     if (!configFile.close()) {
@@ -284,7 +284,7 @@ void getDates() {
     if (!dateFile.isOpen()){
       DEBUG_PRINTLN("Warning: Could not open EPOCH.TXT");
       DEBUG_PRINTLN("Warning: Using hard-coded sleep duration");
-      blinkLed(5, 100);
+      blinkLed(5, 100, RED);
       delay(1000);
       return;
     }
@@ -299,7 +299,7 @@ void getDates() {
       DEBUG_PRINT("Warning: detected an incompatable Date file. Your version # of dates: ");
       DEBUG_PRINT(lineCount); DEBUG_PRINT(" Should be: ");
       DEBUG_PRINTLN(CONFIG_FILE); DEBUG_PRINTLN("Warning: Not using dates.");
-      blinkLed(5, 100);
+      blinkLed(5, 100, RED);
       delay(1000);
 
       if (!dateFile.close()) {
