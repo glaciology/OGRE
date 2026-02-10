@@ -76,7 +76,7 @@ FsFile dateFile;                              // USER INPUT EPOCHS FILE
   TwoWire myWire(0);                            // USE I2C bus 0, SDA/SCL 5/6
 #endif
 const byte PIN_SD_CS              = 41;       //
-SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 41, 42, 43
+SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 42, 43
 #define SD_CONFIG SdSpiConfig(PIN_SD_CS, DEDICATED_SPI, SD_SCK_MHZ(24), &mySpi)
 
 //////////////////////////////////////////////////////
