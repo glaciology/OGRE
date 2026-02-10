@@ -16,25 +16,25 @@
    - See github.com/glaciology/OGRENet/ for detailed instructions.
    - Optional settings files on SD card: CONFIG.txt, EPOCHS.txt
    - LED indicators:
-        *2 Blink Pattern: uSD failed - waiting for RESET
-        *3 Blink Pattern: Ublox I2C or config failed - waiting for RESET
-        *5 Blink Pattern: RTC sync fail - waiting for RESET
-        *6 Rapid Blinks: CONFIG file failed to read; using defaults
-        *10 Blinks: RTC synced and System Configuration COMPLETE (After Initial Power On or Reset Only)
-        *1 Blink every 12 seconds: Sleeping 
-        *Random Rapid Blinks: System logging data.
-        *No Blinks: System deep sleep due to low battery or battery dead.
+         2 Blink Pattern: uSD failed - waiting for RESET
+         3 Blink Pattern: Ublox I2C or config failed - waiting for RESET
+         5 Blink Pattern: RTC sync fail - waiting for RESET
+         6 Rapid Blinks: CONFIG file failed to read; using defaults
+         10 Blinks: RTC synced and System Configuration COMPLETE (After Initial Power On or Reset Only)
+         1 Blink every 12 seconds: Sleeping
+         Random Rapid Blinks: System logging data.
+         No Blinks: System deep sleep due to low battery or battery dead.
 
-   Attributions: 
-   - Some code, structure and ideas adapted/modified from Sparkfun 
+   Attributions:
+   - Some code, structure and ideas adapted/modified from Sparkfun
    - and A. Garbo GVMS [Copyright (c) 2020 SparkFun, Copyright (c) 2020 Adam Garbo]
    - are dilineated in these pages, and further detailed in the documentation.
-   - Libraries are detailed and attributed below. 
+   - Libraries are detailed and attributed below.
    - This project is open source; see Readme/Licensing.
 */
 
-#define HARDWARE_VERSION 1  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
-#define SOFTWARE_VERSION "V3.1.1" 
+#define HARDWARE_VERSION 2  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
+#define SOFTWARE_VERSION "V3.1.1"
 #define CONFIG_FILE 23
 #define EPOCH_FILE 20
 #define STAT_REGISTER_ADDRESS 0x4FFFF000
@@ -47,11 +47,11 @@ volatile uint32_t *unique_chip_id = (uint32_t *)UNIQUE_ID_ADDRESS;
 #include <WDT.h>                              // ""
 #include <RTC.h>                              // ""
 #include <SdFat.h>                            // https://github.com/greiman/SdFat v2.1.0
-#include <SparkFun_u-blox_GNSS_Arduino_Library.h> 
+#include <SparkFun_u-blox_GNSS_Arduino_Library.h>
 SFE_UBLOX_GNSS gnss;                          // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
 SdFs sd;                                      // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
 APM3_RTC rtc;                                 //
-APM3_WDT wdt;                                 // 
+APM3_WDT wdt;                                 //
 FsFile myFile;                                // RAW UBX LOG FILE
 FsFile debugFile;                             // DEBUG LOG FILE
 FsFile configFile;                            // USER INPUT CONFIG FILE
@@ -59,21 +59,21 @@ FsFile dateFile;                              // USER INPUT EPOCHS FILE
 
 ///////// HARDWARE-SPECIFIC PINOUTS & OBJECTS ////////
 #if HARDWARE_VERSION == 1
-  const byte BAT                    = 35;       // Measure Battery Voltage
-  const byte SHIELD                 = 19;       // Use with Telemetry Shield (v1 only)
-  const byte PER_POWER              = 18;       // Drive to turn off uSD 
-  const byte ZED_POWER              = 34;       // Drive to turn off ZED 
-  const byte LED                    = 33;       // LED
-  const byte BAT_CNTRL              = 22;       // Drive high to turn on Bat measure 
-  TwoWire myWire(2);                            // USE I2C bus 2, SDA/SCL 25/27
+const byte BAT                    = 35;       // Measure Battery Voltage
+const byte SHIELD                 = 19;       // Use with Telemetry Shield (v1 only)
+const byte PER_POWER              = 18;       // Drive to turn off uSD
+const byte ZED_POWER              = 34;       // Drive to turn off ZED
+const byte LED                    = 33;       // LED
+const byte BAT_CNTRL              = 22;       // Drive high to turn on Bat measure
+TwoWire myWire(2);                            // USE I2C bus 2, SDA/SCL 25/27
 #elif HARDWARE_VERSION == 2
-  const byte BAT                    = 12;       // Measure Battery Voltage
-  const byte PER_POWER              = 2;        // Drive to turn off uSD
-  const byte ZED_POWER              = 28;       // Drive to turn off ZED 
-  const byte LED                    = 31;       // LED1
-  const byte LED2                   = 32;       // LED2
-  const byte BAT_CNTRL              = 7;        // Drive high to turn on Bat measure 
-  TwoWire myWire(0);                            // USE I2C bus 0, SDA/SCL 5/6
+const byte BAT                    = 12;       // Measure Battery Voltage
+const byte PER_POWER              = 2;        // Drive to turn off uSD
+const byte ZED_POWER              = 28;       // Drive to turn off ZED
+const byte LED                    = 40;       // LED1 (red)
+const byte LED2                   = 39;       // LED2 (yellow)
+const byte BAT_CNTRL              = 7;        // Drive high to turn on Bat measure
+TwoWire myWire(0);                            // USE I2C bus 0, SDA/SCL 5/6
 #endif
 const byte PIN_SD_CS              = 41;       //
 SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 42, 43
@@ -81,11 +81,11 @@ SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 42, 43
 
 //////////////////////////////////////////////////////
 //--------- USER DEFAULT CONFIGURATION HERE ------------
-// LOG MODE: 
+// LOG MODE:
 byte logMode                = 2;              // {1, 2, 3, 4, 5, 6, 99}
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
-byte logStartHr             = 12;             // UTC Hour 
+byte logStartHr             = 12;             // UTC Hour
 byte logEndHr               = 14;             // UTC Hour
 
 // LOG MODE 3: ONCE/MONTH FOR 24 HOURS
@@ -100,18 +100,18 @@ byte startMonth             = 4;              // Start month, inclusive (April)
 byte endMonth               = 9;              // End month, inclusive (August)
 byte startDay               = 21;             // Start day (of month), inclusive, e.g., Apr 21
 byte endDay                 = 21;             // End day (of month), inclusive, e.g., Sep 21
- 
+
 // LOG MODE 99: TEST: ALTERNATE SLEEP/LOG FOR X SECONDS
 uint32_t secondsSleep       = 50;             // Sleep interval (Seconds)
 uint32_t secondsLog         = 50;             // Logging interval (Seconds)
 
-// UBLOX MESSAGE CONFIGURATION: 
+// UBLOX MESSAGE CONFIGURATION:
 int logGPS                  = 1;              // FOR EACH CONSTELLATION 1 = ENABLE, 0 = DISABLE
 int logGLO                  = 1;              //
 int logGAL                  = 1;              //
 int logBDS                  = 1;              //
 int logQZSS                 = 0;              //
-int logSBAS                 = 0;              // Not on SD CONFIG File 
+int logSBAS                 = 0;              // Not on SD CONFIG File
 int logNav                  = 0;              //
 int logL5                   = 0;              // WARNING: only set if using L5-capable ZED.
 
@@ -126,7 +126,7 @@ int  measurementRate        = 5;              // Produce a measurement every X s
 float gain                   = 17.2;          // Gain/offset for 68k/10k voltage divider battery voltage measure
 float offset                 = 0.23;          // ADC range 0-2.0V
 float shutdownThreshold      = 10.9;          // Shutdown if battery voltage dips below this (10.8V for DEKA 12V GEL)
-                                              // SYSTEM WILL SLEEP IF DIPS BELOW HERE, WAKES after shutdownThreshold + 0.5V reached
+// SYSTEM WILL SLEEP IF DIPS BELOW HERE, WAKES after shutdownThreshold + 0.5V reached
 //----------------------------------------------------
 //////////////////////////////////////////////////////
 
@@ -157,14 +157,14 @@ unsigned int  debugCounter        = 0;        // Counts Debug messages
 volatile int  wdtCounter          = 0;        // Counts WDT triggers
 volatile int  wdtCounterMax       = 0;        // Tracks Max times WDT interrupts
 long          rtcDrift            = 0;        // Tracks drift of RTC
-enum LedColor { GREEN, RED }; 
+enum LedColor { GREEN, RED };
 void blinkLed(byte ledFlashes, unsigned int ledDelay, LedColor color = GREEN);
 
 struct struct_online {
   bool uSD      = false;
   bool gnss     = false;
   bool rtcSync  = false;
-  bool chargedBat = true;                      
+  bool chargedBat = true;
 } online;
 //////////////////////////////////////////////////////
 
@@ -189,18 +189,15 @@ void setup() {
   Serial.begin(115200);
   delay(1000);  // Give time for Serial to start
 
-  #if DEBUG
-    Serial.println("***WELCOME TO GNSS LOGGER " SOFTWARE_VERSION "***");
-    uint32_t chip_id = *unique_chip_id;
-    Serial.print("Unique Chip ID: ");
-    Serial.println(chip_id, HEX);
-  #endif
+#if DEBUG
+  Serial.println("***WELCOME TO GNSS LOGGER " SOFTWARE_VERSION "***");
+  uint32_t chip_id = *unique_chip_id;
+  Serial.print("Unique Chip ID: ");
+  Serial.println(chip_id, HEX);
+#endif
 
   //// CONFIGURE INITIAL SETTINGS  ////
   pinMode(LED, OUTPUT);              //
-  #if HARDWARE_VERSION == 2
-    pinMode(LED2, OUTPUT);             //
-  #endif
   configureWdt();                    // 12s interrupt, 24s reset period
   checkBattery();                    // IF battery LOW, send back to sleep until recharged
   initializeBuses();                 // Initializes I2C & SPI and turns on ZED (I2C), uSD (SPI)
@@ -211,12 +208,12 @@ void setup() {
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
-//------------LOG MODE-SPECIFC SETTINGS----------------
-  if (logMode == 1 || logMode == 3) {                    
-       configureSleepAlarm();        // Get ready to sleep for these modes
-       deinitializeBuses();
+  //------------LOG MODE-SPECIFC SETTINGS----------------
+  if (logMode == 1 || logMode == 3) {
+    configureSleepAlarm();        // Get ready to sleep for these modes
+    deinitializeBuses();
   }
-//----------------------------------------------------  
+  //----------------------------------------------------
 
   blinkLed(10, 100, GREEN);                 // BLINK 10x - SETUP COMPLETE
   DEBUG_PRINTLN("Info: SETUP COMPLETE");
@@ -224,50 +221,50 @@ void setup() {
 
 
 void loop() {
-  
-    if (alarmFlag) {                 // SLEEPS until alarmFlag = True
-      checkBattery();                //
-      petDog();                      //
-      
-      if (online.gnss == false || online.uSD == false) {
-        initializeBuses();           // Reconfigure GNSS/SD if necessary, e.g., after low battery
-        configureSD();               //
-        configureGNSS();             //
-      }                              //
 
-      if (!online.rtcSync) {        // sync clock if hasn't happened
-        syncRtc();                   // flag is reset in deinitializeBuses(), incl. mode 2, 6
-      }
-      
-      configureLogAlarm();           // 
-      logGNSS();                     //
-      
-      DEBUG_PRINTLN("Info: Logging Terminated");   
-      closeGNSS(); 
-      logDebug("success");                 
-      configureSleepAlarm();
-      deinitializeBuses();
-    }
-    
-    petDog();
+  if (alarmFlag) {                 // SLEEPS until alarmFlag = True
+    checkBattery();                //
+    petDog();                      //
 
-    if (ledBlink) {                  // Only if User wants blinking every WDT interrupt
-      blinkLed(1, 100, GREEN);      
+    if (online.gnss == false || online.uSD == false) {
+      initializeBuses();           // Reconfigure GNSS/SD if necessary, e.g., after low battery
+      configureSD();               //
+      configureGNSS();             //
+    }                              //
+
+    if (!online.rtcSync) {        // sync clock if hasn't happened
+      syncRtc();                   // flag is reset in deinitializeBuses(), incl. mode 2, 6
     }
- 
-    goToSleep();  
+
+    configureLogAlarm();           //
+    logGNSS();                     //
+
+    DEBUG_PRINTLN("Info: Logging Terminated");
+    closeGNSS();
+    logDebug("success");
+    configureSleepAlarm();
+    deinitializeBuses();
+  }
+
+  petDog();
+
+  if (ledBlink) {                  // Only if User wants blinking every WDT interrupt
+    blinkLed(1, 100, GREEN);
+  }
+
+  goToSleep();
 }
 
 ///////// INTERRUPT HANDLERS
 // Watchdog
 extern "C" void am_watchdog_isr(void) {
-  
+
   wdt.clear();      // Clear the watchdog interrupt
 
-  if (wdtCounter < 5) { 
+  if (wdtCounter < 5) {
     wdt.restart();  // Restart the watchdog timer
   }                 // ELSE, if WDT will keep counting until it reaches RESET period
-  
+
   wdtFlag = true;   // Set the watchdog flag
   wdtCounter++;     // Increment watchdog interrupt counter
 

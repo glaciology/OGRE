@@ -13,6 +13,9 @@ void initializeBuses() {
   peripheralPowerOn();
   mySpi.begin();
   delay(1);
+  #if HARDWARE_VERSION == 2
+    pinMode(LED2, OUTPUT);           //
+  #endif
 }
 
 
@@ -191,13 +194,13 @@ void blinkLed(byte ledFlashes, unsigned int ledDelay, LedColor color) {
   byte i = 0;
   byte ledPin;
 
-    #if HARDWARE_VERSION == 1
+  #if HARDWARE_VERSION == 1
         // v1 hardware: ignore color, always use the single LED
-        ledPin = LED;
-    #elif HARDWARE_VERSION == 2
-        // v2 hardware: choose pin based on requested color
-        ledPin = (color == GREEN) ? LED : LED2;
-    #endif
+    ledPin = LED;
+  #elif HARDWARE_VERSION == 2
+      // v2 hardware: choose pin based on requested color
+      ledPin = (color == GREEN) ? LED2 : LED;
+  #endif
 
   while (i < ledFlashes * 2) {
     unsigned long currMillis = millis();
