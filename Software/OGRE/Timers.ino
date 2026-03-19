@@ -107,7 +107,7 @@ void configureLogAlarm() {
     rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
   }
 
-  else if (logMode == 7) {
+  else if (logMode == 7) { // log twice a day (values harcoded for 0200-0800 and 1600-2200)
     // WILL LOG until midnight, UTC during summer, or 24 Hours from power-on in winter
 
     int whichMonth = rtc.hour;
@@ -149,6 +149,23 @@ void configureLogAlarm() {
       rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
     }
   }
+
+  else if (logMode == 8) {
+    uint8_t nowHr = rtc.hour;
+
+    if (nowHr >= 2 && nowHr < 8) {
+      // Morning session → log until 12:00
+      rtc.setAlarm(8, 0, 0, 0, 0, 0);
+      rtc.setAlarmMode(4);
+      DEBUG_PRINTLN("Info: Logging (morning session)");
+
+    } else if (nowHr >= 16 && nowHr < 22) {
+      // Evening session → log until 22:00
+      rtc.setAlarm(22, 0, 0, 0, 0, 0);
+      rtc.setAlarmMode(4);
+      DEBUG_PRINTLN("Info: Logging (evening session)");
+  }
+
 
   rtc.attachInterrupt();
   alarmFlag = false;
@@ -282,6 +299,29 @@ void configureSleepAlarm() {
     gmtime_r(&a, &t);
     rtc.setAlarm(t.tm_hour, t.tm_min, t.tm_sec, 0, t.tm_mday, t.tm_mon + 1);
     rtc.setAlarmMode(1); // Set the RTC alarm to match on exact date
+  }
+
+  else if (logMode == 8) {
+    uint8_t nowHr = rtc.hour;
+
+    if (nowHr < 2) {
+      // Before morning session: sleep until 02:00 today
+      rtc.setAlarm(2, 0, 0, 0, 0, 0);
+      rtc.setAlarmMode(4);
+      DEBUG_PRINTLN("Info: Sleeping until morning session");
+
+    } else if (nowHr >= 8 && nowHr < 16) {
+      // Between sessions: sleep until 16:00 today
+      rtc.setAlarm(16, 0, 0, 0, 0, 0);
+      rtc.setAlarmMode(4);
+      DEBUG_PRINTLN("Info: Sleeping until evening session");
+
+    } else {
+      // After evening session: sleep until 02:00 tomorrow
+      rtc.setAlarm(2, 0, 0, 0, 0, 0);
+      rtc.setAlarmMode(4);
+      DEBUG_PRINTLN("Info: Sleeping until next day morning");
+    }
   }
 
   rtc.attachInterrupt();
