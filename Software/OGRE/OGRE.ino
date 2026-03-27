@@ -33,7 +33,7 @@
    - This project is open source; see Readme/Licensing.
 */
 
-#define HARDWARE_VERSION 2  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
+#define HARDWARE_VERSION 1  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
 #define SOFTWARE_VERSION "V3.1.1"
 #define CONFIG_FILE 23
 #define EPOCH_FILE 20
