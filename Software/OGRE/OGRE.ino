@@ -82,7 +82,7 @@ SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 42, 43
 //////////////////////////////////////////////////////
 //--------- USER DEFAULT CONFIGURATION HERE ------------
 // LOG MODE:
-byte logMode                = 2;              // {1, 2, 3, 4, 5, 6, 99}
+byte logMode                = 8;              // {1, 2, 3, 4, 5, 6, 99}
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour
