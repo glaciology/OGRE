@@ -7,7 +7,7 @@
 
 # Open GNSS Research Equipment :: A low-power, low-cost GNSS data logger for monitoring the cryosphere.
 <p align="center">
-<img src="https://github.com/glaciology/OGRENet/assets/37055625/04b9404f-7409-4638-b8b2-81a605f01529" width="350"/>
+<img src="https://github.com/user-attachments/assets/352f2a3b-dfde-4013-85c5-045853ee4342" width="500"/>
 </p>
 
 
@@ -55,8 +55,8 @@ V3.0.1 of the OGRE has 7 modes of operation:
   
 OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, nav message etc.) are logged to a uSD card in .ubx (UBLOX) proprietary format. Under open sky conditions, we found that an epoch of data (1s) is ~2000-3000 bytes. If logging at 15 seconds for a year, this equates to 6GB of data. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery voltage, logging errors, etc.).
   
-INPUTs: USERS specify settings in the [CONFIG.txt](OGRE/CONFIG.txt) file, which, if uploaded to the SD card, will be read into the software. If no CONFIG.txt exists on the attached SD card, it will automatically be added to the SD card with the default settings upon initial power-on.
-Otherwise, software will default to hardcoded configuration. USER may also upload a [EPOCH.txt](OGRE/EPOCH.txt) file, which allows the user to specify up to 20 log dates (unix epoch format) for logging in Mode 5. The CONFIG.txt and EPOCH.txt files are Windows and Mac (e.g., Notepad or Textedit) compatable (previously, carriage return characters \n caused issues for Windows-generated files). Using an older CONFIG.txt version will not crash the OGRE, but will cause the OGRE to use the default settings instead. 
+INPUTs: USERS specify settings in the CONFIG.txt file, which, if uploaded to the SD card, will be read into the software. If no CONFIG.txt exists on the attached SD card, it will automatically be added to the SD card with the default settings upon initial power-on.
+Otherwise, software will default to hardcoded configuration. USER may also upload a EPOCH.txt file, which allows the user to specify up to 20 log dates (unix epoch format) for logging in Mode 5. The CONFIG.txt and EPOCH.txt files are Windows and Mac (e.g., Notepad or Textedit) compatable (previously, carriage return characters \n caused issues for Windows-generated files). Using an older CONFIG.txt version will not crash the OGRE, but will cause the OGRE to use the default settings instead. 
 
 The CONFIG.TXT file is formatted as follows: 
 
