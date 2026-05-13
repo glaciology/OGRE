@@ -7,10 +7,7 @@ void createDebugFile() {
   uint32_t stat_value = *stat_register;
   String STAT_CODES = getStatusCodes(stat_value);
 
-  uint32_t chip_id_value = *unique_chip_id;
-  String chip_id_string = String(chip_id_value, HEX);
-
-  sprintf(debugFileName, "debug_%s.csv", chip_id_string.c_str());  // Generate "debug_1234.csv", e.g.
+  sprintf(debugFileName, "debug_%lx.csv", (unsigned long)cached_chip_id);
   if (!debugFile.open(debugFileName, O_CREAT | O_APPEND | O_WRITE)) { // Create file if new, Append to end, Open to Write
     DEBUG_PRINTLN("Warning: Failed to create debug file.");
     return;
