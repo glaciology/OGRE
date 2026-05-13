@@ -150,26 +150,6 @@ void configureLogAlarm() {
     }
   }
 
-<<<<<<< Updated upstream
-=======
-  else if (logMode == 8) {
-    uint8_t nowHr = rtc.hour;
-
-    if (nowHr >= 2 && nowHr < 8) {
-      // Morning session: log until 12:00
-      rtc.setAlarm(8, 0, 0, 0, 0, 0);
-      rtc.setAlarmMode(4);
-      DEBUG_PRINTLN("Info: Logging (morning session)");
-
-    } else if (nowHr >= 16 && nowHr < 22) {
-      // Evening session: log until 22:00
-      rtc.setAlarm(22, 0, 0, 0, 0, 0);
-      rtc.setAlarmMode(4);
-      DEBUG_PRINTLN("Info: Logging (evening session)");
-    }
-  }
-
->>>>>>> Stashed changes
   rtc.attachInterrupt();
   alarmFlag = false;
   DEBUG_PRINT("Info: Logging until "); printAlarm();
