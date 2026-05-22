@@ -33,7 +33,7 @@
    - This project is open source; see Readme/Licensing.
 */
 
-#define HARDWARE_VERSION 1  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
+#define HARDWARE_VERSION 2  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
 #define SOFTWARE_VERSION "V3.1.2"
 #define CONFIG_FILE 23
 #define EPOCH_FILE 20
@@ -54,7 +54,7 @@ volatile uint32_t *unique_chip_id = (uint32_t *)UNIQUE_ID_ADDRESS;
   SFE_UBLOX_GNSS gnss;
 #elif HARDWARE_VERSION == 2
   #include <SparkFun_u-blox_GNSS_v3.h>              // Library v3.1.13:
-  SFE_UBLOX_GNSS gnss;  // v3's I2C-only class, same name by coincidence
+  SFE_UBLOX_GNSS gnss;
 #endif
 SdFs sd;                                      // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
 APM3_RTC rtc;                                 //
@@ -89,7 +89,7 @@ SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 42, 43
 //////////////////////////////////////////////////////
 //--------- USER DEFAULT CONFIGURATION HERE ------------
 // LOG MODE:
-byte logMode                = 99;              // {1, 2, 3, 4, 5, 6, 8, 99}
+byte logMode                = 2;              // {1, 2, 3, 4, 5, 6, 8, 99}
 
 // LOG MODE 1: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour
@@ -120,7 +120,7 @@ int logBDS                  = 1;              //
 int logQZSS                 = 0;              //
 int logSBAS                 = 0;              // Not on SD CONFIG File
 int logNav                  = 0;              //
-int logL5                   = 0;              // WARNING: only set if using L5-capable ZED.
+int logL5                   = 1;              // WARNING: only set if using L5-capable ZED.
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
@@ -178,7 +178,7 @@ struct struct_online {
 
 ///////// DEBUGGING MACROS ///////////////////////////
 #define DEBUG                     true        // Output messages to Serial monitor
-#define DEBUG_GNSS                true       // Output GNSS debug messages to Serial monitor
+#define DEBUG_GNSS                false       // Output GNSS debug messages to Serial monitor
 
 #if DEBUG
 #define DEBUG_PRINTLN(x)          Serial.println(x)
