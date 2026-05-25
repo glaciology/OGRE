@@ -16,10 +16,10 @@
 
 
 ## Overview
-Originally designed for easily logging multi-GNSS data in remote regions of the Arctic, this instruments incorporates low power, low cost components onto a single circuit board and features a Ublox ZED-F9P GNSS module and Sparkfun Artemis MCU (Ambiq Apollo3 MCU, Cortex-M4). 
-- Logs binary (.ubx) GPS, GLONASS, BEIDOU, GALILEO & Satellite Nav Messages to a microSD, which can be easily converted to standard RINEX format for positioning with PPK or PPP.
+Originally designed for easily logging multi-GNSS data in remote regions of the Arctic, this instruments incorporates low power, low cost components onto a single circuit board and features a Ublox ZED-F9P/X20P GNSS module and Ambiq Apollo3 MCU. 
+- Logs GPS, GLONASS, BEIDOU, GALILEO & Satellite Nav Messages to a microSD, which can be easily converted to standard RINEX format (from .ubx) for positioning with PPK or PPP. F9P variants log L1/L2, X20P variant logs L1/L2/L5. 
 - Easily configurable via microSD card. Many configuration options to optimize data and battery needs, such as a polar-specific mode of daily logging during summertime and weekly logging during the winter, or a sunrise/sunset mode for logging data for 3 hours, twice daily to capture diurnal glacial signals. 
-- Simple 2 layer PCB with SMD components totaling ~$175, not including external components. PCB inside enclosure measures 7x6.5x2.5cm. 
+- Low cost, totaling ~$175, not including external components. PCB inside enclosure measures 7x6.5x2.5cm. 
 - Current consumption with a 12V supply is 45-65mA (.5-.8W) awake, and 0.07mA (.8mW) asleep. We have used a single 12V 40Amp hr battery with a 10W solar panel to log continuously for 3 hours a day every day, including throughout the long polar night in Greenland.
 - Programmed in Arduino environment.
 
@@ -44,13 +44,15 @@ Again, a detailed, up-to-date guide can found [here](https://docs.google.com/doc
 
 ## Getting Started 
 
-V3.0.1 of the OGRE has 7 modes of operation: 
+The OGRE has the following modes of operation (note, not all modes are available on old versions of the firmware, upgrade may be necessary): 
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER-defined start/stop hours, OR
   - (2) Continous Mode: Log GNSS data continously (new file generated at each midnight UTC), OR
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER-specified day (1-28) each month, OR
   - (4) Interval Mode: Each 24-hour log session is spaced by a USER-defined interval (e.g., log every 3 days for 24 hours), OR
   - (5) Log GNSS data for 24 hours on USER specified dates/times read from a .txt file. Defaults to mode 4 after last user-provided date.
-  - (6) Log GNSS data for 24 hours; During winter once on every Nth day (or USER-defined interval, in # of days); During summer daily. "Summer" is May-August (or USER-defined months). 
+  - (6) Log GNSS data for 24 hours; During winter once on every Nth day (or USER-defined interval, in # of days); During summer daily. "Summer" is May-August (or USER-defined months).
+  - (7) Reserved.
+  - (8) Log GNSS data twice daily for USER specified duration, during-USER defined morning period and USER-defined evening. 
   - (99) Test Mode: Used for development. Log GNSS data for 50 second interval, sleep for 50 second and repeat.
   
 OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, nav message etc.) are logged to a uSD card in .ubx (UBLOX) proprietary format. Under open sky conditions, we found that an epoch of data (1s) is ~2000-3000 bytes. If logging at 15 seconds for a year, this equates to 6GB of data. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery voltage, logging errors, etc.).
@@ -126,15 +128,14 @@ You can also compile the source code with the Arduino IDE, ensuring that the cod
 
 ## Hardware Notes
 <p align="center">
-<img src="https://user-images.githubusercontent.com/37055625/207705966-89887dd3-3384-4fdd-b19f-6bf830b9bbab.jpg" width="296"/>
-<img src="https://user-images.githubusercontent.com/37055625/181101078-56771903-b7e9-467f-81ce-15af4ea97b13.jpg" width="250"/>
+<img src="https://github.com/user-attachments/assets/226c09d0-3a6c-419c-b80c-52f5dac20911" width="250"/>
 </p>
 
 MATERIALS
 Cost of PCB and all components totals ~$175. Detailed list of components found [here](Hardware/Components1-3.md). <br>
 
 ASSEMBLY
-Assembly services are available through PCBWay, and the OGRE can be ordered directly from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_Receiver_33a809f3.html). Note that this assembly service does not include the [Pololu](https://www.pololu.com/product/3792) component, which must be soldered (4 through-hole) by the user. The user must also program the device following the instructions from the Software Upload section. 
+Assembly services are available through PCBWay, and the OGRE can be ordered directly from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_Receiver_33a809f3.html). Note that this assembly service does not include the [Pololu](https://www.pololu.com/product/3792) component, which must be soldered (4 through-hole) by the user. The user must also program the device following the instructions from the Software Upload section. OGRE2.0 (with ublox X20P) can similarly be ordered from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_v2_0_82247d12.html). 
 
 If you choose to use a u-blox antenna, you will need a ground plane, which you can make out of any metal disc, or you can order pre-drilled discs from PCBWay too, [here](https://www.pcbway.com/project/shareproject/Ground_Plane_for_ublox_L1_L2_L5_GNSS_antenna_c3519487.html), compatitble for both L1/L2 and L1/L2/L5 versions of their antennas.
 
