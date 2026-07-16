@@ -7,7 +7,7 @@
 
 # Open GNSS Research Equipment :: A low-power, low-cost GNSS data logger for monitoring the cryosphere.
 <p align="center">
-<img src="https://github.com/glaciology/OGRENet/assets/37055625/04b9404f-7409-4638-b8b2-81a605f01529" width="350"/>
+<img src="https://github.com/user-attachments/assets/352f2a3b-dfde-4013-85c5-045853ee4342" width="500"/>
 </p>
 
 
@@ -16,16 +16,14 @@
 
 
 ## Overview
-Originally designed for easily logging multi-GNSS data in remote regions of the Arctic, this instruments incorporates low power, low cost components onto a single circuit board and features a Ublox ZED-F9P GNSS module and Sparkfun Artemis MCU (Ambiq Apollo3 MCU, Cortex-M4). 
-- Logs binary (.ubx) GPS, GLONASS, BEIDOU, GALILEO & Satellite Nav Messages to a microSD, which can be easily converted to standard RINEX format for positioning with PPK or PPP.
-- Easily configurable via microSD card. Many configuration options to optimize data and battery needs, such as daily logging during summertime and weekly logging during the winter.
-- Simple 2 layer PCB with SMD components totaling ~$260, including patch antenna. PCB inside enclosure measures 7x6.5x2.5cm. 
-- Nominal data rate under open sky conditions 2000-3000 bytes per solution, equivalent to 5 GB of data for logging all constellations at 15 second interval for a year.
+Originally designed for easily logging multi-GNSS data in remote regions of the Arctic, this instruments incorporates low-power, low-cost components onto a single circuit board and features a Ublox ZED-F9P/X20P GNSS module and Ambiq Apollo3 MCU. By stripping away many of the features of commercial options, we streamline this instrument specifically for "set it and forget it" rapid deployments, acquiring high quality GNSS data.
+- Logs GPS, GLONASS, BEIDOU, GALILEO & Satellite Nav Messages to a microSD, which can be easily converted to standard RINEX format (from .ubx) for positioning with PPK or PPP (RTK is possible but DIY). F9P variants log L1/L2, X20P variant logs L1/L2/L5. 
+- Easily configurable via microSD card. Many configuration options to optimize data and battery needs, such as a polar-specific mode of daily logging during summertime and weekly logging during the winter, or a sunrise/sunset mode for logging data for 3 hours, twice daily to capture diurnal glacial signals. 
+- Low cost, totaling ~$175, not including external components. PCB inside enclosure measures 7x6.5x2.5cm. 
 - Current consumption with a 12V supply is 45-65mA (.5-.8W) awake, and 0.07mA (.8mW) asleep. We have used a single 12V 40Amp hr battery with a 10W solar panel to log continuously for 3 hours a day every day, including throughout the long polar night in Greenland.
-- Features on-board battery measurement circuit and temperature sensor.
-- Programmed in Arduino environment.
-- Additional pins & peripherals include RX/TX for serial programming, 3-Wire Temperature sensor, secondary I2C bus, secondary UART bus, secondary SPI bus, several GPIO pins and I/O pins for streaming or receiving RTCM messages for RTK operation.  
+- Programmed in Arduino environment, for easy customization.
 
+A detailed guide is maintained [here](https://docs.google.com/document/d/1q8-jAFY2cO8MIOHwoCQhJwPjmURbkkGEsrDBrOs5gMM/edit?usp=sharing). 
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/37055625/207705142-4ba32b05-6b62-4d18-bcf7-4f9eb635589c.jpeg" width="500"/>
@@ -37,29 +35,29 @@ Originally designed for easily logging multi-GNSS data in remote regions of the 
 
 
 [Hardware: Hardware & Manufacturing Files](Hardware/)
-- [Components: List of PCB parts](Hardware/Components1-3.md)
-- [OGRE Manufacturing Files: PCB Computer Aided Manufacturing Files](Hardware/OGRE_PCB_Gerbers.zip)
-- [Hardware Docs: Linked documentation for critical components](Hardware/HardwareDocuments.md)
-- [Schematic: Electrical connection schematic](Hardware/OGRE_Schematic1-3.pdf)
+- Here you will find the component lists for OGREv1 and OGREv2. We recommend all future acquisitions use OGREv2, which is optimized for the X20P reciever. However, use v1 if you or your manufacturer cannot flash the device using a SWD/JTAG interface. See the firmware section for details on flashing the correct firmware onto your v1 or v2 device.  
 
+Again, a detailed, up-to-date guide can found [here](https://docs.google.com/document/d/1q8-jAFY2cO8MIOHwoCQhJwPjmURbkkGEsrDBrOs5gMM/edit?usp=sharing)!
 
 ## Getting Started 
 
-V3.0.1 of the OGRE has 7 modes of operation: 
+The OGRE has the following modes of operation (note, not all modes are available on old versions of the firmware, upgrade may be necessary): 
   - (1) Daily Fixed Mode: Log GNSS data same time every day, starting & ending during USER-defined start/stop hours, OR
   - (2) Continous Mode: Log GNSS data continously (new file generated at each midnight UTC), OR
   - (3) Monthly Mode: Log GNSS data for 24 hours on a USER-specified day (1-28) each month, OR
   - (4) Interval Mode: Each 24-hour log session is spaced by a USER-defined interval (e.g., log every 3 days for 24 hours), OR
   - (5) Log GNSS data for 24 hours on USER specified dates/times read from a .txt file. Defaults to mode 4 after last user-provided date.
-  - (6) Log GNSS data for 24 hours; During winter once on every Nth day (or USER-defined interval, in # of days); During summer daily. "Summer" is May-August (or USER-defined months). 
+  - (6) Log GNSS data for 24 hours; During winter once on every Nth day (or USER-defined interval, in # of days); During summer daily. "Summer" is May-August (or USER-defined months).
+  - (7) Reserved.
+  - (8) Log GNSS data twice daily for USER specified duration, during-USER defined morning period and USER-defined evening. 
   - (99) Test Mode: Used for development. Log GNSS data for 50 second interval, sleep for 50 second and repeat.
   
-OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, nav message etc.) are logged to a uSD card in .ubx (UBLOX) proprietary format. Under open sky conditions, we found that an epoch of data (1s) is ~2000-3000 bytes. If logging at 15 seconds for a year, this equates to 6GB of data. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery voltage, logging errors, etc.).
+OUTPUTs: With all modes, GNSS data (phase, doppler, SNR, nav message etc.) are logged to a uSD card in .ubx (UBLOX) proprietary format. Under open sky conditions, we found that an epoch of data (1s) is ~2000-3000 bytes. If logging at 15 seconds for a year, this equates to 6GB of data. A debug file is also generated after each log session is closed, reporting the health of the system (temperature, battery voltage, logging errors, etc.). 
   
-INPUTs: USERS specify settings in the [CONFIG.txt](OGRENet/CONFIG) file, which, if uploaded to the SD card, will be read into the software. If no CONFIG.txt exists on the attached SD card, it will automatically be added to the SD card with the default settings upon initial power-on.
-Otherwise, software will default to hardcoded configuration. USER may also upload a [EPOCH.txt](OGRENet/EPOCH) file, which allows the user to specify up to 20 log dates (unix epoch format) for logging in Mode 5. The CONFIG.txt and EPOCH.txt files are Windows and Mac (e.g., Notepad or Textedit) compatable (previously, carriage return characters \n caused issues for Windows-generated files). Using an older CONFIG.txt version will not crash the OGRE, but will cause the OGRE to use the default settings instead. 
+INPUTs: USERS specify settings in the CONFIG.txt file, which, if uploaded to the SD card, will be read into the software. If no CONFIG.txt exists on the attached SD card, it will automatically be added to the SD card with the default settings upon initial power-on.
+Otherwise, software will default to hardcoded configuration. USER may also upload a EPOCH.txt file, which allows the user to specify up to 20 log dates (unix epoch format) for logging in Mode 5. The CONFIG.txt and EPOCH.txt files are Windows and Mac (e.g., Notepad or Textedit) compatable (previously, carriage return characters \n caused issues for Windows-generated files). Using an older CONFIG.txt version will not crash the OGRE, but will cause the OGRE to use the default settings instead. 
 
-The CONFIG.TXT file is formatted as follows: 
+The CONFIG.TXT file is formatted as follows (make sure to use the right version, or let the device auto-populate the template onto your SD card): 
 
 ```
 LOG_MODE(1: daily hr, 2: cont, 3: mon, 4: 24 roll, 5: date, 6: season, 99: test)=2
@@ -113,40 +111,43 @@ If the USER has enabled LED_INDICATORS, the following additional lights will fla
   - No blinks: system is in deep sleep due to low battery, or system is dead due to dead battery.
 
 ## Software Upload
-Only do this if you want to update the firmware on the OGRE, or if the OGRE has not yet had the firmware installed. A pre-compiled binary file is available with each release (see [releases](https://github.com/glaciology/OGRE/releases/tag/v.3.0)). This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
+Only do this if you want to update the firmware on the OGRE, or if the OGRE has not yet had the firmware installed. A pre-compiled binary file is available with each release (see [releases](https://github.com/glaciology/OGRE/releases/)). NOTE: this binary is not compatible with v2 OGREs!! This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
+
+For v2 OGREs, please reach out to me or recompile the code and set the macro #HARDWARE_VERSION to 2... v2 OGREs only accept firmware via SWD/JTAG, but once they are flashed the first time, can be interfaced with a standard USB to Serial Converter. 
 
 *Before following the prompts below, ensure that the power is applied to the OGRE power terminal with a DC source (6-20V). Then connect the serial converter. The USB to Serial converter is attached to the OGRE via the 5 through-hole pins on the PCB: attach Ground to GND, RX -> TX, TX->RX, etc. * NOTE: the serial converter must be 3.3V. DO NOT EXPOSE pins to 5V. 
 
-Example command line prompt using the svl.py script: [use baud -b 115200; provide path to binary file OGRENet.ino.bin; find path of usb serial converter port by typing ls /dev/tty.* on Linux and selecting the proper usb port.] 
+Example command line prompt using the svl.py script: [use baud -b 115200; provide path to binary file OGRE.ino.bin; find path of usb serial converter port by typing ls /dev/tty.* on Linux and selecting the proper usb port.] 
 ```
-python3 svl.py -b 115200 -f /PATH/TO/BINARY/FILE/OGRENet.ino.bin /dev/tty.usbserial-####
+python3 svl.py -b 115200 -f /PATH/TO/BINARY/FILE/OGRE.ino.bin /dev/tty.usbserial-####
 ```
 
-You can also compile the source code with the Arduino IDE, ensuring that the code and board libraries match the proper versions defined in the header of OGRENet.ino [Sparkfun Artemis Module v1.2.3, SDFat library v2.1.0, Sparkfun ublox GNSS library v2.2.8]. 
+You can also compile the source code with the Arduino IDE, ensuring that the code and board libraries match the proper versions defined in the header of OGRE.ino [Sparkfun Artemis Module v1.2.3, SDFat library v2.1.0, Sparkfun ublox GNSS library v2.2.8]. 
 
 
 ## Hardware Notes
 <p align="center">
-<img src="https://user-images.githubusercontent.com/37055625/207705966-89887dd3-3384-4fdd-b19f-6bf830b9bbab.jpg" width="296"/>
-<img src="https://user-images.githubusercontent.com/37055625/181101078-56771903-b7e9-467f-81ce-15af4ea97b13.jpg" width="250"/>
+<img src="https://github.com/user-attachments/assets/226c09d0-3a6c-419c-b80c-52f5dac20911" width="250"/>
 </p>
 
 MATERIALS
-Cost of PCB and all components totals ~$170. Detailed list of components found [here](Hardware/Components1-3.md). <br>
+Cost of PCB and all components totals ~$175. Detailed list of components found in the Hardware folder. <br>
 
 ASSEMBLY
-Assembly services are available through PCBWay, and the OGRE can be ordered directly from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_Receiver_33a809f3.html). Note that this assembly service does not include the [Pololu](https://www.pololu.com/product/3792) component, which must be soldered (4 through-hole) by the user. The user must also program the device following the instructions from the Software Upload section. 
+Assembly services are available through PCBWay, and the OGRE can be ordered directly from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_Receiver_33a809f3.html). Note that this assembly service often does not include the [Pololu](https://www.pololu.com/product/3792) component, which must be soldered (4 through-hole) by the user (requests may be made to PCBWay to see if they can source this component, or the user can ship to PCBWay). The user must also program the device following the instructions from the Software Upload section. OGRE2.0 (with ublox X20P) can similarly be ordered from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_v2_0_82247d12.html), and we highly recommend the customer asks PCBWay to upload the .bin firmware to the board using their JTAG/SWD interface. 
+
+If you choose to use a u-blox antenna, you will need a ground plane, which you can make out of any metal disc, or you can order pre-drilled discs from PCBWay too, [here](https://www.pcbway.com/project/shareproject/Ground_Plane_for_ublox_L1_L2_L5_GNSS_antenna_c3519487.html), compatitble for both L1/L2 and L1/L2/L5 versions of their antennas.
 
 POWER REQUIREMENTS: 
 In standard configuration, this system is powered by a 12V lead-acid battery. 
   
 While this system is optimized for 12V batteries, input voltage can range from 5.2V to 20V with the following considerations/customizations:  
   - The DC-DC converter minimum input is 5.2V and maximum input is 50V, although additional power filtering at high voltages is required. 
-  - The Battery Measurement circuit features a voltage divider circuit that must scale max voltage to 3.3V for the ADC pin. Standard dividers for a 12V battery use 68kOhm and 10kOhm resistors. USER must adjust gain/offset of ADC battery measurement conversion in software if using different power configuration (i.e., different resistor dividers and/or a non-12V battery). 
+  - The Battery Measurement circuit features a voltage divider circuit that must scale max voltage to 3.3V for the ADC pin. Standard dividers for a 12V battery use 68kOhm and 10kOhm resistors. USER may wish to adjust gain/offset of ADC battery measurement conversion in software if using non-standard (5.2-20V) power configuration. 
   - The reverse polarity protection MOSFET has a limit of 20V. **Do not exceed 20V** without either removing this part or finding an appropriate substitute component. 
 
 ## License & Credits
-This project is open source! OGRENet software is released under the [MIT License](http://opensource.org/licenses/MIT).
+This project is open source! OGRE software is released under the [MIT License](http://opensource.org/licenses/MIT).
 
 Portions of this code for this project are derived from [Sparkfun GNSS Library](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library) [Sparkfun Arduino Core](https://github.com/sparkfun/Arduino_Apollo3/releases/tag/v1.2.0), [Sparkfun OpenLog GNSS](https://github.com/sparkfun/OpenLog_Artemis_GNSS_Logger), and
 [Cryologger Glacier Velocity Tracker v2.0.3](https://github.com/adamgarbo/Cryologger_Glacier_Velocity_Tracker).
