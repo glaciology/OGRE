@@ -1,7 +1,7 @@
 /*
    OGRE: Open GNSS Research Equipment (On-ice GNSS Research Experimental Network for Greenland)
    Derek Pickell 06 Feb 2026
-   V3.1.2
+   V3.2.0
 
    Hardware:
    - OGRE PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
@@ -34,8 +34,7 @@
 */
 
 #define HARDWARE_VERSION 2  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
-#define SOFTWARE_VERSION "V3.1.2"
-#define CONFIG_FILE 23
+#define SOFTWARE_VERSION "V3.2.0"
 #define EPOCH_FILE 20
 #define STAT_REGISTER_ADDRESS 0x4FFFF000
 #define UNIQUE_ID_ADDRESS     0x40020004
@@ -91,9 +90,13 @@ SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 42, 43
 // LOG MODE:
 byte logMode                = 2;              // {1, 2, 3, 4, 5, 6, 99}
 
-// LOG MODE 1: DAILY, DURING DEFINED HOURS
+// LOG MODE 1/8: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour
 byte logEndHr               = 14;             // UTC Hour
+
+// LOG MODE 8: TWICE DAILY, DURING DEFINED HOURS
+byte logStartHrTWO          = 16;             // UTC Hour
+byte logEndHrTWO            = 19;             // UTC Hour
 
 // LOG MODE 3: ONCE/MONTH FOR 24 HOURS
 byte logStartDay            = 8;              // Day of month between 1 and 28
@@ -148,7 +151,7 @@ unsigned long prevMillis          = 0;        // Global time keeper, not affecte
 uint32_t      intendedWakeEpoch   = 0;        // For Log Mode 6 to deal with drift
 unsigned long syncDuration        = 0;        // How long it took to sync (used for LM 6
 unsigned long dates[21]           = {};       // Array with Unix Epochs of log dates !!! MAX 20 !!!
-int           settings[23]        = {};       // Array that holds user settings on SD
+// int           settings[23]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name
 char          debugFileName[15] = "";         // Debug file name
@@ -216,11 +219,11 @@ void setup() {
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
 
-  //------------LOG MODE-SPECIFC SETTINGS----------------
-  if (logMode == 1 || logMode == 3) {
-    configureSleepAlarm();        // Get ready to sleep for these modes
-    deinitializeBuses();
-  }
+  // //------------LOG MODE-SPECIFC SETTINGS----------------
+  // if (logMode == 1 || logMode == 3) {
+  //   configureSleepAlarm();        // Get ready to sleep for these modes
+  //   deinitializeBuses();
+  // }
   //----------------------------------------------------
 
   blinkLed(10, 100, GREEN);                 // BLINK 10x - SETUP COMPLETE
@@ -257,7 +260,7 @@ void loop() {
   petDog();
 
   if (ledBlink) {                  // Only if User wants blinking every WDT interrupt
-    blinkLed(1, 100, GREEN);
+    blinkLed(1, 100, RED);
   }
 
   goToSleep();

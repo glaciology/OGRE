@@ -36,11 +36,34 @@ void configureLogAlarm() {
 
   // 1 = daily during defined hours, 2 = continuous (new file generated each midnight),
   // 3 = monthly on defined day, 4 = 24 hr log with defined spacing, 5 = programmed dates,
-  // 6 = summer log continuously, winter during defined interval, 99 = test  mode
+  // 6 = summer log continuously, winter during defined interval, 99 = test mode
+  // 8 = diurnal (logs during defined hours, twice daily)
+
+  // if (logMode == 1) {
+  //   rtc.setAlarm(logEndHr, 0, 0, 0, 0, 0);
+  //   rtc.setAlarmMode(4); // match every day during logEndHr
+  // }
 
   if (logMode == 1) {
-    rtc.setAlarm(logEndHr, 0, 0, 0, 0, 0);
-    rtc.setAlarmMode(4); // match every day during logEndHr
+    bool inWindow;
+    if (logStartHr <= logEndHr) {
+      inWindow = (rtc.hour >= logStartHr && rtc.hour < logEndHr);
+    } else { // window wraps past midnight, e.g. start 22, end 4
+      inWindow = (rtc.hour >= logStartHr || rtc.hour < logEndHr);
+    }
+
+    if (inWindow) {
+      rtc.setAlarm(logEndHr, 0, 0, 0, 0, 0);
+      rtc.setAlarmMode(4); // match every day during logEndHr
+      DEBUG_PRINTLN("Info: Logging (in window)");
+    } else {
+      // Booted outside the defined window — bridge briefly rather
+      // than logging a full/incorrect session.
+      uint8_t bridgeSec = (rtc.seconds + 1) % 60;
+      rtc.setAlarm(0, 0, bridgeSec, 0, 0, 0);
+      rtc.setAlarmMode(6);
+      DEBUG_PRINTLN("Info: Outside session window — brief bridge log (~1 sec)");
+    }
   }
 
   else if (logMode == 2) { // continuous: will generate new file at midnight
@@ -51,7 +74,20 @@ void configureLogAlarm() {
     rtc.setAlarmMode(4); // match every day at midnight
   }
 
-  else if (logMode == 3 || logMode == 4 || logMode == 5) {
+  else if (logMode == 3) {
+    if (rtc.dayOfMonth == logStartDay) {
+      rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0);
+      rtc.setAlarmMode(4); // WILL LOG FOR 24 HOURS from power-on
+      DEBUG_PRINTLN("Info: Logging (correct day)");
+    } else {
+      uint8_t bridgeSec = (rtc.seconds + 1) % 60;
+      rtc.setAlarm(0, 0, bridgeSec, 0, 0, 0);
+      rtc.setAlarmMode(6);
+      DEBUG_PRINTLN("Info: Outside session window — brief bridge log (~1 sec)");
+    }
+  }
+
+  else if (logMode == 4 || logMode == 5) {
     rtc.setAlarm(rtc.hour, rtc.minute, rtc.seconds, 0, 0, 0);
     rtc.setAlarmMode(4); // WILL LOG FOR 24 HOURS from power-on
   }
@@ -153,17 +189,25 @@ void configureLogAlarm() {
   else if (logMode == 8) {
     uint8_t nowHr = rtc.hour;
 
-    if (nowHr >= 2 && nowHr < 8) {
-      // Morning session: log until 12:00
-      rtc.setAlarm(8, 0, 0, 0, 0, 0);
+    if (nowHr >= logStartHr && nowHr < logEndHr) {
+      // Morning session: log until logEndHr
+      rtc.setAlarm(logEndHr, 0, 0, 0, 0, 0);
       rtc.setAlarmMode(4);
       DEBUG_PRINTLN("Info: Logging (morning session)");
 
-    } else if (nowHr >= 16 && nowHr < 22) {
+    } else if (nowHr >= logStartHrTWO && nowHr < logEndHrTWO) {
       // Evening session: log until 22:00
-      rtc.setAlarm(22, 0, 0, 0, 0, 0);
+      rtc.setAlarm(logEndHrTWO, 0, 0, 0, 0, 0);
       rtc.setAlarmMode(4);
       DEBUG_PRINTLN("Info: Logging (evening session)");
+    } else {
+      // outside designated log hours... log data for a second, then sleep
+      uint8_t bridgeSec = (rtc.seconds + 1) % 60;
+      rtc.setAlarm(0, 0, bridgeSec, 0, 0, 0);
+      rtc.setAlarmMode(6);
+      DEBUG_PRINTLN("Info: Outside session window — brief bridge log (~1 sec)");
+
+    }
   }
 
 
@@ -304,21 +348,21 @@ void configureSleepAlarm() {
   else if (logMode == 8) {
     uint8_t nowHr = rtc.hour;
 
-    if (nowHr < 2) {
-      // Before morning session: sleep until 02:00 today
-      rtc.setAlarm(2, 0, 0, 0, 0, 0);
+    if (nowHr < logStartHr) {
+      // Before morning session: sleep until 02:00 today, e.g.
+      rtc.setAlarm(logStartHr, 0, 0, 0, 0, 0);
       rtc.setAlarmMode(4);
       DEBUG_PRINTLN("Info: Sleeping until morning session");
 
-    } else if (nowHr >= 8 && nowHr < 16) {
-      // Between sessions: sleep until 16:00 today
-      rtc.setAlarm(16, 0, 0, 0, 0, 0);
+    } else if (nowHr >= logEndHr && nowHr < logStartHrTWO) {
+      // Between sessions: sleep until 16:00 today, e.g.
+      rtc.setAlarm(logStartHrTWO, 0, 0, 0, 0, 0);
       rtc.setAlarmMode(4);
       DEBUG_PRINTLN("Info: Sleeping until evening session");
 
     } else {
-      // After evening session: sleep until 02:00 tomorrow
-      rtc.setAlarm(2, 0, 0, 0, 0, 0);
+      // After evening session: sleep until 02:00 tomorrow, e.g.
+      rtc.setAlarm(logStartHr, 0, 0, 0, 0, 0);
       rtc.setAlarmMode(4);
       DEBUG_PRINTLN("Info: Sleeping until next day morning");
     }

@@ -79,15 +79,15 @@ void configureGNSS() {
       gnss.newCfgValset(VAL_LAYER_RAM);
       gnss.addCfgValset(key, value);
       bool ok = gnss.sendCfgValset();
-      DEBUG_PRINT("  "); DEBUG_PRINT(name);
-      DEBUG_PRINTLN(ok ? ": OK" : ": FAILED");
+      DEBUG_PRINT(" - "); DEBUG_PRINT(name);
+      DEBUG_PRINT(ok ? ": OK " : ": FAILED ");
       petDog();
       return ok;
     };
 
     DEBUG_PRINTLN("Info: Configuring constellations:");
     trySetKey("GPS",  UBLOX_CFG_SIGNAL_GPS_ENA,  (uint8_t)logGPS);
-    // GLO skipped: X20P rejects explicit set; factory default is enabled
+    // GLO skipped... geopolitical thing with current X20P firmware...?
     trySetKey("GAL",  UBLOX_CFG_SIGNAL_GAL_ENA,  (uint8_t)logGAL);
     trySetKey("BDS",  UBLOX_CFG_SIGNAL_BDS_ENA,  (uint8_t)logBDS);
     trySetKey("SBAS", UBLOX_CFG_SIGNAL_SBAS_ENA, (uint8_t)logSBAS);
@@ -121,7 +121,7 @@ void configureGNSS() {
   gnss.setAutoPVTrate(true);
 #endif
 
-  DEBUG_PRINTLN("Info: GNSS configured.");
+  DEBUG_PRINTLN();
 }
 
 void logGNSS() {
