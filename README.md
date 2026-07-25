@@ -17,7 +17,7 @@
 
 ## Overview
 Originally designed for easily logging multi-GNSS data in remote regions of the Arctic, this instruments incorporates low-power, low-cost components onto a single circuit board and features a Ublox ZED-F9P/X20P GNSS module and Ambiq Apollo3 MCU. By stripping away many of the features of commercial options, we streamline this instrument specifically for "set it and forget it" rapid deployments, acquiring high quality GNSS data.
-- Logs GPS, GLONASS, BEIDOU, GALILEO & Satellite Nav Messages to a microSD, which can be easily converted to standard RINEX format (from .ubx) for positioning with PPK or PPP (RTK is possible but DIY). F9P variants log L1/L2, X20P variant logs L1/L2/L5. 
+- Logs GPS, GLONASS, BEIDOU, GALILEO & Satellite Nav Messages to a microSD, which can be easily converted to standard RINEX format (from .ubx) for positioning with PPK or PPP (RTK is possible but DIY). F9P variants (hardware v1.0) log L1/L2, X20P variant logs L1/L2/L5 (hardware v2.0). 
 - Easily configurable via microSD card. Many configuration options to optimize data and battery needs, such as a polar-specific mode of daily logging during summertime and weekly logging during the winter, or a sunrise/sunset mode for logging data for 3 hours, twice daily to capture diurnal glacial signals. 
 - Low cost, totaling ~$175, not including external components. PCB inside enclosure measures 7x6.5x2.5cm. 
 - Current consumption with a 12V supply is 45-65mA (.5-.8W) awake, and 0.07mA (.8mW) asleep. We have used a single 12V 40Amp hr battery with a 10W solar panel to log continuously for 3 hours a day every day, including throughout the long polar night in Greenland.
@@ -32,8 +32,6 @@ A detailed guide is maintained [here](https://docs.google.com/document/d/1q8-jAF
 ## Project Organization 
 [Software: Contains Arduino Code and Test Scripts](Software/)
 - [OGRE: Software and software config files for upload to OGRE instrument](Software/OGRE) <br>
-
-
 [Hardware: Hardware & Manufacturing Files](Hardware/)
 - Here you will find the component lists for OGREv1 and OGREv2. We recommend all future acquisitions use OGREv2, which is optimized for the X20P reciever. However, use v1 if you or your manufacturer cannot flash the device using a SWD/JTAG interface. See the firmware section for details on flashing the correct firmware onto your v1 or v2 device.  
 
@@ -70,24 +68,17 @@ MEASURE_BATTERY(0-false, 1-true)=0
 ENABLE_GPS(0-false, 1-true)=1
 ENABLE_GLO(0-false, 1-true)=1
 ENABLE_GAL(0-false, 1-true)=1
-ENABLE_BDS(0-false, 1-true)=1
-ENABLE_QZSS(0-false, 1-true)=0
-ENABLE_NAV_SFRBX(0-false, 1-true)=1
-STATION_NAME(0000, char)=tes1
-MEASURE_RATE(integer seconds)=1
-BAT_SHUTDOWN_V(00.0, volts)=10.9
-WINTER_INTERVAL(seconds, mode 6 only)=777600
-SUMMER_START_MONTH(mode 6 only)=4
-SUMMER_END_MONTH(mode 6 only)=9
-SUMMER_START_DAY(mode 6 only)=21
-SUMMER_END_DAY(mode 6 only)=21
-v3.0.1 end;
+...
+...
+...
+...
 ```
 
 - If the USER selects LOG_MODE=1, then LOG_START_HOUR_UTC and LOG_END_HOUR_UTC must be specified. 
 - If the USER selects LOG_MODE=3, then LOG_START_DAY must also be specified (day of each month GNSS data is logged). 
 - If the USER selects LOG_MODE=5, then unix epoch dates for logging are specified in EPOCH.txt. If no dates are specified or if all dates have elapsed, then log interval defaults to LOG_MODE 4, where LOG_EPOCH_SLEEP must be defined.
 - If the USER selects LOG_MODE=6, the instrument logs continuously during SUMMER_START_MONTH + SUMMER_START_DAY through SUMMER_END_MONTH + SUMMER_END_DAY (inclusive). Furthermore, the duration between logging during winter is set by WINTER_INTERVAL. Note: log sessions are 24 hours.
+- If the USER selects LOG_MODE=8, then LOG_START_HOUR_UTC and LOG_END_HOUR_UTC must be specified, along with LOG_START_HR_TWO and LOG_END_HR_TWO. 
 - LED_INDICATORS, if false, will disable all LEDs, excluding those present during initialization. 
 - MEASURE_BATTERY, if true, battery voltage is measured/monitored, and the instrument will be put to sleep when voltage dips below 10.9V (OR as defined by user in BAT_SHUTDOWN_V). System will restart when voltage measured above ~11.2V (or 0.5V above BAT_SHUTDOWN_V). 
 - STATION_NAME is a number between 0000 and zzzz (no special characters, please!), and will be appended to the timestamped file names for each GNSS file.
@@ -98,24 +89,29 @@ Insert the uSD card (with or without CONFIG & EPOCH files), then connect battery
   - 1 Hz Blinks: System acquiring GPS time and attempting to sync real time clock (RTC).
   - 10 rapid Blinks: System Configuration Complete!
   
- The following indicate failure of initialization: 
-  - 2 Blink Pattern: uSD initialization failed (is the SD card seated properly?) - system awaiting automatic reset to try again (60 seconds).
-  - 3 Blink Pattern: Ublox/antenna initialization failed (is the antenna properly connected?) - system awaiting automatic reset to try again (60 seconds).
-  - 5 Blink Pattern: RTC failed to sync with GNSS time (are you outside?) - system awaiting automatic reset to try again (60 seconds).
-  - 6 Rapid Blinks: uSD failed to read CONFIG settings (did you intend to not include the CONFIG file?). 
-
-Once the system is initialized, it will either sleep or begin logging data, depending on the specified log mode. 
-If the USER has enabled LED_INDICATORS, the following additional lights will flash: 
-  - Flashes (faint) at measurement rate: System logging GNSS data
-  - 1 Blink (bright) every 12 seconds: System sleeping
-  - No blinks: system is in deep sleep due to low battery, or system is dead due to dead battery.
+ The following LED patterns indicate success or failure for OGREv2. For OGREv1, there is only 1 led. 
+| Pattern | Meaning | Color (v2) | Triggered From |
+|---|---|---|---|
+| 2 blink pattern, then waits for reset | microSD card failed to initialize (twice) | 🔴 Red (`LED`) | `configureSD()` |
+| 3 blink pattern, then waits for reset | u-blox I2C not detected, or GNSS constellation config failed | 🔴 Red (`LED`) | `configureGNSS()` |
+| 5 blink pattern, then waits for reset | RTC failed to sync with GNSS within 3-minute window | 🔴 Red (`LED`) | `syncRtc()` |
+| 6 rapid blinks | `CONFIG.TXT` missing/unreadable — using hard-coded defaults | 🔴 Red (`LED`) | `getConfig()` |
+| 10 blinks | RTC synced + system configuration complete (boot only) | 🟡 Yellow (`LED2`) | `setup()` |
+| 1 blink, roughly every 12 seconds | Device sleeping between sessions | 🔴 Red (`LED`) | `loop()` |
+| 1 Hz blink | Acquiring GNSS fix during RTC sync | 🟡 Yellow (`LED2`) | `syncRtc()` |
+| Rapid, irregular blinks while active, approx. corresponding to logging rate | Actively logging GNSS data to SD | 🔴 Red (`LED`) | `logGNSS()` |
+| No blinks at all | Deep sleep — battery below shutdown threshold | *(none — both LEDs off)* | `checkBattery()` / `goToSleep()` |
 
 ## Software Upload
-Only do this if you want to update the firmware on the OGRE, or if the OGRE has not yet had the firmware installed. A pre-compiled binary file is available with each release (see [releases](https://github.com/glaciology/OGRE/releases/)). NOTE: this binary is not compatible with v2 OGREs!! This binary file included in the release can be uploaded to the Apollo MCU with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
+For OGREv1, software is uploaded using a USB-to-Serial converter. 
+For OGREv2, software is uploaded using JTAG/SWD, or, if the proper bootloader is installed on the MCU, can be done over USB-to-Serial.
 
-For v2 OGREs, please reach out to me or recompile the code and set the macro #HARDWARE_VERSION to 2... v2 OGREs only accept firmware via SWD/JTAG, but once they are flashed the first time, can be interfaced with a standard USB to Serial Converter. 
+Only do this if you want to update the firmware on the OGRE, or if the OGRE has not yet had the firmware installed. A pre-compiled binary file is available with each release (see [releases](https://github.com/glaciology/OGRE/releases/)). Note: there are separate binaries for v1 and v2 OGREs. This binary file included in the release can be uploaded to the Apollo MCU (OGREv1) with a usb-to-serial cable connected to the PCB header pins using the Sparkfun Apollo3 Uploader [here](https://github.com/sparkfun/Apollo3_Uploader_SVL). 
 
-*Before following the prompts below, ensure that the power is applied to the OGRE power terminal with a DC source (6-20V). Then connect the serial converter. The USB to Serial converter is attached to the OGRE via the 5 through-hole pins on the PCB: attach Ground to GND, RX -> TX, TX->RX, etc. * NOTE: the serial converter must be 3.3V. DO NOT EXPOSE pins to 5V. 
+For v2 OGREs, please reach out to me if you have questions that come up. The HARDWARE_VERSION macro must be set properly when manually compiling the code.
+
+### OGRE V1
+The USB to Serial converter is attached to the OGRE via the 5 through-hole pins on the PCB: attach Ground to GND, RX -> TX, TX->RX, etc. NOTE: the serial converter must be 3.3V. DO NOT EXPOSE pins to 5V. 
 
 Example command line prompt using the svl.py script: [use baud -b 115200; provide path to binary file OGRE.ino.bin; find path of usb serial converter port by typing ls /dev/tty.* on Linux and selecting the proper usb port.] 
 ```
@@ -124,6 +120,8 @@ python3 svl.py -b 115200 -f /PATH/TO/BINARY/FILE/OGRE.ino.bin /dev/tty.usbserial
 
 You can also compile the source code with the Arduino IDE, ensuring that the code and board libraries match the proper versions defined in the header of OGRE.ino [Sparkfun Artemis Module v1.2.3, SDFat library v2.1.0, Sparkfun ublox GNSS library v2.2.8]. 
 
+### OGRE V2
+If the bootloader is installed on OGRE v2, you can follow the above steps (same as OGRE v1). Otherwise, or if you don't know what I mean by this, you'll have to use JTAG/SWD. More details to come...
 
 ## Hardware Notes
 <p align="center">
@@ -134,7 +132,7 @@ MATERIALS
 Cost of PCB and all components totals ~$175. Detailed list of components found in the Hardware folder. <br>
 
 ASSEMBLY
-Assembly services are available through PCBWay, and the OGRE can be ordered directly from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_Receiver_33a809f3.html). Note that this assembly service often does not include the [Pololu](https://www.pololu.com/product/3792) component, which must be soldered (4 through-hole) by the user (requests may be made to PCBWay to see if they can source this component, or the user can ship to PCBWay). The user must also program the device following the instructions from the Software Upload section. OGRE2.0 (with ublox X20P) can similarly be ordered from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_v2_0_82247d12.html), and we highly recommend the customer asks PCBWay to upload the .bin firmware to the board using their JTAG/SWD interface. 
+Assembly services are available through PCBWay, and the OGRE can be ordered directly from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_Receiver_33a809f3.html) for V1 or from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_v2_0_82247d12.html) for V2. Note that this assembly service often does not include the [Pololu](https://www.pololu.com/product/3792) component, which must be soldered (4 through-hole) by the user (requests may be made to PCBWay to see if they can source this component, or the user can ship to PCBWay). The user must also program the device following the instructions from the Software Upload section. OGRE2.0 (with ublox X20P) can similarly be ordered from [here](https://www.pcbway.com/project/shareproject/OGRE_Open_GNSS_Research_Equipment_v2_0_82247d12.html), and we highly recommend the customer asks PCBWay to upload the .bin firmware to the board using their JTAG/SWD interface. Instructions for PCBWay upload can be found [in Upload_Instructions](/Hardware/OGRE_v2.0/). 
 
 If you choose to use a u-blox antenna, you will need a ground plane, which you can make out of any metal disc, or you can order pre-drilled discs from PCBWay too, [here](https://www.pcbway.com/project/shareproject/Ground_Plane_for_ublox_L1_L2_L5_GNSS_antenna_c3519487.html), compatitble for both L1/L2 and L1/L2/L5 versions of their antennas.
 
