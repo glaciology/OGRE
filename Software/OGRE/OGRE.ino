@@ -33,7 +33,7 @@
    - This project is open source; see Readme/Licensing.
 */
 
-#define HARDWARE_VERSION 2  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
+#define HARDWARE_VERSION 1  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
 #define SOFTWARE_VERSION "V3.2.0"
 #define EPOCH_FILE 20
 #define STAT_REGISTER_ADDRESS 0x4FFFF000
@@ -88,11 +88,11 @@ SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 42, 43
 //////////////////////////////////////////////////////
 //--------- USER DEFAULT CONFIGURATION HERE ------------
 // LOG MODE:
-byte logMode                = 2;              // {1, 2, 3, 4, 5, 6, 99}
+byte logMode                = 6;              // {1, 2, 3, 4, 5, 6, 99}
 
 // LOG MODE 1/8: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour
-byte logEndHr               = 14;             // UTC Hour
+byte logEndHr               = 16;             // UTC Hour
 
 // LOG MODE 8: TWICE DAILY, DURING DEFINED HOURS
 byte logStartHrTWO          = 16;             // UTC Hour
@@ -123,7 +123,7 @@ int logBDS                  = 1;              //
 int logQZSS                 = 0;              //
 int logSBAS                 = 0;              // Not on SD CONFIG File
 int logNav                  = 0;              //
-int logL5                   = 1;              // WARNING: only set if using L5-capable ZED.
+int logL5                   = 0;              // WARNING: only set if using L5-capable ZED.
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled

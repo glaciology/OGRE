@@ -4,7 +4,7 @@
 */
 void configureGNSS() {
 #if DEBUG_GNSS
-  gnss.enableDebugging(Serial, true);
+  gnss.enableDebugging(Serial);
 #endif
 
 #if HARDWARE_VERSION == 1

@@ -416,6 +416,10 @@ void syncRtc() {
         online.rtcSync = true;                         // Set flag, end SYNC
         gnss.setAutoPVTrate(0);                         // Turn off PVT rate
 
+        #if HARDWARE_VERSION == 2
+          digitalWrite(LED2, LOW);                      // guarantee sync-blink LED ends off
+        #endif
+
         DEBUG_PRINT("Info: RTC drift: "); DEBUG_PRINTLN(rtcDrift);
         DEBUG_PRINT("Info: RTC time synced to "); printDateTime();
       }

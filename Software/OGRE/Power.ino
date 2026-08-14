@@ -14,7 +14,7 @@ void initializeBuses() {
   mySpi.begin();
   delay(1);
   #if HARDWARE_VERSION == 2
-    pinMode(LED2, OUTPUT);           //
+    pinMode(LED2, OUTPUT);
   #endif
 }
 
