@@ -97,34 +97,3 @@ void logDebug(const char* errorCode) {
     closeFailCounter++; // Count number of failed file closes
   }
 }
-
-//void renameDebugFile() {
-//
-//   // Get new name
-//  sprintf(debugFileName, "debug_%s.csv", stationName); 
-//
-//  // Check if new Rename already exists
-//  if (debugFile.open(debugFileName, O_READ)) {
-//    if (!debugFile.close()) {
-//      DEBUG_PRINTLN("Warning: Failed to close debug file.");
-//    }
-//    return;
-//  }
-//  
-//  // Make sure the old file exists before renaming
-//  if (!debugFile.open("debug_0000.csv", O_READ)) {
-//    DEBUG_PRINTLN("ORIGINAL DEBUG DOESN'T eXIST");
-//    return;
-//  }
-//  
-//  if (debugFile.rename(debugFileName)) {
-//    DEBUG_PRINTLN("Info: Successfully renamed debug file.");
-//  } else {
-//    DEBUG_PRINTLN("Warning: Failed to rename debug file.");
-//  }
-//
-//    // Close log file
-//  if (!debugFile.close()) {
-//    DEBUG_PRINTLN("Warning: Failed to close debug file.");
-//  }
-//}

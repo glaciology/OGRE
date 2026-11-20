@@ -197,9 +197,9 @@ void setup() {
   Serial.begin(115200);
   delay(1000);  // Give time for Serial to start
 
+  cached_chip_id = *unique_chip_id;
 #if DEBUG
   Serial.println("***WELCOME TO GNSS LOGGER " SOFTWARE_VERSION "***");
-  cached_chip_id = *unique_chip_id;
   Serial.print("Unique Chip ID: ");
   Serial.println(cached_chip_id, HEX);
 #endif
