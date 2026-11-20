@@ -386,11 +386,7 @@ void syncRtc() {
 
     // Check for UBX-NAV-PVT messages
     if (gnss.getPVT()) {
-      #if HARDWARE_VERSION == 1
-        digitalWrite(LED, !digitalRead(LED)); // Blink LED
-      #elif HARDWARE_VERSION == 2
-        digitalWrite(LED2, !digitalRead(LED2)); // Blink LED
-      #endif
+      digitalWrite(LED_LOG, !digitalRead(LED_LOG));
 
       bool dateValidFlag = gnss.getConfirmedDate();
       bool timeValidFlag = gnss.getConfirmedTime();
@@ -413,12 +409,10 @@ void syncRtc() {
         unsigned long gnssEpoch = gnss.getUnixEpoch();  // Get GNSS epoch time
         rtc.setEpoch(gnssEpoch);                        // Set RTC date and time
         rtcDrift = gnssEpoch - rtcEpoch;                // Calculate RTC drift (debug)
-        online.rtcSync = true;                         // Set flag, end SYNC
+        online.rtcSync = true;                          // Set flag, end SYNC
         gnss.setAutoPVTrate(0);                         // Turn off PVT rate
 
-        #if HARDWARE_VERSION == 2
-          digitalWrite(LED2, LOW);                      // guarantee sync-blink LED ends off
-        #endif
+        digitalWrite(LED_LOG, LOW);                     // guarantee sync-blink LED ends off
 
         DEBUG_PRINT("Info: RTC drift: "); DEBUG_PRINTLN(rtcDrift);
         DEBUG_PRINT("Info: RTC time synced to "); printDateTime();

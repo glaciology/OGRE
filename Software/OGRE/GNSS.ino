@@ -7,9 +7,9 @@ void configureGNSS() {
   gnss.enableDebugging(Serial);
 #endif
 
-#if HARDWARE_VERSION == 1
-  gnss.disableUBX7Fcheck();
-#endif
+// #if HARDWARE_VERSION == 1
+//   gnss.disableUBX7Fcheck();
+// #endif
 
   gnss.setFileBufferSize(fileBufferSize);
 
@@ -33,79 +33,87 @@ void configureGNSS() {
     online.gnss = true;
   }
 
-  ///////// CONSTELLATION CONFIG
+  identifyGNSS(); // get module Type and version
+
+  ///////// CONSTELLATION CONFIG (same code for F9P, F9T and X20P)
   if (initSetup) {
-
-#if HARDWARE_VERSION == 1
-    // ---- v2 API: batch VALSET; retry once on failure ----
-    auto sendV1Config = [&]() -> bool {
-      bool ok = true;
-      ok &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_ENA, logGPS);
-      ok &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GLO_ENA, logGLO);
-      ok &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_GAL_ENA, logGAL);
-      ok &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_BDS_ENA, logBDS);
-      ok &= gnss.addCfgValset8(UBLOX_CFG_SIGNAL_SBAS_ENA, logSBAS);
-      ok &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_QZSS_ENA, logQZSS);
-
-      if (logL5 == 1) {
-        ok &= gnss.newCfgValset8(UBLOX_CFG_SIGNAL_GPS_L5_ENA, logL5);
-        ok &= gnss.sendCfgValset8(UBLOX_CFG_SIGNAL_GAL_E5A_ENA, logL5);
-      }
-      return ok;
-    };
-
-    bool success = sendV1Config();
-    delay(2000);
-    petDog();
-
-    if (!success) {
-      DEBUG_PRINTLN("Warning: GNSS CONSTELLATION CONFIG FAILED - ATTEMPTING AGAIN");
-      delay(2000);
-      petDog();
-      success = sendV1Config();
-      delay(2000);
-      petDog();
-
-      if (!success) {
-        DEBUG_PRINTLN("Warning: GNSS CONSTELLATION CONFIG FAILED AGAIN. Waiting for system reset.");
-        logDebug("CFG");
-        while (1) { blinkLed(3, 250, RED); delay(2000); }
-      }
-    }
-
-#elif HARDWARE_VERSION == 2
-    // ---- v3 API: X20P needs keys set individually; GLO can't be reconfigured ----
-    auto trySetKey = [&](const char* name, uint32_t key, uint8_t value) -> bool {
-      gnss.newCfgValset(VAL_LAYER_RAM);
+    // Each setting is sent on its own, so one rejected setting can't block the others.
+    // Tries RAM + flash first, so settings survive power-off; falls back to RAM only.
+    uint8_t failed = 0;
+    auto trySetKey = [&](const char* name, uint32_t key, uint8_t value) {
+      gnss.newCfgValset(VAL_LAYER_ALL);              // RAM + BBR + flash
       gnss.addCfgValset(key, value);
       bool ok = gnss.sendCfgValset();
-      DEBUG_PRINT(" - "); DEBUG_PRINT(name);
-      DEBUG_PRINT(ok ? ": OK " : ": FAILED ");
+      if (!ok) {                                     // flash rejected? apply to RAM only
+        gnss.newCfgValset(VAL_LAYER_RAM);
+        gnss.addCfgValset(key, value);
+        ok = gnss.sendCfgValset();
+      }
+      if (!ok) {                                     // write rejected: is the setting in effect anyway?
+        uint8_t cur;
+        if (!gnss.getVal8(key, &cur, VAL_LAYER_RAM)) {
+          DEBUG_PRINT(" (not supported)");           // firmware has no such setting: not a failure
+        } else if (cur != value) {
+          failed++;                                  // module is using a different value: real failure
+        }
+      }
+
+      delay(500);                                    // let the receiver restart tracking
       petDog();
-      return ok;
+    };
+    // One message for all signal settings. If any setting is rejected,
+    // none is applied, so retry without GLONASS, then fall back to one at a time.
+    auto sendBatch = [&](bool includeGlo) -> bool {
+      gnss.newCfgValset(VAL_LAYER_ALL);              // RAM + BBR + flash
+      gnss.addCfgValset(UBLOX_CFG_SIGNAL_GPS_ENA,  (uint8_t)logGPS);
+      if (includeGlo) gnss.addCfgValset(UBLOX_CFG_SIGNAL_GLO_ENA, (uint8_t)logGLO);
+      gnss.addCfgValset(UBLOX_CFG_SIGNAL_GAL_ENA,  (uint8_t)logGAL);
+      gnss.addCfgValset(UBLOX_CFG_SIGNAL_BDS_ENA,  (uint8_t)logBDS);
+      gnss.addCfgValset(UBLOX_CFG_SIGNAL_SBAS_ENA, (uint8_t)logSBAS);
+      gnss.addCfgValset(UBLOX_CFG_SIGNAL_QZSS_ENA, (uint8_t)logQZSS);
+      if (logL5 == 1) {
+        gnss.addCfgValset(UBLOX_CFG_SIGNAL_GPS_L5_ENA,  (uint8_t)logL5);
+        gnss.addCfgValset(UBLOX_CFG_SIGNAL_GAL_E5A_ENA, (uint8_t)logL5);
+      }
+      return gnss.sendCfgValset();
     };
 
-    DEBUG_PRINTLN("Info: Configuring constellations:");
-    trySetKey("GPS",  UBLOX_CFG_SIGNAL_GPS_ENA,  (uint8_t)logGPS);
-    // GLO skipped... geopolitical thing with current X20P firmware...?
-    trySetKey("GAL",  UBLOX_CFG_SIGNAL_GAL_ENA,  (uint8_t)logGAL);
-    trySetKey("BDS",  UBLOX_CFG_SIGNAL_BDS_ENA,  (uint8_t)logBDS);
-    trySetKey("SBAS", UBLOX_CFG_SIGNAL_SBAS_ENA, (uint8_t)logSBAS);
-    trySetKey("QZSS", UBLOX_CFG_SIGNAL_QZSS_ENA, (uint8_t)logQZSS);
-
-    if (logL5 == 1) {
-      trySetKey("GPS_L5",  UBLOX_CFG_SIGNAL_GPS_L5_ENA,  (uint8_t)logL5);
-      trySetKey("GAL_E5A", UBLOX_CFG_SIGNAL_GAL_E5A_ENA, (uint8_t)logL5);
+    DEBUG_PRINTLN("Info: Configuring constellations.");
+    if (sendBatch(true)) {
+      DEBUG_PRINTLN(" - All settings OK");
+    } else if (sendBatch(false)) {
+      DEBUG_PRINTLN(" - All settings OK except GLO");
+      uint8_t cur;                                   // GLO only counts as a failure if it isn't
+      if (gnss.getVal8(UBLOX_CFG_SIGNAL_GLO_ENA, &cur, VAL_LAYER_RAM) && cur != (uint8_t)logGLO) {
+        failed++;                                    // already set the way CONFIG asks
+      }
+    } else {
+      DEBUG_PRINTLN(" - Batch rejected, setting one at a time");
+      trySetKey("GPS",  UBLOX_CFG_SIGNAL_GPS_ENA,  (uint8_t)logGPS);
+      trySetKey("GLO",  UBLOX_CFG_SIGNAL_GLO_ENA,  (uint8_t)logGLO);
+      trySetKey("GAL",  UBLOX_CFG_SIGNAL_GAL_ENA,  (uint8_t)logGAL);
+      trySetKey("BDS",  UBLOX_CFG_SIGNAL_BDS_ENA,  (uint8_t)logBDS);
+      trySetKey("SBAS", UBLOX_CFG_SIGNAL_SBAS_ENA, (uint8_t)logSBAS);
+      trySetKey("QZSS", UBLOX_CFG_SIGNAL_QZSS_ENA, (uint8_t)logQZSS);
+      if (logL5 == 1) {
+        trySetKey("GPS_L5",  UBLOX_CFG_SIGNAL_GPS_L5_ENA,  (uint8_t)logL5);
+        trySetKey("GAL_E5A", UBLOX_CFG_SIGNAL_GAL_E5A_ENA, (uint8_t)logL5);
+      }
     }
-    // No retry/halt for X20P — individual key failures are expected and non-fatal
-#endif
-  }
+    delay(1000);                                     // one pause for the receiver to restart tracking
+    petDog();
 
+    if (failed) {                                    // record it, but keep logging
+      char code[16];
+      snprintf(code, sizeof(code), "CFG_FAIL_%u", failed);
+      logDebug(code);
+    }
+  }
   initSetup = false;
 
   //////////////////////////////////////////
   gnss.setI2COutput(COM_TYPE_UBX);                 // Set the I2C port to output UBX only (no NMEA)
-  gnss.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); // Save communications port settings to flash and BBR
+  gnss.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); // Save communications port settings to flash
   gnss.setNavigationFrequency(1);                  // Produce one navigation solution per second
   gnss.setAutoRXMRAWXrate(measurementRate, false); // Enable automatic RXM RAWX (RAW) messages 
   gnss.logRXMRAWX();                               // Enable RXM RAWX (RAW) data logging
@@ -115,13 +123,7 @@ void configureGNSS() {
     gnss.logRXMSFRBX();                                // Enable RXM SFRBX (NAV) data logging
   }
 
-#if HARDWARE_VERSION == 1
-  gnss.setAutoPVTrate(1);
-#elif HARDWARE_VERSION == 2
   gnss.setAutoPVTrate(true);
-#endif
-
-  DEBUG_PRINTLN();
 }
 
 void logGNSS() {
@@ -163,7 +165,7 @@ void logGNSS() {
       petDog();
   
       if (ledBlink){
-        digitalWrite(LED, HIGH);
+        digitalWrite(LED_LOG, HIGH);
       }
       
       uint8_t myBuffer[sdWriteSize];                                 // Create our own buffer to hold the data while we write it to SD card
@@ -184,7 +186,7 @@ void logGNSS() {
       gnss.checkUblox();                                             // Check for the arrival of new data and process it if SD slow
   
       if (ledBlink){
-        digitalWrite(LED, LOW);
+        digitalWrite(LED_LOG, LOW);
       }
     }
   
@@ -243,4 +245,34 @@ void closeGNSS() {
       DEBUG_PRINTLN("Warning: failed to close log file.");
       closeFailCounter++; 
     }
+}
+
+
+// Runs once per boot, after gnss.begin(). Decides whether OGRE turns L5 on.
+void identifyGNSS() {
+  static bool done = false;
+  if (done) return;
+  done = true;
+
+  logL5 = 0;
+
+  const char* name = "UNKNOWN";
+  bool haveInfo = gnss.getModuleInfo();
+  if (haveInfo) name = gnss.getModuleName();
+
+  // What the module is running right now (loaded from its flash/factory settings)
+  uint8_t l5Now = 0;
+  bool l5KeyExists = gnss.getVal8(UBLOX_CFG_SIGNAL_GPS_L5_ENA, &l5Now, VAL_LAYER_RAM);
+  if (l5KeyExists && strstr(name, "X20")) logL5 = 1;
+
+  // Record what was detected in the debug file (one row per boot)
+  char info[48];
+  if (haveInfo) {
+    snprintf(info, sizeof(info), "GNSS module: %s %s %d.%02d", name,
+             gnss.getFirmwareType(), gnss.getFirmwareVersionHigh(), gnss.getFirmwareVersionLow());
+  } else {
+    snprintf(info, sizeof(info), "GNSS module: UNKNOWN");
+  }
+  DEBUG_PRINT("Info: "); DEBUG_PRINTLN(info);
+  // logDebugLine(info);   // once per boot, its own line, not in the errorCode column
 }

@@ -5,6 +5,7 @@
  */
 
 void initializeBuses() {
+  pinMode(LED, OUTPUT); 
   pinMode(ZED_POWER, OUTPUT);
   zedPowerOn();
   myWire.begin();
@@ -70,7 +71,7 @@ void goToSleep() { // Function from Sparkfun Example6_LowPower_Alarm.ino, see Li
   // Disable all pads except LED and PWR CONTROL PINS
   for (int x = 0; x < 50; x++)
   {
-    if ((x != LED) && (x != ZED_POWER) && (x != PER_POWER) )
+    if ((x != LED_LOG) && (x != ZED_POWER) && (x != PER_POWER) )
     {
       am_hal_gpio_pinconfig(x, g_AM_HAL_GPIO_DISABLE);
     }
@@ -192,14 +193,14 @@ void checkBattery() {
 // blink LED (https://forum.arduino.cc/index.php?topic=503368.0)
 void blinkLed(byte ledFlashes, unsigned int ledDelay, LedColor color) {
   byte i = 0;
-  byte ledPin;
+  byte ledPin = (color == YELLOW) ? LED_LOG : LED;   // LED_LOG == LED on v1
 
   #if HARDWARE_VERSION == 1
         // v1 hardware: ignore color, always use the single LED
     ledPin = LED;
   #elif HARDWARE_VERSION == 2
       // v2 hardware: choose pin based on requested color
-      ledPin = (color == GREEN) ? LED2 : LED;
+      ledPin = (color == YELLOW) ? LED2 : LED;
   #endif
 
   while (i < ledFlashes * 2) {

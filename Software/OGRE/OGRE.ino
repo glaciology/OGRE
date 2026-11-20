@@ -1,14 +1,14 @@
 /*
    OGRE: Open GNSS Research Equipment (On-ice GNSS Research Experimental Network for Greenland)
    Derek Pickell 06 Feb 2026
-   V3.2.0
+   V3.2.1
 
    Hardware:
-   - OGRE PCB w/ ZED-F9P/T (Note: using -F9T, adjust L5 settings).
-   - OGREv2 PCB w/ZED-X20P
+   - OGRE PCB w/ Sparkfun Artemis + ZED-F9P/T (Note: using -F9T, adjust L5 settings).
+   - OGREv2 PCB w/ Ambiq Apollo3 + ZED-X20P or ZED-F9P
 
    Dependencies:
-   - SparkFun_u-blox_GNSS_Arduino_Library v2.2.8
+   - SparkFun_u-blox_GNSS_Arduino_Library v3.1.15
    - Apollo3 Arduino Core v1.2.3
    - SdFat Library v2.1.0
 
@@ -33,8 +33,8 @@
    - This project is open source; see Readme/Licensing.
 */
 
-#define HARDWARE_VERSION 1  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
-#define SOFTWARE_VERSION "V3.2.0"
+#define HARDWARE_VERSION 2  // 1 = OGREv1 3/22 || 2 = OGREv2 2/26
+#define SOFTWARE_VERSION "V3.2.1"
 #define EPOCH_FILE 20
 #define STAT_REGISTER_ADDRESS 0x4FFFF000
 #define UNIQUE_ID_ADDRESS     0x40020004
@@ -46,15 +46,8 @@ volatile uint32_t *unique_chip_id = (uint32_t *)UNIQUE_ID_ADDRESS;
 #include <WDT.h>                              // ""
 #include <RTC.h>                              // ""
 #include <SdFat.h>                            // https://github.com/greiman/SdFat v2.1.0
-//#include <SparkFun_u-blox_GNSS_Arduino_Library.h>
-//SFE_UBLOX_GNSS gnss;                          
-#if HARDWARE_VERSION == 1
-  #include <SparkFun_u-blox_GNSS_Arduino_Library.h> // Library v2.2.8: http://librarymanager/All#SparkFun_u-blox_GNSS
-  SFE_UBLOX_GNSS gnss;
-#elif HARDWARE_VERSION == 2
-  #include <SparkFun_u-blox_GNSS_v3.h>              // Library v3.1.13:
-  SFE_UBLOX_GNSS gnss;
-#endif
+#include <SparkFun_u-blox_GNSS_v3.h>              // Library v3.1.15:
+SFE_UBLOX_GNSS gnss;
 SdFs sd;                                      // SdFs = supports FAT16, FAT32 and exFAT (4GB+), corresponding to FsFile class
 APM3_RTC rtc;                                 //
 APM3_WDT wdt;                                 //
@@ -70,6 +63,7 @@ const byte SHIELD                 = 19;       // Use with Telemetry Shield (v1 o
 const byte PER_POWER              = 18;       // Drive to turn off uSD
 const byte ZED_POWER              = 34;       // Drive to turn off ZED
 const byte LED                    = 33;       // LED
+const byte LED_LOG                = LED;      // Logging/sleep blinks (v1: only LED)
 const byte BAT_CNTRL              = 22;       // Drive high to turn on Bat measure
 TwoWire myWire(2);                            // USE I2C bus 2, SDA/SCL 25/27
 #elif HARDWARE_VERSION == 2
@@ -78,6 +72,7 @@ const byte PER_POWER              = 2;        // Drive to turn off uSD
 const byte ZED_POWER              = 28;       // Drive to turn off ZED
 const byte LED                    = 40;       // LED1 (red)
 const byte LED2                   = 39;       // LED2 (yellow)
+const byte LED_LOG                = LED2;     // Logging/sleep blinks (v2: yellow)
 const byte BAT_CNTRL              = 7;        // Drive high to turn on Bat measure
 TwoWire myWire(0);                            // USE I2C bus 0, SDA/SCL 5/6
 #endif
@@ -88,7 +83,7 @@ SPIClass mySpi(3);                            // Use SPI 3 - pins 38, 42, 43
 //////////////////////////////////////////////////////
 //--------- USER DEFAULT CONFIGURATION HERE ------------
 // LOG MODE:
-byte logMode                = 6;              // {1, 2, 3, 4, 5, 6, 99}
+byte logMode                = 2;              // {1, 2, 3, 4, 5, 6, 99}
 
 // LOG MODE 1/8: DAILY, DURING DEFINED HOURS
 byte logStartHr             = 12;             // UTC Hour
@@ -107,7 +102,7 @@ uint32_t epochSleep         = 518400;        // Sleep duration (Seconds) (i.e., 
 // LOG MODE 6: SUMMER/WINTER: LOG 24 HOURS, SLEEP FOR:
 uint32_t winterInterval     = 777600;         // Sleep duration during winter, i.e., 9 days
 byte startMonth             = 4;              // Start month, inclusive (April)
-byte endMonth               = 9;              // End month, inclusive (August)
+byte endMonth               = 9;              // End month, inclusive (September)
 byte startDay               = 21;             // Start day (of month), inclusive, e.g., Apr 21
 byte endDay                 = 21;             // End day (of month), inclusive, e.g., Sep 21
 
@@ -123,7 +118,7 @@ int logBDS                  = 1;              //
 int logQZSS                 = 0;              //
 int logSBAS                 = 0;              // Not on SD CONFIG File
 int logNav                  = 0;              //
-int logL5                   = 0;              // WARNING: only set if using L5-capable ZED.
+uint8_t logL5               = 0;              // SET AUTOMATICALLY at boot (see identifyGNSS)
 
 // ADDITIONAL CONFIGURATION
 bool ledBlink               = true;           // If FALSE, all LED indicators during log/sleep disabled
@@ -154,7 +149,7 @@ unsigned long dates[21]           = {};       // Array with Unix Epochs of log d
 // int           settings[23]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name
-char          debugFileName[15] = "";         // Debug file name
+char          debugFileName[24] = "";         // Debug file name
 
 // DEBUGGING
 unsigned long maxBufferBytes      = 0;        // How full the file buffer has been
@@ -167,8 +162,8 @@ unsigned int  debugCounter        = 0;        // Counts Debug messages
 volatile int  wdtCounter          = 0;        // Counts WDT triggers
 volatile int  wdtCounterMax       = 0;        // Tracks Max times WDT interrupts
 long          rtcDrift            = 0;        // Tracks drift of RTC
-enum LedColor { GREEN, RED };
-void blinkLed(byte ledFlashes, unsigned int ledDelay, LedColor color = GREEN);
+enum LedColor { RED, YELLOW };   // RED = errors; YELLOW = status (v1: both on the single LED)
+void blinkLed(byte ledFlashes, unsigned int ledDelay, LedColor color = YELLOW);
 uint32_t cached_chip_id = 0;
 
 struct struct_online {
@@ -186,6 +181,8 @@ struct struct_online {
 #if DEBUG
 #define DEBUG_PRINTLN(x)          Serial.println(x)
 #define DEBUG_PRINT(x)            Serial.print(x)
+// #define DEBUG_PRINTLN(x)          do { Serial.println(x); Serial.flush(); } while (0)
+// #define DEBUG_PRINT(x)            do { Serial.print(x);   Serial.flush(); } while (0)
 
 #else
 #define DEBUG_PRINTLN(x)
@@ -218,15 +215,7 @@ void setup() {
   getDates();                        // Read Dates (in unix epoch format) for log mode 5
   configureGNSS();                   // BLINK 3x pattern - FAILED SETUP
   syncRtc();                         // 1Hz BLINK-AQUIRING; 5x - FAIL (3 min MAX)
-
-  // //------------LOG MODE-SPECIFC SETTINGS----------------
-  // if (logMode == 1 || logMode == 3) {
-  //   configureSleepAlarm();        // Get ready to sleep for these modes
-  //   deinitializeBuses();
-  // }
-  //----------------------------------------------------
-
-  blinkLed(10, 100, GREEN);                 // BLINK 10x - SETUP COMPLETE
+  blinkLed(10, 100, YELLOW);                 // BLINK 10x - SETUP COMPLETE
   DEBUG_PRINTLN("Info: SETUP COMPLETE");
 }
 
@@ -260,7 +249,7 @@ void loop() {
   petDog();
 
   if (ledBlink) {                  // Only if User wants blinking every WDT interrupt
-    blinkLed(1, 100, RED);
+    blinkLed(1, 100, YELLOW);
   }
 
   goToSleep();
