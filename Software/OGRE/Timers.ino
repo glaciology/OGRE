@@ -421,6 +421,7 @@ void syncRtc() {
   }
   if (!online.rtcSync) {
     DEBUG_PRINTLN("Warning: Unable to sync RTC! Awaiting System Reset");
+    digitalWrite(LED_LOG, LOW);
     logDebug("RTC_SYNC");
 
     while (1) { //Awaiting WDT Reset

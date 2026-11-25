@@ -146,7 +146,6 @@ unsigned long prevMillis          = 0;        // Global time keeper, not affecte
 uint32_t      intendedWakeEpoch   = 0;        // For Log Mode 6 to deal with drift
 unsigned long syncDuration        = 0;        // How long it took to sync (used for LM 6
 unsigned long dates[21]           = {};       // Array with Unix Epochs of log dates !!! MAX 20 !!!
-// int           settings[23]        = {};       // Array that holds user settings on SD
 char          line[100];                      // Temporary array for parsing user settings
 char          logFileNameDate[30] = "";       // Log file name
 char          debugFileName[24] = "";         // Debug file name
@@ -199,7 +198,7 @@ void setup() {
 
   cached_chip_id = *unique_chip_id;
 #if DEBUG
-  Serial.println("***WELCOME TO GNSS LOGGER " SOFTWARE_VERSION "***");
+  Serial.println("----WELCOME TO OGRE! " SOFTWARE_VERSION "----");
   Serial.print("Unique Chip ID: ");
   Serial.println(cached_chip_id, HEX);
 #endif
